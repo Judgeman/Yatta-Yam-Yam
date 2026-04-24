@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <link rel="icon" type="image/svg+xml" href="/images/favicon.svg"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title th:text="${order.placeName} + ' – Yatta-Yam-Yam'">Order</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}"/>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-bold" th:href="@{/orders/dashboard}">Yatta-Yam-Yam</a>
+        <div class="d-flex align-items-center gap-3">
+            <a th:href="@{/}" class="d-flex align-items-center gap-2 text-decoration-none">
+                <div class="user-badge">
+                    <span th:text="${#strings.toUpperCase(#strings.substring(user.name,0,1))}">A</span>
+                </div>
+                <span class="text-white fw-semibold" th:text="${user.name}">Name</span>
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container py-4">
+
+    <!-- Order Header -->
+    <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2">
+        <div>
+            <a th:href="@{/orders/dashboard}" class="text-muted small text-decoration-none">
+                <i class="bi bi-arrow-left"></i> Dashboard
+            </a>
+            <h2 class="fw-bold mb-0 mt-1" th:text="${order.placeName}">Place</h2>
+            <span class="text-muted">
+                <i class="bi bi-calendar3"></i>
+                <span th:text="${#temporals.format(order.orderDate,'EEEE, dd MMM yyyy')}">Date</span>
+                &nbsp;·&nbsp;
+                Created by <span th:text="${order.creator.name}">Owner</span>
+            </span>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <span class="order-status-badge align-self-center"
+                  th:classappend="${order.status.name() == 'OPEN'} ? 'badge-open' : (${order.status.name() == 'ORDERED'} ? 'badge-ordered' : (${order.status.name() == 'CLOSED'} ? 'badge-closed' : 'badge-archived'))"
+                  th:text="${order.status.name()}">OPEN</span>
+
+            <button class="btn btn-outline-secondary btn-sm align-self-center"
+                    data-bs-toggle="modal" data-bs-target="#phoneOrderModal">
+                <i class="bi bi-telephone"></i> Order
+            </button>
+
+            <!-- Owner actions -->
+            <th:block th:if="${isOwner}">
+                <a th:href="@{'/orders/' + ${order.id} + '/edit'}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-pencil"></i> Edit
+                </a>
+                <a th:if="${order.status.name() == 'OPEN' or order.status.name() == 'ORDERED'}"
+                   th:href="@{'/orders/' + ${order.id} + '/close'}"
+                   class="btn btn-warning btn-sm">
+                    <i class="bi bi-lock"></i> Close Order
+                </a>
+                <form th:if="${order.status.name() == 'CLOSED'}" th:action="@{'/orders/' + ${order.id} + '/archive'}" method="post" class="mb-0">
+                    <button type="submit" class="btn btn-secondary btn-sm">
+                        <i class="bi bi-archive"></i> Archive
+                    </button>
+                </form>
+                <form th:if="${order.status.name() == 'CLOSED' or order.status.name() == 'ARCHIVED' or order.status.name() == 'ORDERED'}"
+                      th:action="@{'/orders/' + ${order.id} + '/reopen'}" method="post" class="mb-0">
+                    <button type="submit" class="btn btn-outline-success btn-sm">
+                        <i class="bi bi-arrow-counterclockwise"></i> Reopen
+                    </button>
+                </form>
+            </th:block>
+        </div>
+    </div>
+
+    <div th:if="${order.status.name() == 'ORDERED'}"
+         class="alert alert-info mb-4">
+        <i class="bi bi-telephone-fill"></i>
+        <strong>Order already placed!</strong>
+        <span th:text="${order.orderedByContact}">Someone</span> has already called in this order.
+        If you want to join, please contact them first — unconfirmed additions may be ignored.
+    </div>
+
+    <div class="row g-4">
+
+        <!-- LEFT: Item selection -->
+        <div class="col-lg-7">
+
+            <!-- No item list warning -->
+            <div th:if="${order.itemList == null}" class="alert alert-warning">
+                <i class="bi bi-exclamation-triangle"></i>
+                No item list attached to this order.
+                <span th:if="${isOwner}">
+                    <a th:href="@{'/orders/' + ${order.id} + '/edit'}">Edit the order</a> to add one.
+                </span>
+            </div>
+
+            <div th:if="${order.itemList != null}">
+                <!-- Owner: add items -->
+                <div th:if="${isOwner}" class="card shadow-sm mb-3">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-semibold">
+                                <i class="bi bi-list-ul"></i>
+                                <span th:text="${order.itemList.name}">List</span>
+                            </span>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse"
+                                        data-bs-target="#renameListForm">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-outline-primary btn-sm" data-bs-toggle="collapse"
+                                        data-bs-target="#addItemForm">
+                                    <i class="bi bi-plus"></i> Add Item
+                                </button>
+                            </div>
+                        </div>
+                        <div class="collapse mt-2" id="renameListForm">
+                            <form th:action="@{'/orders/itemlist/' + ${order.itemList.id} + '/rename'}" method="post"
+                                  class="d-flex gap-2">
+                                <input type="hidden" name="orderId" th:value="${order.id}"/>
+                                <input type="text" name="name" class="form-control form-control-sm"
+                                       th:value="${order.itemList.name}" required maxlength="100"/>
+                                <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="collapse" id="addItemForm">
+                        <div class="card-body border-top">
+                            <form th:action="@{'/orders/itemlist/' + ${order.itemList.id} + '/items/add'}"
+                                  method="post" enctype="multipart/form-data">
+                                <input type="hidden" name="orderId" th:value="${order.id}"/>
+                                <div class="row g-2">
+                                    <div class="col-md-5">
+                                        <input type="text" name="name" class="form-control"
+                                               placeholder="Item name" required/>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="input-group">
+                                            <span class="input-group-text">€</span>
+                                            <input type="number" name="price" class="form-control"
+                                                   placeholder="0.00" step="0.01" min="0" required/>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="text" name="imageUrl" class="form-control"
+                                               placeholder="Image URL (optional)"/>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label small text-muted">Or upload image:</label>
+                                        <input type="file" name="imageFile" class="form-control form-control-sm"
+                                               accept="image/*" onchange="checkFileSize(this, 100)"/>
+                                        <small class="text-muted">Max file size: 100 MB</small>
+                                        <div class="text-danger small mt-1" id="fileSizeError" style="display:none">
+                                            <i class="bi bi-exclamation-triangle"></i>
+                                            File is too large. Maximum allowed size is 100 MB.
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <button type="submit" class="btn btn-primary btn-sm">Add Item</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Item selection form (only when order is OPEN) -->
+                <div th:if="${order.status.name() == 'OPEN' or order.status.name() == 'ORDERED'}" >
+                    <h5 class="fw-bold mb-3">
+                        <i class="bi bi-basket"></i> Select Your Items
+                    </h5>
+                    <form th:action="@{'/orders/' + ${order.id} + '/select'}" method="post" id="selectionForm">
+                        <input type="hidden" name="confirmedOrdered" id="confirmedOrderedInput" value=""/>
+                        <div class="row g-3 mb-3">
+                            <div class="col-sm-6 col-lg-6" th:each="item : ${order.itemList.items}">
+                                <div class="item-card">
+                                    <img th:if="${item.imageUrl != null and !item.imageUrl.isEmpty()}"
+                                         th:src="${item.imageUrl}" class="item-image" th:alt="${item.name}"
+                                         onerror="this.style.display='none'"/>
+                                    <div th:if="${item.imageUrl == null or item.imageUrl.isEmpty()}"
+                                         class="item-image-placeholder">
+                                        <i class="bi bi-image text-muted"></i>
+                                    </div>
+                                    <div class="item-info">
+                                        <div class="fw-semibold" th:text="${item.name}">Item</div>
+                                        <div class="text-primary fw-bold" th:text="'€' + ${#numbers.formatDecimal(item.price,1,2)}">€0.00</div>
+                                    </div>
+                                    <div class="qty-control">
+                                        <button type="button" class="qty-btn" onclick="changeQty(this, -1)">−</button>
+                                        <input type="number" th:name="'qty_' + ${item.id}"
+                                               th:id="'qty_' + ${item.id}"
+                                               class="qty-input"
+                                               value="0" min="0" max="20"
+                                               th:value="${itemQuantities[item.id] != null} ? ${itemQuantities[item.id]} : 0" />
+                                        <button type="button" class="qty-btn" onclick="changeQty(this, 1)">+</button>
+                                    </div>
+                                    <a th:if="${isOwner}"
+                                       th:href="@{'/orders/itemlist/' + ${order.itemList.id} + '/items/' + ${item.id} + '/edit?orderId=' + ${order.id}}"
+                                       class="btn btn-outline-secondary btn-sm py-0 ms-2">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <!-- Owner: delete item -->
+                                    <button th:if="${isOwner}"
+                                            type="button"
+                                            class="btn btn-outline-danger btn-sm py-0 ms-2"
+                                            th:attr="data-list-id=${order.itemList.id}, data-item-id=${item.id}, data-order-id=${order.id}, data-item-name=${item.name}"
+                                            onclick="deleteItem(this)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div th:if="${order.itemList.items.empty}" class="text-muted text-center py-3">
+                            <i class="bi bi-basket2"></i> No items yet.
+                            <span th:if="${isOwner}"> Use "Add Item" above to get started.</span>
+                        </div>
+
+                        <button th:if="${!order.itemList.items.empty and order.status.name() != 'ORDERED'}"
+                                type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg"></i> Save My Selection
+                        </button>
+                        <button th:if="${!order.itemList.items.empty and order.status.name() == 'ORDERED'}"
+                                type="button" class="btn btn-warning"
+                                data-bs-toggle="modal" data-bs-target="#confirmSelectionModal">
+                            <i class="bi bi-check-lg"></i> Save My Selection
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Closed: show user's selection read-only -->
+                <div th:if="${order.status.name() != 'OPEN' and order.status.name() != 'ORDERED'}" class="card shadow-sm">
+                <div class="card-header fw-semibold">
+                        <i class="bi bi-bag-check"></i> Your Order
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${mySelection == null or mySelection.items.empty}" class="text-muted">
+                            You didn't order anything.
+                        </div>
+                        <ul th:if="${mySelection != null}" class="list-unstyled mb-0">
+                            <li th:each="si : ${mySelection.items}" class="d-flex justify-content-between py-1 border-bottom">
+                                <span th:text="${si.quantity} + 'x ' + ${si.item.name}">Item</span>
+                                <span class="fw-semibold" th:text="'€' + ${#numbers.formatDecimal(lineTotals[si.id],1,2)}">€0.00</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div th:if="${deleteError}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle"></i>
+                Cannot delete item — it has already been ordered by someone.
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        </div>
+
+        <!-- RIGHT: Summary -->
+        <div class="col-lg-5">
+
+            <!-- My cost summary -->
+            <div class="summary-card mb-3">
+                <h6 class="fw-bold mb-3"><i class="bi bi-receipt"></i> My Summary</h6>
+
+                <div th:if="${mySelection == null or mySelection.items.empty}" class="text-muted small">
+                    No items selected yet.
+                </div>
+
+                <div th:if="${mySelection != null and !mySelection.items.empty}">
+                    <div th:each="si : ${mySelection.items}"
+                         class="d-flex justify-content-between small mb-1">
+                        <span th:text="${si.quantity} + 'x ' + ${si.item.name}">Item</span>
+                        <span th:text="'€' + ${#numbers.formatDecimal(si.item.price.multiply(new java.math.BigDecimal(si.quantity)),1,2)}">€0</span>
+                    </div>
+                    <div class="d-flex justify-content-between small border-top mt-2 pt-2">
+                        <span class="text-muted">Subtotal</span>
+                        <span th:text="'€' + ${#numbers.formatDecimal(mySelection.subtotal,1,2)}">€0</span>
+                    </div>
+                    <div class="d-flex justify-content-between small text-muted">
+                        <span>Tip (my share)</span>
+                        <span th:text="'€' + ${#numbers.formatDecimal(tipPerPerson,1,2)}">€0.00</span>
+                    </div>
+                    <div class="d-flex justify-content-between fw-bold border-top mt-2 pt-2">
+                        <span>Total</span>
+                        <span class="text-primary"
+                              th:text="'€' + ${#numbers.formatDecimal(myTotal,1,2)}">€0.00</span>
+                    </div>
+
+                    <!-- Payment status -->
+                    <div class="mt-3">
+                        <div th:if="${mySelection.paid or mySelection.markedPaidByOwner}"
+                             class="alert alert-success py-2 mb-2 small d-flex justify-content-between align-items-center">
+                            <span>
+                                <i class="bi bi-check-circle-fill"></i>
+                                <span th:if="${mySelection.paid}">
+                                    Paid via <strong th:text="${mySelection.paymentMethod}">method</strong>
+                                </span>
+                                <span th:if="${mySelection.markedPaidByOwner and !mySelection.paid}">
+                                    Marked as paid by the owner
+                                </span>
+                            </span>
+                            <form th:if="${mySelection.paid and !mySelection.markedPaidByOwner}"
+                                  th:action="@{'/orders/selection/' + ${mySelection.id} + '/unpay'}"
+                                  method="post" class="mb-0">
+                                <input type="hidden" name="orderId" th:value="${order.id}"/>
+                                <button type="submit" class="btn btn-outline-light btn-sm py-0"
+                                        style="font-size:11px">↩ Undo</button>
+                            </form>
+                        </div>
+                        <div th:if="${!mySelection.paid and !mySelection.markedPaidByOwner and order.status.name() == 'CLOSED'}">
+                            <p class="small text-muted mb-2">Mark as paid:</p>
+                            <div class="d-flex gap-2 flex-wrap">
+
+                                <!-- CASH: direct submit -->
+                                <form th:action="@{'/orders/selection/' + ${mySelection.id} + '/pay'}"
+                                      method="post" class="mb-0">
+                                    <input type="hidden" name="orderId" th:value="${order.id}"/>
+                                    <input type="hidden" name="method" value="CASH"/>
+                                    <button type="submit" class="btn btn-outline-success btn-sm">💵 Cash</button>
+                                </form>
+
+                                <!-- PAYPAL: opens modal if link exists, otherwise direct submit -->
+                                <button th:if="${order.paypalLink != null}"
+                                        type="button" class="btn btn-outline-primary btn-sm"
+                                        data-bs-toggle="modal" data-bs-target="#paypalModal">
+                                    💳 PayPal
+                                </button>
+                                <form th:if="${order.paypalLink == null}"
+                                      th:action="@{'/orders/selection/' + ${mySelection.id} + '/pay'}"
+                                      method="post" class="mb-0">
+                                    <input type="hidden" name="orderId" th:value="${order.id}"/>
+                                    <input type="hidden" name="method" value="PAYPAL"/>
+                                    <button type="submit" class="btn btn-outline-primary btn-sm">💳 PayPal</button>
+                                </form>
+
+                                <!-- WERO: opens modal if link exists, otherwise direct submit -->
+                                <button th:if="${order.weroLink != null}"
+                                        type="button" class="btn btn-outline-info btn-sm"
+                                        data-bs-toggle="modal" data-bs-target="#weroModal">
+                                    📱 Wero
+                                </button>
+                                <form th:if="${order.weroLink == null}"
+                                      th:action="@{'/orders/selection/' + ${mySelection.id} + '/pay'}"
+                                      method="post" class="mb-0">
+                                    <input type="hidden" name="orderId" th:value="${order.id}"/>
+                                    <input type="hidden" name="method" value="WERO"/>
+                                    <button type="submit" class="btn btn-outline-info btn-sm">📱 Wero</button>
+                                </form>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- All participants summary -->
+            <div class="summary-card">
+                <h6 class="fw-bold mb-3"><i class="bi bi-people"></i> All Participants</h6>
+
+                <div th:if="${selections.empty}" class="text-muted small">No orders placed yet.</div>
+
+                <div th:each="sel : ${selections}" class="participant-row">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="mini-avatar"
+                                 th:text="${#strings.toUpperCase(#strings.substring(sel.user.name,0,1))}">A</div>
+                            <div>
+                                <div class="fw-semibold small" th:text="${sel.user.name}">Name</div>
+                                <div th:each="si : ${sel.items}" style="font-size:11px" class="text-muted">
+                                    <span th:text="${si.quantity} + 'x ' + ${si.item.name}">item</span>
+                                    <span th:text="'– €' + ${#numbers.formatDecimal(allLineTotals[si.id],1,2)}">€0</span>
+                                </div>
+                                <div th:if="${sel.items.empty}" style="font-size:11px" class="text-muted">No items</div>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <div class="small text-muted"
+                                 th:text="'€' + ${#numbers.formatDecimal(sel.subtotal,1,2)}"></div>
+                            <div class="small text-muted"
+                                 th:text="'+ €' + ${#numbers.formatDecimal(tipPerPerson,1,2)} + ' tip'"></div>
+                            <div class="fw-bold small text-primary"
+                                 th:text="'= €' + ${#numbers.formatDecimal(participantTotals[sel.id],1,2)}">€0</div>
+                            <span th:if="${sel.paid or sel.markedPaidByOwner}" class="badge bg-success" style="font-size:10px"
+                                  th:text="${sel.paymentMethod}">PAID</span>
+                            <span th:if="${!sel.paid and !sel.markedPaidByOwner}"
+                                  class="badge bg-secondary" style="font-size:10px">UNPAID</span>
+                        </div>
+                    </div>
+                    <!-- Owner: mark others as paid -->
+                    <div th:if="${isOwner and !sel.markedPaidByOwner and !sel.paid}" class="mt-1">
+                        <p class="small text-muted mb-1" style="font-size:11px">Mark as paid via:</p>
+                        <div class="d-flex gap-1 flex-wrap">
+                            <form th:each="method : ${paymentMethods}"
+                                  th:action="@{'/orders/selection/' + ${sel.id} + '/owner-paid'}"
+                                  method="post" class="mb-0">
+                                <input type="hidden" name="orderId" th:value="${order.id}"/>
+                                <input type="hidden" name="method" th:value="${method.name()}"/>
+                                <button type="submit" class="btn btn-outline-success btn-sm py-0"
+                                        style="font-size:11px" th:text="${method.name()}">PAY</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div th:if="${isOwner and (sel.markedPaidByOwner or sel.paid)}" class="mt-1">
+                        <form th:action="@{'/orders/selection/' + ${sel.id} + '/owner-unpaid'}" method="post" class="mb-0">
+                            <input type="hidden" name="orderId" th:value="${order.id}"/>
+                            <button type="submit" class="btn btn-outline-secondary btn-sm py-0" style="font-size:11px">
+                                ↩ Unmark paid
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Grand total -->
+                <div th:if="${!selections.empty}" class="border-top mt-3 pt-3">
+                    <div class="d-flex justify-content-between small text-muted mb-1">
+                        <span>Subtotal</span>
+                        <span th:text="'€' + ${#numbers.formatDecimal(total,1,2)}">€0</span>
+                    </div>
+                    <div class="d-flex justify-content-between small text-muted mb-1">
+                        <span>Tip</span>
+                        <span th:text="'€' + ${#numbers.formatDecimal(order.tipAmount != null ? order.tipAmount : 0,1,2)}">€0.00</span>
+                    </div>
+                    <div class="d-flex justify-content-between fw-bold border-top pt-2">
+                        <span>Grand Total</span>
+                        <span class="text-primary"
+                              th:text="'€' + ${#numbers.formatDecimal(grandTotal,1,2)}">€0.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form id="deleteItemForm" method="post" style="display:none">
+        <input type="hidden" name="orderId" id="deleteOrderId"/>
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+    </form>
+
+    <div class="version-footer" th:text="'v' + ${@environment.getProperty('spring.application.version')}">v?</div>
+</div>
+
+<!-- PayPal Modal -->
+<div th:if="${mySelection != null and !mySelection.paid and !mySelection.markedPaidByOwner and order.paypalLink != null}"
+     class="modal fade" id="paypalModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">💳 Pay via PayPal</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <p class="text-muted mb-3">Scan the QR code or click the link to pay</p>
+                <img th:src="'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + ${order.paypalLink} + '/' + ${myTotal}"
+                     alt="PayPal QR Code" class="mb-3 rounded" style="width:200px;height:200px;"/>
+                <div class="mb-3">
+                    <a th:href="${order.paypalLink} + '/' + ${myTotal}" target="_blank"
+                       class="btn btn-primary">Open PayPal link ↗</a>
+                </div>
+                <p class="text-muted small">After completing the payment, confirm below.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary"
+                        data-bs-dismiss="modal">Close</button>
+                <form th:action="@{'/orders/selection/' + ${mySelection.id} + '/pay'}" method="post">
+                    <input type="hidden" name="orderId" th:value="${order.id}"/>
+                    <input type="hidden" name="method" value="PAYPAL"/>
+                    <button type="submit" class="btn btn-success">✓ Yes, I paid!</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Wero Modal -->
+<div th:if="${mySelection != null and !mySelection.paid and !mySelection.markedPaidByOwner and order.weroLink != null}"
+     class="modal fade" id="weroModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">📱 Pay via Wero</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <p class="text-muted mb-3">Scan the QR code or click the link to pay</p>
+                <img th:src="'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + ${order.weroLink}"
+                     alt="Wero QR Code" class="mb-3 rounded" style="width:200px;height:200px;"/>
+                <div class="mb-3">
+                    <a th:href="${order.weroLink}" target="_blank"
+                       class="btn btn-info">Open Wero link ↗</a>
+                </div>
+                <p class="text-muted small">After completing the payment, confirm below.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary"
+                        data-bs-dismiss="modal">Cancel</button>
+                <form th:action="@{'/orders/selection/' + ${mySelection.id} + '/pay'}" method="post">
+                    <input type="hidden" name="orderId" th:value="${order.id}"/>
+                    <input type="hidden" name="method" value="WERO"/>
+                    <button type="submit" class="btn btn-success">✓ Yes, I paid!</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="phoneOrderModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-telephone"></i>
+                    Order at <span th:text="${order.placeName}">Place</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted small mb-3">
+                    <i class="bi bi-calendar3"></i>
+                    <span th:text="${#temporals.format(order.orderDate,'dd MMM yyyy')}">Date</span>
+                </p>
+
+                <div th:if="${phoneOrderQuantities.empty}" class="text-muted text-center py-3">
+                    <i class="bi bi-basket2"></i> No items ordered yet.
+                </div>
+
+                <table th:if="${!phoneOrderQuantities.empty}"
+                       class="table table-hover mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Item</th>
+                        <th class="text-center">Qty</th>
+                        <th class="text-end">Unit</th>
+                        <th class="text-end">Total</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="entry : ${phoneOrderQuantities}">
+                        <td th:text="${phoneOrderNames[entry.key]}">Item</td>
+                        <td class="text-center fw-bold text-primary"
+                            th:text="${entry.value}">0</td>
+                        <td class="text-end"
+                            th:text="'€' + ${#numbers.formatDecimal(phoneOrderPrices[entry.key],1,2)}">€0</td>
+                        <td class="text-end fw-semibold"
+                            th:text="'€' + ${#numbers.formatDecimal(phoneOrderLineTotals[entry.key],1,2)}">€0</td>
+                    </tr>
+                    </tbody>
+                    <tfoot class="table-light">
+                    <tr>
+                        <td colspan="3" class="fw-bold">Total</td>
+                        <td class="text-end fw-bold text-primary"
+                            th:text="'€' + ${#numbers.formatDecimal(total,1,2)}">€0</td>
+                    </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button th:if="${order.status.name() == 'OPEN' or order.status.name() == 'ORDERED'}"
+                        type="button" class="btn btn-primary"
+                        data-bs-dismiss="modal"
+                        data-bs-toggle="modal" data-bs-target="#markOrderedModal">
+                    <i class="bi bi-telephone-fill"></i> Mark as Ordered
+                </button>
+                <button type="button" class="btn btn-outline-secondary"
+                        data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="markOrderedModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-telephone-fill"></i> Mark as Ordered
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to mark this order as placed?</p>
+                <p class="text-muted small">
+                    Other users will see a warning that the order has already been called in.
+                </p>
+                <form th:action="@{'/orders/' + ${order.id} + '/mark-ordered'}"
+                      method="post" id="markOrderedForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Your contact name</label>
+                        <input type="text" name="contactName" class="form-control"
+                               th:value="${user.name}" required maxlength="100"/>
+                        <small class="text-muted">
+                            This name will be shown to others so they can contact you.
+                        </small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary"
+                        data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="markOrderedForm" class="btn btn-primary">
+                    <i class="bi bi-telephone-fill"></i> Yes, I placed the order
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirm Selection Despite Ordered Modal -->
+<div class="modal fade" id="confirmSelectionModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">
+                    ⚠️ Order Already Placed
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    <strong th:text="${order.orderedByContact}">Someone</strong>
+                    has already called in this order.
+                </p>
+                <p class="text-muted">
+                    Changing your selection now may not be included in the order.
+                    Please contact <strong th:text="${order.orderedByContact}">them</strong> first
+                    to confirm your changes can still be accepted.
+                </p>
+                <p>Do you still want to save your selection?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary"
+                        data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-warning"
+                        onclick="confirmSaveSelection()">
+                    Yes, save anyway
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function changeQty(btn, delta) {
+        const input = btn.parentElement.querySelector('.qty-input');
+        const newVal = Math.max(0, Math.min(20, parseInt(input.value || 0) + delta));
+        input.value = newVal;
+    }
+
+    function changeQty(btn, delta) {
+        const input = btn.parentElement.querySelector('.qty-input');
+        const newVal = Math.max(0, Math.min(20, parseInt(input.value || 0) + delta));
+        input.value = newVal;
+    }
+
+    function deleteItem(btn) {
+        const listId = btn.getAttribute('data-list-id');
+        const itemId = btn.getAttribute('data-item-id');
+        const orderId = btn.getAttribute('data-order-id');
+        const itemName = btn.getAttribute('data-item-name');
+        if (!confirm('Are you sure you want to delete "' + itemName + '"?')) return;
+        const form = document.getElementById('deleteItemForm');
+        form.action = '/orders/itemlist/' + listId + '/items/' + itemId + '/delete';
+        document.getElementById('deleteOrderId').value = orderId;
+        form.submit();
+    }
+
+    function confirmSaveSelection() {
+        document.getElementById('confirmedOrderedInput').value = 'yes';
+        document.getElementById('selectionForm').submit();
+    }
+
+    function checkFileSize(input, maxMB) {
+        const error = document.getElementById('fileSizeError');
+        const submitBtn = input.closest('form').querySelector('button[type="submit"]');
+        if (input.files.length > 0) {
+            const sizeMB = input.files[0].size / (1024 * 1024);
+            if (sizeMB > maxMB) {
+                error.style.display = 'block';
+                input.value = '';
+                if (submitBtn) submitBtn.disabled = true;
+            } else {
+                error.style.display = 'none';
+                if (submitBtn) submitBtn.disabled = false;
+            }
+        }
+    }
+
+    window.addEventListener('load', function() {
+        if ([[${showOrderedWarning}]] === true) {
+            new bootstrap.Modal(document.getElementById('confirmSelectionModal')).show();
+        }
+    });
+</script>
+</body>
+</html>

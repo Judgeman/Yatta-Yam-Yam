@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <link rel="icon" type="image/svg+xml" href="/images/favicon.svg"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title th:text="'Welcome, ' + ${user.name} + ' to Yatta-Yam-Yam!'">Welcome!</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+
+    <style>
+        .version-footer {
+            text-align: right;
+            font-size: 11px;
+            color: #adb5bd;
+            padding: 16px;
+            margin-top: 24px;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            padding: 12px 8px;
+        }
+        .stat-card-warning {
+            background: #fff8e1;
+            border-color: #ffe082;
+        }
+        .stat-value {
+            font-weight: 700;
+            font-size: 16px;
+            color: #667eea;
+        }
+        .stat-label {
+            font-size: 11px;
+            color: #adb5bd;
+            margin-top: 2px;
+        }
+    </style>
+</head>
+<body class="bg-light d-flex align-items-center justify-content-center vh-100">
+
+<div class="card shadow-lg p-5 text-center" style="width: 100%; max-width: 480px;">
+
+    <!-- Avatar initials circle -->
+    <div class="avatar-circle mx-auto mb-4">
+        <span th:text="${#strings.toUpperCase(#strings.substring(user.name, 0, 1))}">A</span>
+    </div>
+
+    <h1 class="fw-bold mb-1">
+        Hello, <span class="text-primary" th:text="${user.name}">Name</span>! 👋
+    </h1>
+    <p class="text-muted mb-4">You're logged in. Great to have you here.</p>
+
+    <div class="card bg-light border-0 p-3 mb-4">
+        <small class="text-muted">Signed in as</small>
+        <div class="fw-semibold fs-5" th:text="${user.name}">Name</div>
+        <small class="text-muted">Remembered on this browser</small>
+    </div>
+
+    <div class="row g-2 mb-4 text-center">
+        <div class="col-6">
+            <div class="stat-card">
+                <div class="stat-value" th:text="${stats.registeredAt != null} ? ${#temporals.format(stats.registeredAt,'dd MMM yyyy')} : 'N/A'">-</div>
+                <div class="stat-label">Member since</div>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="stat-card">
+                <div class="stat-value" th:text="${stats.participated}">0</div>
+                <div class="stat-label">Orders joined</div>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="stat-card">
+                <div class="stat-value" th:text="${stats.openPayments}">0</div>
+                <div class="stat-label">Open payments</div>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="stat-card"
+                 th:classappend="${stats.openAmount gt 0} ? 'stat-card-warning' : ''">
+                <div class="stat-value"
+                     th:text="'€' + ${#numbers.formatDecimal(stats.openAmount,1,2)}">€0</div>
+                <div class="stat-label">Amount due</div>
+            </div>
+        </div>
+    </div>
+
+    <a th:href="@{/orders/dashboard}" class="btn btn-primary btn-lg mb-2">Go to Dashboard →</a>
+
+    <hr class="my-3"/>
+
+    <div class="mb-3">
+        <button class="btn btn-outline-primary btn-lg w-100"
+                type="button" data-bs-toggle="collapse"
+                data-bs-target="#renameForm">
+            ✏️ Rename Account
+        </button>
+        <div class="collapse mt-2" id="renameForm">
+            <div th:if="${renameError}" class="alert alert-warning small py-2 mb-2"
+                 th:text="${renameError}"></div>
+            <form th:action="@{/rename}" method="post" class="d-flex gap-2">
+                <input type="text" name="newName" class="form-control form-control-sm"
+                       placeholder="New name" required maxlength="50"
+                       th:value="${user.name}"/>
+                <button type="submit" class="btn btn-primary btn-sm">Save</button>
+            </form>
+        </div>
+    </div>
+
+    <form th:action="@{/switch-account}" method="post" class="d-grid">
+        <button type="submit" class="btn btn-outline-primary btn-lg">
+            🔄 Switch Account
+        </button>
+    </form>
+
+    <div class="version-footer" th:text="'v' + ${@environment.getProperty('spring.application.version')}">v?</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

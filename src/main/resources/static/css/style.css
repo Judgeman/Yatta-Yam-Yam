@@ -1,0 +1,73 @@
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: linear-gradient(135deg, #667eea22 0%, #764ba222 100%);
+    min-height: 100vh;
+}
+
+.card {
+    border-radius: 1.25rem;
+    border: none;
+}
+
+.app-icon {
+    font-size: 3rem;
+}
+
+/* Avatar circle with initial letter */
+.avatar-circle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 700;
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+/* Button polish */
+.btn-primary {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border: none;
+    border-radius: 0.75rem;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #5a6fd6, #6a3f96);
+    border: none;
+}
+
+.btn-success {
+    border-radius: 0.75rem;
+}
+
+.btn-outline-primary {
+    border-radius: 0.75rem;
+    border-color: #667eea;
+    color: #667eea;
+}
+
+.btn-outline-primary:hover {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-color: transparent;
+}
+
+.btn-outline-secondary {
+    border-radius: 0.75rem;
+}
+
+.form-control {
+    border-radius: 0.75rem;
+}
+
+.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.text-primary {
+    color: #667eea !important;
+}
