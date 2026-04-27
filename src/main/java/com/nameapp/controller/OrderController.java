@@ -477,6 +477,14 @@ public class OrderController {
                         phoneOrderPrices.get(itemId).multiply(java.math.BigDecimal.valueOf(qty)))
         );
 
+        long unpaidCount = selections.stream()
+                .filter(s -> !s.getItems().isEmpty() && !s.isPaid() && !s.isMarkedPaidByOwner())
+                .count();
+        BigDecimal unpaidAmount = selections.stream()
+                .filter(s -> !s.getItems().isEmpty() && !s.isPaid() && !s.isMarkedPaidByOwner())
+                .map(s -> s.getSubtotal().add(tipPerPerson))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
         model.addAttribute("user", currentUser);
         model.addAttribute("order", order);
         model.addAttribute("selections", selections);
@@ -494,6 +502,8 @@ public class OrderController {
         model.addAttribute("phoneOrderPrices", phoneOrderPrices);
         model.addAttribute("phoneOrderLineTotals", phoneOrderLineTotals);
         model.addAttribute("isOwner", order.getCreator().getId().equals(currentUser.getId()));
+        model.addAttribute("unpaidCount", unpaidCount);
+        model.addAttribute("unpaidAmount", unpaidAmount);
         model.addAttribute("paymentMethods", UserOrderSelection.PaymentMethod.values());
         model.addAttribute("showOrderedWarning", showOrderedWarning);
         return "order-detail";
