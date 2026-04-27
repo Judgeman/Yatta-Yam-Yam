@@ -37,6 +37,8 @@ public class LoginController {
         if (savedName != null) {
             Optional<AppUser> user = userService.findByName(savedName);
             if (user.isPresent()) {
+                String redirect = consumeRedirect(request);
+                if (redirect != null) return "redirect:" + redirect;
                 model.addAttribute("user", user.get());
                 model.addAttribute("stats", userService.getStatsForUser(user.get()));
                 return "welcome";
@@ -72,6 +74,7 @@ public class LoginController {
 
     @PostMapping("/confirm-login")
     public String confirmLogin(@RequestParam String name,
+                               HttpServletRequest request,
                                HttpServletResponse response,
                                Model model) {
         Optional<AppUser> user = userService.findByName(name);
@@ -80,6 +83,8 @@ public class LoginController {
             return "index";
         }
         setLoginCookie(response, user.get().getName());
+        String redirect = consumeRedirect(request);
+        if (redirect != null) return "redirect:" + redirect;
         model.addAttribute("user", user.get());
         model.addAttribute("stats", userService.getStatsForUser(user.get()));
         return "welcome";
@@ -97,6 +102,7 @@ public class LoginController {
 
     @PostMapping("/confirm-new-login")
     public String confirmNewLogin(@RequestParam String name,
+                                  HttpServletRequest request,
                                   HttpServletResponse response,
                                   Model model) {
         Optional<AppUser> user = userService.findByName(name);
@@ -105,6 +111,8 @@ public class LoginController {
             return "index";
         }
         setLoginCookie(response, user.get().getName());
+        String redirect = consumeRedirect(request);
+        if (redirect != null) return "redirect:" + redirect;
         model.addAttribute("user", user.get());
         model.addAttribute("stats", userService.getStatsForUser(user.get()));
         return "welcome";
@@ -199,5 +207,14 @@ public class LoginController {
         cookie.setMaxAge(0);
         cookie.setPath("/");
         response.addCookie(cookie);
+    }
+
+    private String consumeRedirect(HttpServletRequest request) {
+        String url = (String) request.getSession().getAttribute("redirectAfterLogin");
+        if (url != null && url.startsWith("/") && !url.startsWith("//")) {
+            request.getSession().removeAttribute("redirectAfterLogin");
+            return url;
+        }
+        return null;
     }
 }

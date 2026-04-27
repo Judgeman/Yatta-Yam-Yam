@@ -26,6 +26,18 @@ public class OrderController {
         this.userService = userService;
     }
 
+    // ── Helper: redirect to home, preserving the intended URL in session ────────
+
+    private String redirectToHome(HttpServletRequest request) {
+        if ("GET".equalsIgnoreCase(request.getMethod())) {
+            String uri = request.getRequestURI();
+            String query = request.getQueryString();
+            request.getSession().setAttribute("redirectAfterLogin",
+                    query != null ? uri + "?" + query : uri);
+        }
+        return "redirect:/";
+    }
+
     // ── Helper: get current user from cookie ─────────────────────────────────
 
     private Optional<AppUser> currentUser(HttpServletRequest request) {
@@ -48,7 +60,7 @@ public class OrderController {
     @GetMapping("/dashboard")
     public String dashboard(HttpServletRequest request, Model model) {
         Optional<AppUser> user = currentUser(request);
-        if (user.isEmpty()) return "redirect:/";
+        if (user.isEmpty()) return redirectToHome(request);
 
         AppUser currentUser = user.get();
         List<FoodOrder> orders = orderService.getOpenOrders();
@@ -109,7 +121,7 @@ public class OrderController {
     @GetMapping("/archive")
     public String archive(HttpServletRequest request, Model model) {
         Optional<AppUser> user = currentUser(request);
-        if (user.isEmpty()) return "redirect:/";
+        if (user.isEmpty()) return redirectToHome(request);
 
         List<FoodOrder> orders = orderService.getArchivedOrders();
 
@@ -145,7 +157,7 @@ public class OrderController {
     @GetMapping("/create")
     public String createForm(HttpServletRequest request, Model model) {
         Optional<AppUser> user = currentUser(request);
-        if (user.isEmpty()) return "redirect:/";
+        if (user.isEmpty()) return redirectToHome(request);
 
         model.addAttribute("user", user.get());
         model.addAttribute("itemLists", orderService.getAllItemLists());
@@ -179,7 +191,7 @@ public class OrderController {
     @GetMapping("/{id}")
     public String viewOrder(@PathVariable Long id, HttpServletRequest request, Model model) {
         Optional<AppUser> user = currentUser(request);
-        if (user.isEmpty()) return "redirect:/";
+        if (user.isEmpty()) return redirectToHome(request);
         return buildOrderDetailModel(id, user.get(), model, false);
     }
 
@@ -188,7 +200,7 @@ public class OrderController {
     @GetMapping("/{id}/edit")
     public String editForm(@PathVariable Long id, HttpServletRequest request, Model model) {
         Optional<AppUser> user = currentUser(request);
-        if (user.isEmpty()) return "redirect:/";
+        if (user.isEmpty()) return redirectToHome(request);
 
         Optional<FoodOrder> orderOpt = orderService.findOrder(id);
         if (orderOpt.isEmpty()) return "redirect:/orders/dashboard";
