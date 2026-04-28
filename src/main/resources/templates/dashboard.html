@@ -109,6 +109,21 @@
                             <i class="bi bi-check-circle-fill"></i> All paid!
                         </div>
                     </th:block>
+
+                    <!-- Closed order: non-owner unpaid summary -->
+                    <th:block th:if="${order.status.name() == 'CLOSED' and unpaidCountForNonOwner[order.id] != null}">
+                        <div class="mt-1 rounded px-2 py-1 small"
+                             style="background-color:#f2f2f2; border:1px solid #e0e0e0;">
+                            <span th:if="${unpaidCountForNonOwner[order.id] == 0}" class="text-success">
+                                <i class="bi bi-check-circle-fill"></i> All paid!
+                            </span>
+                            <span th:if="${unpaidCountForNonOwner[order.id] > 0}" class="text-muted">
+                                <i class="bi bi-cash-stack"></i>
+                                <span th:text="${unpaidCountForNonOwner[order.id]}">0</span> unpaid ·
+                                <strong th:text="'€' + ${#numbers.formatDecimal(unpaidAmountForNonOwner[order.id],1,2)}"></strong> open
+                            </span>
+                        </div>
+                    </th:block>
                 </div>
             </a>
         </div>
