@@ -51,6 +51,10 @@ public class OrderService {
         return orderRepo.findByStatusOrderByOrderDateDesc(FoodOrder.OrderStatus.ARCHIVED);
     }
 
+    public List<FoodOrder> getArchivedOrdersByLocation(FoodOrder.Location location) {
+        return orderRepo.findByStatusAndLocationOrderByOrderDateDesc(FoodOrder.OrderStatus.ARCHIVED, location);
+    }
+
     public Optional<FoodOrder> findOrder(Long id) {
         return orderRepo.findById(id);
     }

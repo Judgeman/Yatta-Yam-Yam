@@ -118,11 +118,19 @@ public class OrderController {
     // ── Archive ───────────────────────────────────────────────────────────────
 
     @GetMapping("/archive")
-    public String archive(HttpServletRequest request, Model model) {
+    public String archive(HttpServletRequest request, Model model,
+                          @RequestParam(required = false) String location) {
         Optional<AppUser> user = currentUser(request);
         if (user.isEmpty()) return "redirect:/";
 
-        List<FoodOrder> orders = orderService.getArchivedOrders();
+        FoodOrder.Location locationFilter = null;
+        if (location != null && !location.isBlank()) {
+            try { locationFilter = FoodOrder.Location.valueOf(location.toUpperCase()); } catch (IllegalArgumentException ignored) {}
+        }
+
+        List<FoodOrder> orders = locationFilter != null
+                ? orderService.getArchivedOrdersByLocation(locationFilter)
+                : orderService.getArchivedOrders();
 
         Map<Long, Boolean> allPaidMap = new java.util.HashMap<>();
         Map<Long, java.math.BigDecimal> openAmountMap = new java.util.HashMap<>();
@@ -148,6 +156,8 @@ public class OrderController {
         model.addAttribute("orders", orders);
         model.addAttribute("allPaidMap", allPaidMap);
         model.addAttribute("openAmountMap", openAmountMap);
+        model.addAttribute("locations", FoodOrder.Location.values());
+        model.addAttribute("selectedLocation", location);
         return "archive";
     }
 
