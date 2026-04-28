@@ -36,6 +36,10 @@ public class FoodOrder {
     @Column(nullable = false, columnDefinition = "VARCHAR(255)")
     private OrderStatus status = OrderStatus.OPEN;
 
+    @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "VARCHAR(255)")
+    private Location location;
+
     private String orderedByContact;
 
     // Tip amount entered by the creator (total tip, split per person)
@@ -47,6 +51,10 @@ public class FoodOrder {
 
     public enum OrderStatus {
         OPEN, ORDERED, CLOSED, ARCHIVED
+    }
+
+    public enum Location {
+        KASSEL, FRANKFURT
     }
 
     public FoodOrder() {
@@ -139,5 +147,13 @@ public class FoodOrder {
 
     public void setOrderedByContact(String orderedByContact) {
         this.orderedByContact = orderedByContact;
+    }
+
+    public Location getLocation() {
+        return location;
+    }
+
+    public void setLocation(Location location) {
+        this.location = location;
     }
 }

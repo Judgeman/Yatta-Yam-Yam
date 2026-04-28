@@ -40,6 +40,11 @@
                 <span th:text="${#temporals.format(order.orderDate,'EEEE, dd MMM yyyy')}">Date</span>
                 &nbsp;·&nbsp;
                 Created by <span th:text="${order.creator.name}">Owner</span>
+                <th:block th:if="${order.location != null}">
+                    &nbsp;·&nbsp;
+                    <i class="bi bi-geo-alt"></i>
+                    <span th:text="${#strings.capitalize(#strings.toLowerCase(order.location.name()))}">Location</span>
+                </th:block>
             </span>
         </div>
         <div class="d-flex gap-2 flex-wrap">

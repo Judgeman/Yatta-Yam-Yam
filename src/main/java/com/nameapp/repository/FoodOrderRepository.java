@@ -10,4 +10,6 @@ public interface FoodOrderRepository extends JpaRepository<FoodOrder, Long> {
     List<FoodOrder> findByStatusNotOrderByOrderDateDesc(FoodOrder.OrderStatus status);
     List<FoodOrder> findByStatusOrderByOrderDateDesc(FoodOrder.OrderStatus status);
     Optional<FoodOrder> findTopByCreatorOrderByOrderDateDesc(AppUser creator);
+    List<FoodOrder> findByStatusNotAndLocationOrderByOrderDateDesc(FoodOrder.OrderStatus status, FoodOrder.Location location);
+    List<FoodOrder> findByStatusAndLocationOrderByOrderDateDesc(FoodOrder.OrderStatus status, FoodOrder.Location location);
 }

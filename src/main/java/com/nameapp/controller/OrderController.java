@@ -58,12 +58,21 @@ public class OrderController {
     // ── Dashboard ─────────────────────────────────────────────────────────────
 
     @GetMapping("/dashboard")
-    public String dashboard(HttpServletRequest request, Model model) {
+    public String dashboard(HttpServletRequest request, Model model,
+                            @RequestParam(required = false) String location) {
         Optional<AppUser> user = currentUser(request);
         if (user.isEmpty()) return redirectToHome(request);
 
         AppUser currentUser = user.get();
-        List<FoodOrder> orders = orderService.getOpenOrders();
+
+        FoodOrder.Location locationFilter = null;
+        if (location != null && !location.isBlank()) {
+            try { locationFilter = FoodOrder.Location.valueOf(location.toUpperCase()); } catch (IllegalArgumentException ignored) {}
+        }
+
+        List<FoodOrder> orders = locationFilter != null
+                ? orderService.getOpenOrdersByLocation(locationFilter)
+                : orderService.getOpenOrders();
 
         // Build per-order summary info for the dashboard
         Map<Long, java.math.BigDecimal> myOpenAmounts = new java.util.HashMap<>();
@@ -120,17 +129,27 @@ public class OrderController {
         model.addAttribute("unpaidAmountForOwner", unpaidAmountForOwner);
         model.addAttribute("unpaidCountForNonOwner", unpaidCountForNonOwner);
         model.addAttribute("unpaidAmountForNonOwner", unpaidAmountForNonOwner);
+        model.addAttribute("locations", FoodOrder.Location.values());
+        model.addAttribute("selectedLocation", location);
         return "dashboard";
     }
 
     // ── Archive ───────────────────────────────────────────────────────────────
 
     @GetMapping("/archive")
-    public String archive(HttpServletRequest request, Model model) {
+    public String archive(HttpServletRequest request, Model model,
+                          @RequestParam(required = false) String location) {
         Optional<AppUser> user = currentUser(request);
         if (user.isEmpty()) return redirectToHome(request);
 
-        List<FoodOrder> orders = orderService.getArchivedOrders();
+        FoodOrder.Location locationFilter = null;
+        if (location != null && !location.isBlank()) {
+            try { locationFilter = FoodOrder.Location.valueOf(location.toUpperCase()); } catch (IllegalArgumentException ignored) {}
+        }
+
+        List<FoodOrder> orders = locationFilter != null
+                ? orderService.getArchivedOrdersByLocation(locationFilter)
+                : orderService.getArchivedOrders();
 
         Map<Long, Boolean> allPaidMap = new java.util.HashMap<>();
         Map<Long, java.math.BigDecimal> openAmountMap = new java.util.HashMap<>();
@@ -156,6 +175,8 @@ public class OrderController {
         model.addAttribute("orders", orders);
         model.addAttribute("allPaidMap", allPaidMap);
         model.addAttribute("openAmountMap", openAmountMap);
+        model.addAttribute("locations", FoodOrder.Location.values());
+        model.addAttribute("selectedLocation", location);
         return "archive";
     }
 
@@ -169,6 +190,7 @@ public class OrderController {
         model.addAttribute("user", user.get());
         model.addAttribute("itemLists", orderService.getAllItemLists());
         model.addAttribute("today", LocalDate.now());
+        model.addAttribute("locations", FoodOrder.Location.values());
         return "order-create";
     }
 
@@ -177,6 +199,7 @@ public class OrderController {
                               @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate orderDate,
                               @RequestParam(required = false) Long itemListId,
                               @RequestParam(required = false) String newListName,
+                              @RequestParam(required = false) String location,
                               HttpServletRequest request) {
         Optional<AppUser> user = currentUser(request);
         if (user.isEmpty()) return "redirect:/";
@@ -189,7 +212,12 @@ public class OrderController {
             listId = newList.getId();
         }
 
-        FoodOrder order = orderService.createOrder(placeName, orderDate, user.get(), listId);
+        FoodOrder.Location loc = null;
+        if (location != null && !location.isBlank()) {
+            try { loc = FoodOrder.Location.valueOf(location.toUpperCase()); } catch (IllegalArgumentException ignored) {}
+        }
+
+        FoodOrder order = orderService.createOrder(placeName, orderDate, user.get(), listId, loc);
         return "redirect:/orders/" + order.getId();
     }
 
@@ -218,6 +246,7 @@ public class OrderController {
         model.addAttribute("user", user.get());
         model.addAttribute("order", order);
         model.addAttribute("itemLists", orderService.getItemListsForUser(user.get()));
+        model.addAttribute("locations", FoodOrder.Location.values());
         return "order-edit";
     }
 
@@ -228,13 +257,20 @@ public class OrderController {
                             @RequestParam(required = false) BigDecimal tipAmount,
                             @RequestParam(required = false) String paypalLink,
                             @RequestParam(required = false) String weroLink,
+                            @RequestParam(required = false) String location,
                             HttpServletRequest request) {
         Optional<AppUser> user = currentUser(request);
         if (user.isEmpty()) return "redirect:/";
 
+        FoodOrder.Location loc = null;
+        if (location != null && !location.isBlank()) {
+            try { loc = FoodOrder.Location.valueOf(location.toUpperCase()); } catch (IllegalArgumentException ignored) {}
+        }
+
+        final FoodOrder.Location finalLoc = loc;
         orderService.findOrder(id).ifPresent(order -> {
             if (order.getCreator().getId().equals(user.get().getId())) {
-                orderService.updateOrder(id, placeName, orderDate, tipAmount, paypalLink, weroLink);
+                orderService.updateOrder(id, placeName, orderDate, tipAmount, paypalLink, weroLink, finalLoc);
             }
         });
         return "redirect:/orders/" + id;

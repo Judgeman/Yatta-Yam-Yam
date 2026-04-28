@@ -30,9 +30,21 @@
 </nav>
 
 <div class="container py-4">
-    <div class="mb-4">
+    <div class="mb-3">
         <h2 class="fw-bold mb-0"><i class="bi bi-archive"></i> Archived Orders</h2>
         <p class="text-muted" th:text="${orders.size()} + ' archived order(s)'"></p>
+    </div>
+
+    <!-- Location filter -->
+    <div class="mb-4 d-flex gap-2 flex-wrap">
+        <a th:href="@{/orders/archive}"
+           th:classappend="${selectedLocation == null} ? 'btn-primary' : 'btn-outline-secondary'"
+           class="btn btn-sm">All</a>
+        <a th:each="loc : ${locations}"
+           th:href="@{/orders/archive(location=${loc.name()})}"
+           th:classappend="${selectedLocation != null and selectedLocation.equalsIgnoreCase(loc.name())} ? 'btn-primary' : 'btn-outline-secondary'"
+           class="btn btn-sm"
+           th:text="${#strings.capitalize(#strings.toLowerCase(loc.name()))}">Location</a>
     </div>
 
     <div th:if="${orders.empty}" class="text-center py-5">
@@ -50,9 +62,13 @@
                         <span class="text-muted small" th:text="${#temporals.format(order.orderDate,'dd MMM yyyy')}">Date</span>
                     </div>
                     <h5 class="fw-bold mb-1" th:text="${order.placeName}">Place</h5>
-                    <div class="text-muted small mb-2">
+                    <div class="text-muted small mb-1">
                         <i class="bi bi-person"></i>
                         Created by <span th:text="${order.creator.name}">Owner</span>
+                    </div>
+                    <div th:if="${order.location != null}" class="text-muted small mb-2">
+                        <i class="bi bi-geo-alt"></i>
+                        <span th:text="${#strings.capitalize(#strings.toLowerCase(order.location.name()))}">Location</span>
                     </div>
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <span class="text-muted small">
