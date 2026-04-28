@@ -439,7 +439,7 @@
         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
     </form>
 
-    <div class="version-footer" th:text="'v' + ${@environment.getProperty('spring.application.version')}">v?</div>
+    <div class="version-footer"><a th:href="@{/version}" th:text="'v' + ${@environment.getProperty('spring.application.version')}">v?</a></div>
 </div>
 
 <!-- PayPal Modal -->

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <link rel="icon" type="image/svg+xml" href="/images/favicon.svg"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Release Notes – Yatta-Yam-Yam</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+
+    <style>
+        .version-footer {
+            text-align: right;
+            font-size: 11px;
+            color: #adb5bd;
+            padding: 16px;
+            margin-top: 24px;
+        }
+        .version-footer a {
+            color: #adb5bd;
+            text-decoration: none;
+        }
+        .version-footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+<div class="container py-5" style="max-width: 680px;">
+    <div class="mb-4">
+        <a href="javascript:history.back()" class="text-muted text-decoration-none">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>
+    </div>
+
+    <div class="card shadow-sm p-4">
+        <div class="d-flex align-items-center gap-3 mb-4">
+            <img src="/images/logo.png" alt="Yatta-Yam-Yam" style="height:48px;"/>
+            <div>
+                <h1 class="h4 fw-bold mb-0">Release Notes</h1>
+                <span class="badge bg-primary fs-6 mt-1"
+                      th:text="'v' + ${@environment.getProperty('spring.application.version')}">v?</span>
+            </div>
+        </div>
+
+        <h2 class="h5 fw-semibold mb-3">
+            v<span th:text="${@environment.getProperty('spring.application.version')}">?</span>
+            <span class="text-muted fw-normal fs-6 ms-2">– What's new</span>
+        </h2>
+
+        <ul class="list-group list-group-flush mb-3">
+            <li class="list-group-item d-flex gap-2 align-items-start px-0">
+                <i class="bi bi-clock-history text-primary mt-1"></i>
+                <div>
+                    <strong>Longer session lifetime after login</strong><br/>
+                    <span class="text-muted small">Sessions now stay active for a longer period after entering the password, so you are not logged out as quickly.</span>
+                </div>
+            </li>
+            <li class="list-group-item d-flex gap-2 align-items-start px-0">
+                <i class="bi bi-eye text-primary mt-1"></i>
+                <div>
+                    <strong>Show password toggle</strong><br/>
+                    <span class="text-muted small">A toggle button on password fields lets you reveal or hide the password while typing.</span>
+                </div>
+            </li>
+            <li class="list-group-item d-flex gap-2 align-items-start px-0">
+                <i class="bi bi-link-45deg text-primary mt-1"></i>
+                <div>
+                    <strong>Correct link resolution after password entry</strong><br/>
+                    <span class="text-muted small">Links are now resolved correctly after the password has been entered, so you are no longer redirected to the home page instead of the intended destination.</span>
+                </div>
+            </li>
+            <li class="list-group-item d-flex gap-2 align-items-start px-0">
+                <i class="bi bi-credit-card text-primary mt-1"></i>
+                <div>
+                    <strong>Payment option hidden when no payment link is configured</strong><br/>
+                    <span class="text-muted small">If neither a Wero nor a PayPal link has been provided, the payment option is no longer shown to other users.</span>
+                </div>
+            </li>
+            <li class="list-group-item d-flex gap-2 align-items-start px-0">
+                <i class="bi bi-currency-euro text-primary mt-1"></i>
+                <div>
+                    <strong>Open amounts visible to everyone</strong><br/>
+                    <span class="text-muted small">The outstanding balance for an order is now displayed for all participants, not just the person who created the order.</span>
+                </div>
+            </li>
+        </ul>
+
+        <div class="version-footer">
+            <a th:href="@{/version}"
+               th:text="'v' + ${@environment.getProperty('spring.application.version')}">v?</a>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
