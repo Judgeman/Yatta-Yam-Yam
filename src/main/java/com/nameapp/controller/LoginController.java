@@ -21,7 +21,7 @@ import java.util.Optional;
 public class LoginController {
 
     private static final String COOKIE_NAME = "nameapp_user";
-    private static final int COOKIE_MAX_AGE = 60 * 60 * 24 * 30; // 30 days
+    private static final int COOKIE_MAX_AGE = Integer.MAX_VALUE; // ~68 years
 
     private final AppUserService userService;
 
