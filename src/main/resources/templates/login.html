@@ -39,6 +39,7 @@
     </div>
 
     <form th:action="@{/login}" method="post">
+        <input type="hidden" name="remember-me" value="true"/>
         <div class="mb-3">
             <input type="hidden"
                    id="username"
