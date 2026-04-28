@@ -152,6 +152,11 @@ public class LoginController {
         }
     }
 
+    @GetMapping("/version")
+    public String versionPage() {
+        return "version";
+    }
+
     @GetMapping("/users")
     public String userList(HttpServletRequest request, Model model) {
         String savedName = getCookieValue(request);

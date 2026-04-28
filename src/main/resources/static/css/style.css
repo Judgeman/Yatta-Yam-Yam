@@ -71,3 +71,12 @@ body {
 .text-primary {
     color: #667eea !important;
 }
+
+.version-footer a {
+    color: #adb5bd;
+    text-decoration: none;
+}
+
+.version-footer a:hover {
+    text-decoration: underline;
+}
