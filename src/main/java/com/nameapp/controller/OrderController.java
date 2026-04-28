@@ -71,6 +71,8 @@ public class OrderController {
         Map<Long, Boolean> myPaidStatus = new java.util.HashMap<>();
         Map<Long, Integer> unpaidCountForOwner = new java.util.HashMap<>();
         Map<Long, java.math.BigDecimal> unpaidAmountForOwner = new java.util.HashMap<>();
+        Map<Long, Integer> unpaidCountForNonOwner = new java.util.HashMap<>();
+        Map<Long, java.math.BigDecimal> unpaidAmountForNonOwner = new java.util.HashMap<>();
 
         for (FoodOrder order : orders) {
             if (order.getStatus() != FoodOrder.OrderStatus.CLOSED) continue;
@@ -91,18 +93,21 @@ public class OrderController {
                         }
                     });
 
-            // Owner summary
-            if (order.getCreator().getId().equals(currentUser.getId())) {
-                int unpaidCount = 0;
-                java.math.BigDecimal unpaidTotal = java.math.BigDecimal.ZERO;
-                for (UserOrderSelection sel : selections) {
-                    if (!sel.isPaid() && !sel.isMarkedPaidByOwner() && !sel.getItems().isEmpty()) {
-                        unpaidCount++;
-                        unpaidTotal = unpaidTotal.add(sel.getSubtotal().add(tipPerPerson));
-                    }
+            // Unpaid summary (owner gets red alert, non-owner gets gray box)
+            int unpaidCount = 0;
+            java.math.BigDecimal unpaidTotal = java.math.BigDecimal.ZERO;
+            for (UserOrderSelection sel : selections) {
+                if (!sel.isPaid() && !sel.isMarkedPaidByOwner() && !sel.getItems().isEmpty()) {
+                    unpaidCount++;
+                    unpaidTotal = unpaidTotal.add(sel.getSubtotal().add(tipPerPerson));
                 }
+            }
+            if (order.getCreator().getId().equals(currentUser.getId())) {
                 unpaidCountForOwner.put(order.getId(), unpaidCount);
                 unpaidAmountForOwner.put(order.getId(), unpaidTotal);
+            } else {
+                unpaidCountForNonOwner.put(order.getId(), unpaidCount);
+                unpaidAmountForNonOwner.put(order.getId(), unpaidTotal);
             }
         }
 
@@ -113,6 +118,8 @@ public class OrderController {
         model.addAttribute("myPaidMethods", myPaidMethods);
         model.addAttribute("unpaidCountForOwner", unpaidCountForOwner);
         model.addAttribute("unpaidAmountForOwner", unpaidAmountForOwner);
+        model.addAttribute("unpaidCountForNonOwner", unpaidCountForNonOwner);
+        model.addAttribute("unpaidAmountForNonOwner", unpaidAmountForNonOwner);
         return "dashboard";
     }
 
@@ -489,6 +496,14 @@ public class OrderController {
                         phoneOrderPrices.get(itemId).multiply(java.math.BigDecimal.valueOf(qty)))
         );
 
+        long unpaidCount = selections.stream()
+                .filter(s -> !s.getItems().isEmpty() && !s.isPaid() && !s.isMarkedPaidByOwner())
+                .count();
+        BigDecimal unpaidAmount = selections.stream()
+                .filter(s -> !s.getItems().isEmpty() && !s.isPaid() && !s.isMarkedPaidByOwner())
+                .map(s -> s.getSubtotal().add(tipPerPerson))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
         model.addAttribute("user", currentUser);
         model.addAttribute("order", order);
         model.addAttribute("selections", selections);
@@ -506,6 +521,8 @@ public class OrderController {
         model.addAttribute("phoneOrderPrices", phoneOrderPrices);
         model.addAttribute("phoneOrderLineTotals", phoneOrderLineTotals);
         model.addAttribute("isOwner", order.getCreator().getId().equals(currentUser.getId()));
+        model.addAttribute("unpaidCount", unpaidCount);
+        model.addAttribute("unpaidAmount", unpaidAmount);
         model.addAttribute("paymentMethods", UserOrderSelection.PaymentMethod.values());
         model.addAttribute("showOrderedWarning", showOrderedWarning);
         return "order-detail";
