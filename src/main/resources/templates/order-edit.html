@@ -39,6 +39,17 @@
                        th:value="${order.orderDate}" required/>
             </div>
 
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Location</label>
+                <select name="location" class="form-select form-select-lg" required>
+                    <option value="" disabled th:selected="${order.location == null}">Select location...</option>
+                    <option th:each="loc : ${locations}"
+                            th:value="${loc.name()}"
+                            th:text="${#strings.capitalize(#strings.toLowerCase(loc.name()))}"
+                            th:selected="${order.location == loc}">Location</option>
+                </select>
+            </div>
+
             <div class="mb-4">
                 <label class="form-label fw-semibold">Tip Amount (€) <span class="text-muted fw-normal small">– split equally per person</span></label>
                 <div class="input-group">
