@@ -41,6 +41,16 @@
             </div>
 
             <div class="mb-4">
+                <label class="form-label fw-semibold">Location</label>
+                <select name="location" class="form-select form-select-lg" required>
+                    <option value="" disabled selected>Select location...</option>
+                    <option th:each="loc : ${locations}"
+                            th:value="${loc.name()}"
+                            th:text="${#strings.capitalize(#strings.toLowerCase(loc.name()))}">Location</option>
+                </select>
+            </div>
+
+            <div class="mb-4">
                 <label class="form-label fw-semibold">Item List</label>
 
                 <!-- Existing lists -->

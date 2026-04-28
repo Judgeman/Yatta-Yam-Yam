@@ -43,6 +43,10 @@ public class OrderService {
         return orderRepo.findByStatusNotOrderByOrderDateDesc(FoodOrder.OrderStatus.ARCHIVED);
     }
 
+    public List<FoodOrder> getOpenOrdersByLocation(FoodOrder.Location location) {
+        return orderRepo.findByStatusNotAndLocationOrderByOrderDateDesc(FoodOrder.OrderStatus.ARCHIVED, location);
+    }
+
     public List<FoodOrder> getArchivedOrders() {
         return orderRepo.findByStatusOrderByOrderDateDesc(FoodOrder.OrderStatus.ARCHIVED);
     }
@@ -51,13 +55,15 @@ public class OrderService {
         return orderRepo.findById(id);
     }
 
-    public FoodOrder createOrder(String placeName, LocalDate date, AppUser creator, Long itemListId) {
+    public FoodOrder createOrder(String placeName, LocalDate date, AppUser creator, Long itemListId,
+                                 FoodOrder.Location location) {
         FoodOrder order = new FoodOrder();
         order.setPlaceName(placeName);
         order.setOrderDate(date);
         order.setCreator(creator);
         order.setStatus(FoodOrder.OrderStatus.OPEN);
         order.setTipAmount(BigDecimal.ZERO);
+        order.setLocation(location);
         if (itemListId != null) {
             itemListRepo.findById(itemListId).ifPresent(order::setItemList);
         }
@@ -79,6 +85,19 @@ public class OrderService {
             order.setTipAmount(tip != null ? tip : BigDecimal.ZERO);
             order.setPaypalLink(paypalLink != null && !paypalLink.isBlank() ? paypalLink.trim() : null);
             order.setWeroLink(weroLink != null && !weroLink.isBlank() ? weroLink.trim() : null);
+            orderRepo.save(order);
+        });
+    }
+
+    public void updateOrder(Long orderId, String placeName, LocalDate date, BigDecimal tip,
+                            String paypalLink, String weroLink, FoodOrder.Location location) {
+        orderRepo.findById(orderId).ifPresent(order -> {
+            order.setPlaceName(placeName);
+            order.setOrderDate(date);
+            order.setTipAmount(tip != null ? tip : BigDecimal.ZERO);
+            order.setPaypalLink(paypalLink != null && !paypalLink.isBlank() ? paypalLink.trim() : null);
+            order.setWeroLink(weroLink != null && !weroLink.isBlank() ? weroLink.trim() : null);
+            order.setLocation(location);
             orderRepo.save(order);
         });
     }
