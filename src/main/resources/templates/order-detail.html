@@ -323,33 +323,19 @@
                                     <button type="submit" class="btn btn-outline-success btn-sm">💵 Cash</button>
                                 </form>
 
-                                <!-- PAYPAL: opens modal if link exists, otherwise direct submit -->
+                                <!-- PAYPAL: only show if link exists -->
                                 <button th:if="${order.paypalLink != null}"
                                         type="button" class="btn btn-outline-primary btn-sm"
                                         data-bs-toggle="modal" data-bs-target="#paypalModal">
                                     💳 PayPal
                                 </button>
-                                <form th:if="${order.paypalLink == null}"
-                                      th:action="@{'/orders/selection/' + ${mySelection.id} + '/pay'}"
-                                      method="post" class="mb-0">
-                                    <input type="hidden" name="orderId" th:value="${order.id}"/>
-                                    <input type="hidden" name="method" value="PAYPAL"/>
-                                    <button type="submit" class="btn btn-outline-primary btn-sm">💳 PayPal</button>
-                                </form>
 
-                                <!-- WERO: opens modal if link exists, otherwise direct submit -->
+                                <!-- WERO: only show if link exists -->
                                 <button th:if="${order.weroLink != null}"
                                         type="button" class="btn btn-outline-info btn-sm"
                                         data-bs-toggle="modal" data-bs-target="#weroModal">
                                     📱 Wero
                                 </button>
-                                <form th:if="${order.weroLink == null}"
-                                      th:action="@{'/orders/selection/' + ${mySelection.id} + '/pay'}"
-                                      method="post" class="mb-0">
-                                    <input type="hidden" name="orderId" th:value="${order.id}"/>
-                                    <input type="hidden" name="method" value="WERO"/>
-                                    <button type="submit" class="btn btn-outline-info btn-sm">📱 Wero</button>
-                                </form>
 
                             </div>
                         </div>
@@ -395,6 +381,7 @@
                         <p class="small text-muted mb-1" style="font-size:11px">Mark as paid via:</p>
                         <div class="d-flex gap-1 flex-wrap">
                             <form th:each="method : ${paymentMethods}"
+                                  th:if="${method.name() == 'CASH' or (method.name() == 'PAYPAL' and order.paypalLink != null) or (method.name() == 'WERO' and order.weroLink != null)}"
                                   th:action="@{'/orders/selection/' + ${sel.id} + '/owner-paid'}"
                                   method="post" class="mb-0">
                                 <input type="hidden" name="orderId" th:value="${order.id}"/>
