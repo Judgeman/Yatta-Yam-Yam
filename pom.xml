@@ -12,7 +12,7 @@
     </parent>
 
     <groupId>de.yatta-yam-yam</groupId>
-    <version>1.4.2</version>
+    <version>1.5.0</version>
     <artifactId>yatta-yam-yam</artifactId>
     <name>yatta-yam-yam</name>
     <description>Yatta-Yam-Yam food ordering app</description>
