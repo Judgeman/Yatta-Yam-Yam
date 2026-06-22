@@ -1,6 +1,7 @@
 package com.nameapp.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.ColumnDefault;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +19,13 @@ public class ItemList {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "creator_id")
     private AppUser creator;
+
+    // Whether this list is offered when creating a new order.
+    // Lists created by mistake can be hidden via the hidden item-list admin page.
+    // The DB-level default keeps pre-existing lists visible when the column is added.
+    @Column(nullable = false)
+    @ColumnDefault("true")
+    private boolean visible = true;
 
     @OneToMany(mappedBy = "itemList", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Item> items = new ArrayList<>();
@@ -56,5 +64,13 @@ public class ItemList {
 
     public void setItems(List<Item> items) {
         this.items = items;
+    }
+
+    public boolean isVisible() {
+        return visible;
+    }
+
+    public void setVisible(boolean visible) {
+        this.visible = visible;
     }
 }

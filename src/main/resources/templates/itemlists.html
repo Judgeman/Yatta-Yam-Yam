@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Item Lists – Yatta-Yam-Yam</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}"/>
+    <link rel="icon" type="image/svg+xml" href="/images/favicon.svg"/>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-bold" th:href="@{/orders/dashboard}">Yatta-Yam-Yam</a>
+    </div>
+</nav>
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0"><i class="bi bi-list-check"></i> Item Lists</h2>
+            <p class="text-muted mb-0" th:text="${itemLists.size()} + ' item list(s)'"></p>
+        </div>
+        <a th:href="@{/orders/dashboard}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i> Dashboard
+        </a>
+    </div>
+
+    <p class="text-muted small mb-3">
+        Hidden lists are not offered when creating a new order. Use the toggle to
+        hide lists that were created by mistake, or to bring them back.
+    </p>
+
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th>List</th>
+                    <th>Creator</th>
+                    <th class="text-center">Items</th>
+                    <th class="text-center">Visible</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="list : ${itemLists}" th:classappend="${!list.visible} ? 'table-secondary'">
+                    <td>
+                        <span class="fw-semibold" th:text="${list.name}">List name</span>
+                        <span class="badge bg-secondary ms-2" th:if="${!list.visible}">hidden</span>
+                    </td>
+                    <td class="text-muted">
+                        <span th:if="${list.creator != null}" th:text="${list.creator.name}">-</span>
+                        <span th:if="${list.creator == null}" class="text-muted">N/A</span>
+                    </td>
+                    <td class="text-center">
+                        <span class="badge bg-primary rounded-pill" th:text="${list.items.size()}">0</span>
+                    </td>
+                    <td class="text-center">
+                        <form th:action="@{'/orders/itemlists/' + ${list.id} + '/visibility'}" method="post">
+                            <div class="form-check form-switch d-inline-flex justify-content-center m-0">
+                                <input class="form-check-input" type="checkbox" role="switch"
+                                       name="visible" value="true"
+                                       th:checked="${list.visible}"
+                                       onchange="this.form.submit()"/>
+                            </div>
+                        </form>
+                    </td>
+                </tr>
+                <tr th:if="${itemLists.empty}">
+                    <td colspan="4" class="text-center text-muted py-4">No item lists yet.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="version-footer"><a th:href="@{/version}" th:text="'v' + ${@environment.getProperty('spring.application.version')}">v?</a></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

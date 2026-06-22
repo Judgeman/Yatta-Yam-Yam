@@ -134,15 +134,23 @@ public class OrderService {
         return itemListRepo.findByCreator(user);
     }
 
-    public ItemList createItemList(String name, AppUser creator) {
+    public ItemList createItemList(String name, AppUser creator, boolean visible) {
         ItemList list = new ItemList();
         list.setName(name);
         list.setCreator(creator);
+        list.setVisible(visible);
         return itemListRepo.save(list);
     }
 
     public Optional<ItemList> findItemList(Long id) {
         return itemListRepo.findById(id);
+    }
+
+    public void setItemListVisible(Long listId, boolean visible) {
+        itemListRepo.findById(listId).ifPresent(list -> {
+            list.setVisible(visible);
+            itemListRepo.save(list);
+        });
     }
 
     // ── Items ─────────────────────────────────────────────────────────────────
@@ -300,6 +308,16 @@ public class OrderService {
 
     public List<ItemList> getAllItemLists() {
         return itemListRepo.findAll();
+    }
+
+    // Lists offered when creating a new order (hidden ones are excluded).
+    public List<ItemList> getVisibleItemLists() {
+        return itemListRepo.findByVisibleTrueOrderByIdDesc();
+    }
+
+    // All lists including hidden ones — for the hidden item-list admin page.
+    public List<ItemList> getAllItemListsNewestFirst() {
+        return itemListRepo.findAllByOrderByIdDesc();
     }
 
     public void updateItem(Long itemId, String name, BigDecimal price,

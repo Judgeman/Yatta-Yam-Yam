@@ -7,4 +7,8 @@ import java.util.List;
 
 public interface ItemListRepository extends JpaRepository<ItemList, Long> {
     List<ItemList> findByCreator(AppUser creator);
+
+    List<ItemList> findByVisibleTrueOrderByIdDesc();
+
+    List<ItemList> findAllByOrderByIdDesc();
 }
