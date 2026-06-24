@@ -180,6 +180,29 @@ public class OrderController {
         return "archive";
     }
 
+    // ── Item-list visibility admin (hidden page, not linked anywhere) ──────────
+
+    @GetMapping("/itemlists")
+    public String manageItemLists(HttpServletRequest request, Model model) {
+        Optional<AppUser> user = currentUser(request);
+        if (user.isEmpty()) return redirectToHome(request);
+
+        model.addAttribute("user", user.get());
+        model.addAttribute("itemLists", orderService.getAllItemListsNewestFirst());
+        return "itemlists";
+    }
+
+    @PostMapping("/itemlists/{listId}/visibility")
+    public String setItemListVisibility(@PathVariable Long listId,
+                                         @RequestParam(required = false, defaultValue = "false") boolean visible,
+                                         HttpServletRequest request) {
+        Optional<AppUser> user = currentUser(request);
+        if (user.isEmpty()) return "redirect:/";
+
+        orderService.setItemListVisible(listId, visible);
+        return "redirect:/orders/itemlists";
+    }
+
     // ── Create order form ─────────────────────────────────────────────────────
 
     @GetMapping("/create")
@@ -188,7 +211,7 @@ public class OrderController {
         if (user.isEmpty()) return redirectToHome(request);
 
         model.addAttribute("user", user.get());
-        model.addAttribute("itemLists", orderService.getAllItemLists());
+        model.addAttribute("itemLists", orderService.getVisibleItemLists());
         model.addAttribute("today", LocalDate.now());
         model.addAttribute("locations", FoodOrder.Location.values());
         return "order-create";
@@ -199,6 +222,7 @@ public class OrderController {
                               @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate orderDate,
                               @RequestParam(required = false) Long itemListId,
                               @RequestParam(required = false) String newListName,
+                              @RequestParam(required = false, defaultValue = "false") boolean reuseList,
                               @RequestParam(required = false) String location,
                               HttpServletRequest request) {
         Optional<AppUser> user = currentUser(request);
@@ -206,9 +230,10 @@ public class OrderController {
 
         Long listId = itemListId;
 
-        // Create a new item list if requested
+        // Create a new item list if requested. The "use this list next time"
+        // checkbox controls whether the new list shows up for future orders.
         if ((itemListId == null || itemListId == 0) && newListName != null && !newListName.isBlank()) {
-            ItemList newList = orderService.createItemList(newListName.trim(), user.get());
+            ItemList newList = orderService.createItemList(newListName.trim(), user.get(), reuseList);
             listId = newList.getId();
         }
 

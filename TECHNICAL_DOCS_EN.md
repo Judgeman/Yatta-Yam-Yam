@@ -1,6 +1,6 @@
 # Yatta-Yam-Yam – Technical Documentation
 
-**Version:** 1.5.0  
+**Version:** 1.6.0  
 **Date:** April 2026
 
 ---
@@ -28,6 +28,7 @@ Yatta-Yam-Yam is an internal web application for collective food ordering. Users
 **Core features:**
 - Name-based login without a password (cookie session)
 - Order management with a status lifecycle
+- Reusable menu lists with a visibility toggle (hidden lists are excluded from new orders)
 - Location filter (Kassel / Frankfurt)
 - Per-person tip distribution
 - Payment tracking (Cash, PayPal, Wero)
@@ -136,6 +137,7 @@ OPEN ──► ORDERED ──► CLOSED ──► ARCHIVED
 | `id`      | Long (PK)   |                                 |
 | `name`    | String      | Name of the menu list           |
 | `creator` | AppUser     | Creator of the list             |
+| `visible` | boolean     | Whether the list is offered when creating a new order (default `true`); hidden lists can be created by mistake and toggled off via the hidden item-list page |
 | `items`   | List\<Item\>| Menu items contained in the list|
 
 ### Item
@@ -247,6 +249,8 @@ Remember-Me is enabled with a token validity of one year.
 
 | Method | Path                                                    | Description                           |
 |--------|---------------------------------------------------------|---------------------------------------|
+| GET    | `/orders/itemlists`                                     | List all menu lists + toggle visibility (hidden page, not linked elsewhere) |
+| POST   | `/orders/itemlists/{listId}/visibility`                 | Show/hide a menu list                 |
 | GET    | `/orders/itemlist/{listId}/items`                       | Manage items in a list                |
 | POST   | `/orders/itemlist/{listId}/items/add`                   | Add item                              |
 | GET    | `/orders/itemlist/{listId}/items/{itemId}/edit`         | Edit item (form)                      |
@@ -286,6 +290,8 @@ ARCHIVED
 
 1. **Create order** — Creator chooses restaurant, date, menu list, and optionally a location.
    - PayPal and Wero links are pre-filled from the creator's most recent order.
+   - Only **visible** menu lists are offered for selection.
+   - When creating a brand-new list inline, a "Use this item list next time" checkbox (preselected, but uncheckable) controls whether the list stays visible for future orders.
 2. **Participants select dishes** — Each user picks menu items with quantities. The selection is saved as a `UserOrderSelection` with `SelectionItem` entries.
 3. **Mark as ordered** (ORDERED) — Creator records who called in the order. Users see a warning if they try to change their selection afterwards.
 4. **Close order** (CLOSED) — Creator optionally enters a total tip. The tip is split evenly among all participants who have at least one item.
@@ -375,7 +381,7 @@ Application available at: `http://localhost:38443`
 
 ```bash
 mvn package
-java -DYATTA_YAM_YAM_PASSWORD=yourPassword -jar target/yatta-yam-yam-1.5.0.jar
+java -DYATTA_YAM_YAM_PASSWORD=yourPassword -jar target/yatta-yam-yam-1.6.0.jar
 ```
 
 ---
@@ -435,6 +441,7 @@ Yatta-Yam-Yam/
             ├── order-edit.html               # Edit order
             ├── order-close.html              # Close order
             ├── item-edit.html                # Edit item
+            ├── itemlists.html                # Hidden page: all menu lists + visibility toggle
             ├── users.html                    # User statistics
             └── version.html                  # Version info
 ```

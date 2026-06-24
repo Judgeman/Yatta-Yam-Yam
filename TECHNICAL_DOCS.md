@@ -1,6 +1,6 @@
 # Yatta-Yam-Yam – Technische Dokumentation
 
-**Version:** 1.5.0  
+**Version:** 1.6.0  
 **Stand:** April 2026
 
 ---
@@ -28,6 +28,7 @@ Yatta-Yam-Yam ist eine interne Web-App zur kollektiven Essensbestellung. Nutzer 
 **Kernfunktionen:**
 - Namenbasierter Login ohne Passwort (Cookie-Session)
 - Verwaltung von Bestellungen mit Statuslebenszyklus
+- Wiederverwendbare Menülisten mit Sichtbarkeitsschalter (ausgeblendete Listen erscheinen nicht bei neuen Bestellungen)
 - Standortfilter (Kassel / Frankfurt)
 - Trinkgeldverteilung pro Kopf
 - Zahlungsverfolgung (Bar, PayPal, Wero)
@@ -136,6 +137,7 @@ OPEN ──► ORDERED ──► CLOSED ──► ARCHIVED
 | `id`      | Long (PK) |                                |
 | `name`    | String    | Bezeichnung der Menüliste      |
 | `creator` | AppUser   | Ersteller der Liste            |
+| `visible` | boolean   | Ob die Liste beim Anlegen einer neuen Bestellung angeboten wird (Standard `true`); versehentlich erstellte Listen können über die versteckte Menülisten-Seite ausgeblendet werden |
 | `items`   | List<Item>| Enthaltene Speisepositionen    |
 
 ### Item
@@ -247,6 +249,8 @@ Remember-Me ist aktiviert mit einer Token-Gültigkeit von einem Jahr.
 
 | Methode | Pfad                                                    | Beschreibung                        |
 |---------|---------------------------------------------------------|-------------------------------------|
+| GET     | `/orders/itemlists`                                     | Alle Menülisten auflisten + Sichtbarkeit umschalten (versteckte Seite, nirgends verlinkt) |
+| POST    | `/orders/itemlists/{listId}/visibility`                 | Menüliste ein-/ausblenden           |
 | GET     | `/orders/itemlist/{listId}/items`                       | Artikel einer Liste verwalten       |
 | POST    | `/orders/itemlist/{listId}/items/add`                   | Artikel hinzufügen                  |
 | GET     | `/orders/itemlist/{listId}/items/{itemId}/edit`         | Artikel bearbeiten (Formular)       |
@@ -286,6 +290,8 @@ ARCHIVED
 
 1. **Bestellung erstellen** — Ersteller wählt Restaurant, Datum, Menüliste und optional Standort.
    - PayPal- und Wero-Links werden automatisch aus der letzten Bestellung des Erstellers übernommen.
+   - Zur Auswahl werden nur **sichtbare** Menülisten angeboten.
+   - Beim direkten Anlegen einer neuen Liste steuert eine Checkbox „Diese Artikelliste nächstes Mal verwenden" (vorausgewählt, aber abwählbar), ob die Liste für zukünftige Bestellungen sichtbar bleibt.
 2. **Teilnehmer wählen Speisen** — Jeder Nutzer wählt Menüpositionen mit Mengen aus. Die Auswahl wird als `UserOrderSelection` mit `SelectionItem`-Einträgen gespeichert.
 3. **Als bestellt markieren** (ORDERED) — Ersteller gibt an, wer telefonisch bestellt hat. Nutzer sehen eine Warnung, wenn sie danach noch ihre Auswahl ändern.
 4. **Bestellung schließen** (CLOSED) — Ersteller gibt optionales Gesamttrinkgeld ein. Das Trinkgeld wird gleichmäßig auf alle Teilnehmer mit mindestens einem Artikel aufgeteilt.
@@ -375,7 +381,7 @@ Anwendung erreichbar unter: `http://localhost:38443`
 
 ```bash
 mvn package
-java -DYATTA_YAM_YAM_PASSWORD=deinPasswort -jar target/yatta-yam-yam-1.5.0.jar
+java -DYATTA_YAM_YAM_PASSWORD=deinPasswort -jar target/yatta-yam-yam-1.6.0.jar
 ```
 
 ---
@@ -435,6 +441,7 @@ Yatta-Yam-Yam/
             ├── order-edit.html               # Bestellung bearbeiten
             ├── order-close.html              # Bestellung schließen
             ├── item-edit.html                # Artikel bearbeiten
+            ├── itemlists.html                # Versteckte Seite: alle Menülisten + Sichtbarkeitsschalter
             ├── users.html                    # Nutzerstatistiken
             └── version.html                  # Versionsinfo
 ```
