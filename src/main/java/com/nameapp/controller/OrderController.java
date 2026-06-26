@@ -362,7 +362,9 @@ public class OrderController {
         Optional<AppUser> user = currentUser(request);
         if (user.isEmpty()) return "redirect:/";
 
-        orderService.addItem(listId, name, price, imageUrl, imageFile);
+        if (!orderService.isItemListUsedInOrders(listId)) {
+            orderService.addItem(listId, name, price, imageUrl, imageFile);
+        }
 
         if (orderId != null) return "redirect:/orders/" + orderId;
         return "redirect:/orders/itemlist/" + listId + "/items";
@@ -429,6 +431,7 @@ public class OrderController {
                 model.addAttribute("isOwner", true);
                 model.addAttribute("paymentMethods", UserOrderSelection.PaymentMethod.values());
                 model.addAttribute("deleteError", true);
+                model.addAttribute("listLocked", orderService.isItemListUsedInOrders(listId));
                 return "order-detail";
             }
         }
@@ -561,6 +564,9 @@ public class OrderController {
         model.addAttribute("unpaidAmount", unpaidAmount);
         model.addAttribute("paymentMethods", UserOrderSelection.PaymentMethod.values());
         model.addAttribute("showOrderedWarning", showOrderedWarning);
+        boolean listLocked = order.getItemList() != null
+                && orderService.isItemListUsedInOrders(order.getItemList().getId());
+        model.addAttribute("listLocked", listLocked);
         return "order-detail";
     }
 
@@ -635,10 +641,12 @@ public class OrderController {
         Optional<Item> itemOpt = orderService.findItem(itemId);
         if (itemOpt.isEmpty()) return "redirect:/orders/dashboard";
 
+        boolean locked = orderService.isItemListUsedInOrders(listId);
         model.addAttribute("user", user.get());
         model.addAttribute("itemList", listOpt.get());
         model.addAttribute("item", itemOpt.get());
         model.addAttribute("orderId", orderId);
+        model.addAttribute("locked", locked);
         return "item-edit";
     }
 
@@ -655,12 +663,27 @@ public class OrderController {
         if (user.isEmpty()) return "redirect:/";
 
         Optional<ItemList> listOpt = orderService.findItemList(listId);
-        if (listOpt.isPresent() && listOpt.get().getCreator().getId().equals(user.get().getId())) {
+        if (listOpt.isPresent() && listOpt.get().getCreator().getId().equals(user.get().getId())
+                && !orderService.isItemListUsedInOrders(listId)) {
             orderService.updateItem(itemId, name, price, imageUrl, imageFile);
         }
 
         if (orderId != null) return "redirect:/orders/" + orderId;
         return "redirect:/orders/itemlist/" + listId + "/items";
+    }
+
+    @PostMapping("/itemlist/{listId}/copy")
+    public String copyItemList(@PathVariable Long listId,
+                               HttpServletRequest request) {
+        Optional<AppUser> user = currentUser(request);
+        if (user.isEmpty()) return "redirect:/";
+
+        Optional<ItemList> listOpt = orderService.findItemList(listId);
+        if (listOpt.isEmpty() || !listOpt.get().getCreator().getId().equals(user.get().getId()))
+            return "redirect:/orders/dashboard";
+
+        orderService.copyItemList(listId, user.get());
+        return "redirect:/orders/dashboard";
     }
 
     @PostMapping("/itemlist/{listId}/rename")

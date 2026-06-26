@@ -336,6 +336,31 @@ public class OrderService {
         });
     }
 
+    public boolean isItemListUsedInOrders(Long listId) {
+        return orderRepo.existsByItemListId(listId);
+    }
+
+    public ItemList copyItemList(Long listId, AppUser creator) {
+        ItemList original = itemListRepo.findById(listId)
+                .orElseThrow(() -> new IllegalArgumentException("ItemList not found"));
+
+        ItemList copy = new ItemList();
+        copy.setName(original.getName() + " (Copy)");
+        copy.setCreator(creator);
+        copy = itemListRepo.save(copy);
+
+        for (Item originalItem : original.getItems()) {
+            Item newItem = new Item();
+            newItem.setName(originalItem.getName());
+            newItem.setPrice(originalItem.getPrice());
+            newItem.setImageUrl(originalItem.getImageUrl());
+            newItem.setItemList(copy);
+            itemRepo.save(newItem);
+        }
+
+        return copy;
+    }
+
     public void markAsOrdered(Long orderId, String contactName) {
         orderRepo.findById(orderId).ifPresent(order -> {
             order.setStatus(FoodOrder.OrderStatus.ORDERED);

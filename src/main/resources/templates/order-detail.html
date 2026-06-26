@@ -112,19 +112,35 @@
                             <span class="fw-semibold">
                                 <i class="bi bi-list-ul"></i>
                                 <span th:text="${order.itemList.name}">List</span>
+                                <span th:if="${listLocked}" class="badge bg-warning text-dark ms-1">
+                                    <i class="bi bi-lock-fill"></i> Locked
+                                </span>
                             </span>
                             <div class="d-flex gap-2">
-                                <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse"
+                                <button th:if="${!listLocked}" class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse"
                                         data-bs-target="#renameListForm">
                                     <i class="bi bi-pencil"></i>
                                 </button>
-                                <button class="btn btn-outline-primary btn-sm" data-bs-toggle="collapse"
+                                <form th:if="${listLocked}"
+                                      th:action="@{'/orders/itemlist/' + ${order.itemList.id} + '/copy'}"
+                                      method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-outline-success btn-sm">
+                                        <i class="bi bi-copy"></i> Copy List
+                                    </button>
+                                </form>
+                                <button th:if="${!listLocked}" class="btn btn-outline-primary btn-sm" data-bs-toggle="collapse"
                                         data-bs-target="#addItemForm">
                                     <i class="bi bi-plus"></i> Add Item
                                 </button>
                             </div>
                         </div>
-                        <div class="collapse mt-2" id="renameListForm">
+                        <div th:if="${listLocked}" class="mt-2">
+                            <small class="text-warning">
+                                <i class="bi bi-lock-fill"></i>
+                                This list is locked because it has been used in orders. Prices and items cannot be changed. Create a copy to make modifications.
+                            </small>
+                        </div>
+                        <div th:if="${!listLocked}" class="collapse mt-2" id="renameListForm">
                             <form th:action="@{'/orders/itemlist/' + ${order.itemList.id} + '/rename'}" method="post"
                                   class="d-flex gap-2">
                                 <input type="hidden" name="orderId" th:value="${order.id}"/>
@@ -134,7 +150,7 @@
                             </form>
                         </div>
                     </div>
-                    <div class="collapse" id="addItemForm">
+                    <div th:if="${!listLocked}" class="collapse" id="addItemForm">
                         <div class="card-body border-top">
                             <form th:action="@{'/orders/itemlist/' + ${order.itemList.id} + '/items/add'}"
                                   method="post" enctype="multipart/form-data">
@@ -207,10 +223,10 @@
                                     <a th:if="${isOwner}"
                                        th:href="@{'/orders/itemlist/' + ${order.itemList.id} + '/items/' + ${item.id} + '/edit?orderId=' + ${order.id}}"
                                        class="btn btn-outline-secondary btn-sm py-0 ms-2">
-                                        <i class="bi bi-pencil"></i>
+                                        <i th:class="${listLocked} ? 'bi bi-eye' : 'bi bi-pencil'"></i>
                                     </a>
                                     <!-- Owner: delete item -->
-                                    <button th:if="${isOwner}"
+                                    <button th:if="${isOwner and !listLocked}"
                                             type="button"
                                             class="btn btn-outline-danger btn-sm py-0 ms-2"
                                             th:attr="data-list-id=${order.itemList.id}, data-item-id=${item.id}, data-order-id=${order.id}, data-item-name=${item.name}"

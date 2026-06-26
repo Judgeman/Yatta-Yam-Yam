@@ -28,6 +28,16 @@
         <h3 class="fw-bold mb-1">✏️ Edit Item</h3>
         <p class="text-muted mb-4" th:text="'In list: ' + ${itemList.name}">List</p>
 
+        <!-- Locked warning -->
+        <div th:if="${locked}" class="alert alert-warning d-flex align-items-start gap-2 mb-4">
+            <i class="bi bi-lock-fill fs-5 mt-1"></i>
+            <div>
+                <strong>This item list is locked.</strong><br/>
+                It has already been used in orders. To protect existing order data, the name and price cannot be changed.
+                Please create a copy of the list to make modifications.
+            </div>
+        </div>
+
         <form th:action="@{'/orders/itemlist/' + ${itemList.id} + '/items/' + ${item.id} + '/edit'}"
               method="post" enctype="multipart/form-data">
             <input type="hidden" name="orderId" th:value="${orderId}"/>
@@ -35,7 +45,8 @@
             <div class="mb-3">
                 <label class="form-label fw-semibold">Item Name</label>
                 <input type="text" name="name" class="form-control form-control-lg"
-                       th:value="${item.name}" required maxlength="100"/>
+                       th:value="${item.name}" required maxlength="100"
+                       th:readonly="${locked}" th:classappend="${locked} ? 'bg-light text-muted' : ''"/>
             </div>
 
             <div class="mb-3">
@@ -43,7 +54,8 @@
                 <div class="input-group">
                     <span class="input-group-text">€</span>
                     <input type="number" name="price" class="form-control form-control-lg"
-                           th:value="${item.price}" step="0.01" min="0" required/>
+                           th:value="${item.price}" step="0.01" min="0" required
+                           th:readonly="${locked}" th:classappend="${locked} ? 'bg-light text-muted' : ''"/>
                 </div>
             </div>
 
@@ -56,7 +68,7 @@
                 </div>
             </div>
 
-            <div class="mb-3">
+            <div th:if="${!locked}" class="mb-3">
                 <label class="form-label fw-semibold">
                     New Image URL
                     <span class="text-muted fw-normal small">(optional — replaces current)</span>
@@ -66,7 +78,7 @@
                        placeholder="https://example.com/image.jpg"/>
             </div>
 
-            <div class="mb-4">
+            <div th:if="${!locked}" class="mb-4">
                 <label class="form-label fw-semibold">
                     Or Upload New Image
                     <span class="text-muted fw-normal small">(optional — replaces current)</span>
@@ -81,9 +93,9 @@
             </div>
 
             <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-primary btn-lg">Save Changes</button>
+                <button th:if="${!locked}" type="submit" class="btn btn-primary btn-lg">Save Changes</button>
                 <a th:href="${orderId != null} ? @{'/orders/' + ${orderId}} : @{'/orders/itemlist/' + ${itemList.id} + '/items'}"
-                   class="btn btn-outline-secondary">Cancel</a>
+                   class="btn btn-outline-secondary">Back</a>
             </div>
         </form>
     </div>
