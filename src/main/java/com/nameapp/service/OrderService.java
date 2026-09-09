@@ -94,7 +94,8 @@ public class OrderService {
     }
 
     public void updateOrder(Long orderId, String placeName, LocalDate date, BigDecimal tip,
-                            String paypalLink, String weroLink, FoodOrder.Location location) {
+                            String paypalLink, String weroLink, FoodOrder.Location location,
+                            String paidByName) {
         orderRepo.findById(orderId).ifPresent(order -> {
             order.setPlaceName(placeName);
             order.setOrderDate(date);
@@ -102,6 +103,7 @@ public class OrderService {
             order.setPaypalLink(paypalLink != null && !paypalLink.isBlank() ? paypalLink.trim() : null);
             order.setWeroLink(weroLink != null && !weroLink.isBlank() ? weroLink.trim() : null);
             order.setLocation(location);
+            order.setPaidByName(paidByName != null && !paidByName.isBlank() ? paidByName.trim() : null);
             orderRepo.save(order);
         });
     }
