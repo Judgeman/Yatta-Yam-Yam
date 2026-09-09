@@ -283,6 +283,7 @@ public class OrderController {
                             @RequestParam(required = false) String paypalLink,
                             @RequestParam(required = false) String weroLink,
                             @RequestParam(required = false) String location,
+                            @RequestParam(required = false) String paidByName,
                             HttpServletRequest request) {
         Optional<AppUser> user = currentUser(request);
         if (user.isEmpty()) return "redirect:/";
@@ -295,7 +296,7 @@ public class OrderController {
         final FoodOrder.Location finalLoc = loc;
         orderService.findOrder(id).ifPresent(order -> {
             if (order.getCreator().getId().equals(user.get().getId())) {
-                orderService.updateOrder(id, placeName, orderDate, tipAmount, paypalLink, weroLink, finalLoc);
+                orderService.updateOrder(id, placeName, orderDate, tipAmount, paypalLink, weroLink, finalLoc, paidByName);
             }
         });
         return "redirect:/orders/" + id;
