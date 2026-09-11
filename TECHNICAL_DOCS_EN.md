@@ -1,6 +1,6 @@
 # Yatta-Yam-Yam – Technical Documentation
 
-**Version:** 1.6.0  
+**Version:** 1.7.0  
 **Date:** April 2026
 
 ---
@@ -31,6 +31,7 @@ Yatta-Yam-Yam is an internal web application for collective food ordering. Users
 - Reusable menu lists with a visibility toggle (hidden lists are excluded from new orders)
 - Location filter (Kassel / Frankfurt)
 - Per-person tip distribution
+- Tracking of who advanced/fronted the money (with a quick self-fill button)
 - Payment tracking (Cash, PayPal, Wero)
 - User statistics (total spend, open amounts)
 
@@ -121,6 +122,7 @@ ItemList ──── 1:n ──────────────────
 | `paypalLink`       | String           | Creator's PayPal.me link                             |
 | `weroLink`         | String           | Creator's Wero link                                  |
 | `orderedByContact` | String           | Name of the person who called in the order           |
+| `paidByName`       | String           | Name of the person who advanced/fronted the money (editable in the edit form, pre-fillable with your own name via the "I'm paying" button) |
 
 **OrderStatus lifecycle:**
 
@@ -381,7 +383,7 @@ Application available at: `http://localhost:38443`
 
 ```bash
 mvn package
-java -DYATTA_YAM_YAM_PASSWORD=yourPassword -jar target/yatta-yam-yam-1.6.0.jar
+java -DYATTA_YAM_YAM_PASSWORD=yourPassword -jar target/yatta-yam-yam-1.7.0.jar
 ```
 
 ---

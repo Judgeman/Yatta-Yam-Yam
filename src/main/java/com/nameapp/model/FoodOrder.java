@@ -42,6 +42,9 @@ public class FoodOrder {
 
     private String orderedByContact;
 
+    // Person who advanced/fronted the money for this order (editable by the owner)
+    private String paidByName;
+
     // Tip amount entered by the creator (total tip, split per person)
     @Column(precision = 10, scale = 2)
     private BigDecimal tipAmount = BigDecimal.ZERO;
@@ -155,5 +158,13 @@ public class FoodOrder {
 
     public void setLocation(Location location) {
         this.location = location;
+    }
+
+    public String getPaidByName() {
+        return paidByName;
+    }
+
+    public void setPaidByName(String paidByName) {
+        this.paidByName = paidByName;
     }
 }

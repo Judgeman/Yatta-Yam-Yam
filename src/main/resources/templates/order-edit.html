@@ -51,6 +51,19 @@
             </div>
 
             <div class="mb-4">
+                <label class="form-label fw-semibold">Paid By <span class="text-muted fw-normal small">(who advanced the money)</span></label>
+                <div class="input-group">
+                    <input type="text" name="paidByName" id="paidByName" class="form-control form-control-lg"
+                           th:value="${order.paidByName}" placeholder="e.g. Jane Doe" maxlength="100"/>
+                    <button type="button" class="btn btn-outline-secondary" id="iAmPayingBtn"
+                            th:data-username="${user.name}">
+                        I'm paying
+                    </button>
+                </div>
+                <small class="text-muted">Shown to others so they know who to pay back.</small>
+            </div>
+
+            <div class="mb-4">
                 <label class="form-label fw-semibold">Tip Amount (€) <span class="text-muted fw-normal small">– split equally per person</span></label>
                 <div class="input-group">
                     <span class="input-group-text">€</span>
@@ -81,5 +94,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.getElementById('iAmPayingBtn').addEventListener('click', function () {
+        document.getElementById('paidByName').value = this.dataset.username;
+    });
+</script>
 </body>
 </html>
