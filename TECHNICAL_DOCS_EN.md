@@ -1,6 +1,6 @@
 # Yatta-Yam-Yam – Technical Documentation
 
-**Version:** 1.6.0  
+**Version:** 1.7.0  
 **Date:** April 2026
 
 ---
@@ -383,7 +383,7 @@ Application available at: `http://localhost:38443`
 
 ```bash
 mvn package
-java -DYATTA_YAM_YAM_PASSWORD=yourPassword -jar target/yatta-yam-yam-1.6.0.jar
+java -DYATTA_YAM_YAM_PASSWORD=yourPassword -jar target/yatta-yam-yam-1.7.0.jar
 ```
 
 ---
