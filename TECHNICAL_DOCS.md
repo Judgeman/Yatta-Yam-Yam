@@ -31,6 +31,7 @@ Yatta-Yam-Yam ist eine interne Web-App zur kollektiven Essensbestellung. Nutzer 
 - Wiederverwendbare Menülisten mit Sichtbarkeitsschalter (ausgeblendete Listen erscheinen nicht bei neuen Bestellungen)
 - Standortfilter (Kassel / Frankfurt)
 - Trinkgeldverteilung pro Kopf
+- Erfassung, wer das Geld ausgelegt hat (mit Schnellauswahl per Knopf)
 - Zahlungsverfolgung (Bar, PayPal, Wero)
 - Benutzerstatistiken (Gesamtausgaben, offene Beträge)
 
@@ -121,6 +122,7 @@ ItemList ──── 1:n ──────────────────
 | `paypalLink`       | String           | PayPal.me-Link des Erstellers                        |
 | `weroLink`         | String           | Wero-Link des Erstellers                             |
 | `orderedByContact` | String           | Name der Person, die telefonisch bestellt hat        |
+| `paidByName`       | String           | Name der Person, die das Geld ausgelegt hat (im Bearbeiten-Formular änderbar, per Knopf "I'm paying" mit dem eigenen Namen vorbelegbar) |
 
 **OrderStatus-Lebenszyklus:**
 
