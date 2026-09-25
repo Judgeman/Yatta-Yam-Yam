@@ -2,6 +2,7 @@ package com.nameapp.controller;
 
 import com.nameapp.model.*;
 import com.nameapp.service.AppUserService;
+import com.nameapp.service.ContactService;
 import com.nameapp.service.OrderService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -20,10 +21,13 @@ public class OrderController {
 
     private final OrderService orderService;
     private final AppUserService userService;
+    private final ContactService contactService;
 
-    public OrderController(OrderService orderService, AppUserService userService) {
+    public OrderController(OrderService orderService, AppUserService userService,
+                           ContactService contactService) {
         this.orderService = orderService;
         this.userService = userService;
+        this.contactService = contactService;
     }
 
     // ── Helper: redirect to home, preserving the intended URL in session ────────
@@ -455,6 +459,7 @@ public class OrderController {
                 model.addAttribute("isOwner", true);
                 model.addAttribute("paymentMethods", UserOrderSelection.PaymentMethod.values());
                 model.addAttribute("deleteError", true);
+                model.addAttribute("contacts", contactsForPhoneLookup(order));
                 return "order-detail";
             }
         }
@@ -498,6 +503,15 @@ public class OrderController {
         }
         orderService.saveSelection(id, user.get(), quantities);
         return "redirect:/orders/" + id;
+    }
+
+    // Phone book shown in the call dialog: contacts at the order's location come first
+    private List<Contact> contactsForPhoneLookup(FoodOrder order) {
+        List<Contact> contacts = new ArrayList<>(contactService.getAllContacts());
+        if (order.getLocation() != null) {
+            contacts.sort(Comparator.comparing((Contact c) -> c.getLocation() != order.getLocation()));
+        }
+        return contacts;
     }
 
     private String buildOrderDetailModel(Long orderId, AppUser currentUser,
@@ -587,6 +601,7 @@ public class OrderController {
         model.addAttribute("unpaidAmount", unpaidAmount);
         model.addAttribute("paymentMethods", UserOrderSelection.PaymentMethod.values());
         model.addAttribute("showOrderedWarning", showOrderedWarning);
+        model.addAttribute("contacts", contactsForPhoneLookup(order));
         return "order-detail";
     }
 
