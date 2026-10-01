@@ -422,7 +422,6 @@ Yatta-Yam-Yam/
     │       └── OrderService.java             # Bestelllogik, Kostenberechnung, Zahlungen
     └── resources/
         ├── application.properties
-        ├── data.sql                          # Initiale Testdaten (falls vorhanden)
         ├── static/
         │   ├── css/
         │   │   ├── dashboard.css

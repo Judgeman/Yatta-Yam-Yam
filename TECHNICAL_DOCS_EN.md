@@ -422,7 +422,6 @@ Yatta-Yam-Yam/
     │       └── OrderService.java             # Order logic, cost calculation, payments
     └── resources/
         ├── application.properties
-        ├── data.sql                          # Initial seed data (if present)
         ├── static/
         │   ├── css/
         │   │   ├── dashboard.css
