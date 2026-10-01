@@ -16,16 +16,23 @@ public class DatabaseMigration implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
+        // Tables with enum columns (status, location) whose check constraints
+        // would otherwise block newly added enum values
+        for (String table : new String[]{"FOOD_ORDER", "CONTACT"}) {
+            dropCheckConstraints(table);
+        }
+    }
+
+    private void dropCheckConstraints(String table) {
         try {
-            // Find and drop any check constraints on FOOD_ORDER to allow new enum values
             jdbcTemplate.queryForList(
                     "SELECT CONSTRAINT_NAME FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS " +
-                            "WHERE TABLE_NAME = 'FOOD_ORDER' AND CONSTRAINT_TYPE = 'CHECK'"
+                            "WHERE TABLE_NAME = ? AND CONSTRAINT_TYPE = 'CHECK'", table
             ).forEach(row -> {
                 String name = (String) row.get("CONSTRAINT_NAME");
                 try {
                     jdbcTemplate.execute(
-                            "ALTER TABLE FOOD_ORDER DROP CONSTRAINT IF EXISTS \"" + name + "\"");
+                            "ALTER TABLE " + table + " DROP CONSTRAINT IF EXISTS \"" + name + "\"");
                 } catch (Exception ignored) {}
             });
         } catch (Exception ignored) {

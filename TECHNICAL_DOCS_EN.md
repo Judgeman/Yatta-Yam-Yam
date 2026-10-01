@@ -1,7 +1,7 @@
 # Yatta-Yam-Yam – Technical Documentation
 
-**Version:** 1.7.0  
-**Date:** April 2026
+**Version:** 1.8.0  
+**Date:** September 2026
 
 ---
 
@@ -33,6 +33,7 @@ Yatta-Yam-Yam is an internal web application for collective food ordering. Users
 - Per-person tip distribution
 - Tracking of who advanced/fronted the money (with a quick self-fill button)
 - Payment tracking (Cash, PayPal, Wero)
+- Contact book (name, location, address, phone numbers, image) with a quick lookup in the phone-order dialog
 - User statistics (total spend, open amounts)
 
 ---
@@ -168,6 +169,19 @@ Links a user to an order and holds their item choices as well as payment status.
 
 `getSubtotal()` calculates the sum of all `(price × quantity)` for the selection's items.
 
+### Contact
+
+Contact book entry (e.g. a restaurant or delivery service). Independent of the other entities.
+
+| Field          | Type          | Description                                         |
+|----------------|---------------|-----------------------------------------------------|
+| `id`           | Long (PK)     |                                                     |
+| `name`         | String        | Contact name (required)                             |
+| `location`     | Location      | KASSEL or FRANKFURT (required, same enum as `FoodOrder`) |
+| `address`      | String        | Address (optional)                                  |
+| `phoneNumbers` | List<String>  | Any number of phone numbers, order is preserved (table `contact_phone_number`) |
+| `imageUrl`     | String        | Image URL or path to an uploaded image (optional)   |
+
 ### SelectionItem
 
 | Field       | Type                 | Description                        |
@@ -269,6 +283,19 @@ Remember-Me is enabled with a token validity of one year.
 | POST   | `/orders/selection/{selId}/owner-paid`    | Creator confirms payment for a user               |
 | POST   | `/orders/selection/{selId}/owner-unpaid`  | Creator reverts payment confirmation              |
 
+### Contacts (`ContactController`, prefix `/contacts`)
+
+| Method | Path                     | Description                                                |
+|--------|--------------------------|------------------------------------------------------------|
+| GET    | `/contacts`              | Contact list, optionally filtered (`?location=KASSEL`)     |
+| GET    | `/contacts/new`          | Form: new contact                                          |
+| POST   | `/contacts/new`          | Create contact                                             |
+| GET    | `/contacts/{id}/edit`    | Form: edit contact                                         |
+| POST   | `/contacts/{id}/edit`    | Update contact                                             |
+| POST   | `/contacts/{id}/delete`  | Delete contact                                             |
+
+The contact book is reachable via the "Contacts" button on the dashboard. In the phone-order dialog on the order detail page, the contact-book icon opens a read-only lookup pop-up (no edit) listing all contacts and their numbers; contacts at the order's location are listed first.
+
 ---
 
 ## 7. Order Lifecycle
@@ -349,7 +376,7 @@ All settings are in `src/main/resources/application.properties`.
 
 ### File Uploads
 
-Uploaded item images are stored under `uploads/` in the working directory and served via `/uploads/{filename}`.
+Uploaded item and contact images are stored under `uploads/` in the working directory and served via `/uploads/{filename}`.
 
 ### H2 Console
 
@@ -383,7 +410,7 @@ Application available at: `http://localhost:38443`
 
 ```bash
 mvn package
-java -DYATTA_YAM_YAM_PASSWORD=yourPassword -jar target/yatta-yam-yam-1.7.0.jar
+java -DYATTA_YAM_YAM_PASSWORD=yourPassword -jar target/yatta-yam-yam-1.8.0.jar
 ```
 
 ---
@@ -401,10 +428,12 @@ Yatta-Yam-Yam/
     │   │   ├── SecurityConfig.java           # Spring Security configuration
     │   │   └── WebConfig.java                # Web configuration (e.g. static resources)
     │   ├── controller/
+    │   │   ├── ContactController.java        # Contact book: list, create, edit, delete
     │   │   ├── LoginController.java          # Cookie login, user flow, /users, /version
     │   │   └── OrderController.java          # Orders, selections, payments, item management
     │   ├── model/
     │   │   ├── AppUser.java                  # User entity
+    │   │   ├── Contact.java                  # Contact (name, location, address, phone numbers, image)
     │   │   ├── FoodOrder.java                # Order entity (incl. status and location enums)
     │   │   ├── Item.java                     # Single menu item
     │   │   ├── ItemList.java                 # Menu list (collection of items)
@@ -412,6 +441,7 @@ Yatta-Yam-Yam/
     │   │   └── UserOrderSelection.java       # User's selection for an order
     │   ├── repository/
     │   │   ├── AppUserRepository.java
+    │   │   ├── ContactRepository.java
     │   │   ├── FoodOrderRepository.java
     │   │   ├── ItemListRepository.java
     │   │   ├── ItemRepository.java
@@ -419,6 +449,7 @@ Yatta-Yam-Yam/
     │   │   └── UserOrderSelectionRepository.java
     │   └── service/
     │       ├── AppUserService.java           # Create/rename users, statistics
+    │       ├── ContactService.java           # Save contacts (incl. image upload), delete
     │       └── OrderService.java             # Order logic, cost calculation, payments
     └── resources/
         ├── application.properties
@@ -442,6 +473,8 @@ Yatta-Yam-Yam/
             ├── order-edit.html               # Edit order
             ├── order-close.html              # Close order
             ├── item-edit.html                # Edit item
+            ├── contacts.html                 # Contact book (list with location filter)
+            ├── contact-edit.html             # Create / edit contact
             ├── itemlists.html                # Hidden page: all menu lists + visibility toggle
             ├── users.html                    # User statistics
             └── version.html                  # Version info

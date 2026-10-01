@@ -1,7 +1,7 @@
 # Yatta-Yam-Yam – Technische Dokumentation
 
-**Version:** 1.7.0  
-**Stand:** April 2026
+**Version:** 1.8.0  
+**Stand:** September 2026
 
 ---
 
@@ -33,6 +33,7 @@ Yatta-Yam-Yam ist eine interne Web-App zur kollektiven Essensbestellung. Nutzer 
 - Trinkgeldverteilung pro Kopf
 - Erfassung, wer das Geld ausgelegt hat (mit Schnellauswahl per Knopf)
 - Zahlungsverfolgung (Bar, PayPal, Wero)
+- Kontaktbuch (Name, Standort, Adresse, Telefonnummern, Bild) mit Schnellnachschlagen im Telefonbestell-Dialog
 - Benutzerstatistiken (Gesamtausgaben, offene Beträge)
 
 ---
@@ -168,6 +169,19 @@ Verknüpft einen Nutzer mit einer Bestellung und enthält seine Artikelauswahl s
 
 `getSubtotal()` berechnet die Summe aller `(Preis × Menge)` der Artikel.
 
+### Contact
+
+Eintrag im Kontaktbuch (z. B. Restaurant oder Lieferdienst). Unabhängig von den übrigen Entitäten.
+
+| Feld           | Typ           | Beschreibung                                        |
+|----------------|---------------|-----------------------------------------------------|
+| `id`           | Long (PK)     |                                                     |
+| `name`         | String        | Name des Kontakts (Pflicht)                         |
+| `location`     | Location      | KASSEL oder FRANKFURT (Pflicht, gleiches Enum wie bei `FoodOrder`) |
+| `address`      | String        | Adresse (optional)                                  |
+| `phoneNumbers` | List<String>  | Beliebig viele Telefonnummern, Reihenfolge bleibt erhalten (Tabelle `contact_phone_number`) |
+| `imageUrl`     | String        | Bild-URL oder Pfad zu hochgeladenem Bild (optional) |
+
 ### SelectionItem
 
 | Feld        | Typ                  | Beschreibung              |
@@ -269,6 +283,19 @@ Remember-Me ist aktiviert mit einer Token-Gültigkeit von einem Jahr.
 | POST    | `/orders/selection/{selId}/owner-paid`    | Ersteller bestätigt Zahlung eines Nutzers     |
 | POST    | `/orders/selection/{selId}/owner-unpaid`  | Ersteller widerruft Zahlungsbestätigung       |
 
+### Kontakte (`ContactController`, Präfix `/contacts`)
+
+| Methode | Pfad                     | Beschreibung                                               |
+|---------|--------------------------|------------------------------------------------------------|
+| GET     | `/contacts`              | Kontaktliste, optional gefiltert (`?location=KASSEL`)      |
+| GET     | `/contacts/new`          | Formular: Neuer Kontakt                                    |
+| POST    | `/contacts/new`          | Kontakt anlegen                                            |
+| GET     | `/contacts/{id}/edit`    | Formular: Kontakt bearbeiten                               |
+| POST    | `/contacts/{id}/edit`    | Kontakt aktualisieren                                      |
+| POST    | `/contacts/{id}/delete`  | Kontakt löschen                                            |
+
+Das Kontaktbuch ist über den Knopf „Contacts“ im Dashboard erreichbar. Im Telefonbestell-Dialog der Bestelldetailseite öffnet das Kontaktbuch-Symbol ein reines Nachschlage-Pop-up (ohne Bearbeiten) mit allen Kontakten und ihren Nummern; Kontakte am Standort der Bestellung stehen oben.
+
 ---
 
 ## 7. Bestellablauf
@@ -349,7 +376,7 @@ Alle Einstellungen befinden sich in `src/main/resources/application.properties`.
 
 ### Datei-Uploads
 
-Hochgeladene Artikelbilder werden unter `uploads/` im Arbeitsverzeichnis gespeichert und über den Pfad `/uploads/{filename}` ausgeliefert.
+Hochgeladene Artikel- und Kontaktbilder werden unter `uploads/` im Arbeitsverzeichnis gespeichert und über den Pfad `/uploads/{filename}` ausgeliefert.
 
 ### H2-Konsole
 
@@ -383,7 +410,7 @@ Anwendung erreichbar unter: `http://localhost:38443`
 
 ```bash
 mvn package
-java -DYATTA_YAM_YAM_PASSWORD=deinPasswort -jar target/yatta-yam-yam-1.7.0.jar
+java -DYATTA_YAM_YAM_PASSWORD=deinPasswort -jar target/yatta-yam-yam-1.8.0.jar
 ```
 
 ---
@@ -401,10 +428,12 @@ Yatta-Yam-Yam/
     │   │   ├── SecurityConfig.java           # Spring Security Konfiguration
     │   │   └── WebConfig.java                # Web-Konfiguration (z. B. statische Ressourcen)
     │   ├── controller/
+    │   │   ├── ContactController.java        # Kontaktbuch: Liste, Anlegen, Bearbeiten, Löschen
     │   │   ├── LoginController.java          # Cookie-Login, Nutzer-Flow, /users, /version
     │   │   └── OrderController.java          # Bestellungen, Auswahl, Zahlungen, Artikelverwaltung
     │   ├── model/
     │   │   ├── AppUser.java                  # Nutzer-Entität
+    │   │   ├── Contact.java                  # Kontakt (Name, Standort, Adresse, Telefonnummern, Bild)
     │   │   ├── FoodOrder.java                # Bestellungs-Entität (inkl. Status- und Standort-Enum)
     │   │   ├── Item.java                     # Einzelner Menüartikel
     │   │   ├── ItemList.java                 # Menüliste (Sammlung von Items)
@@ -412,6 +441,7 @@ Yatta-Yam-Yam/
     │   │   └── UserOrderSelection.java       # Nutzerauswahl für eine Bestellung
     │   ├── repository/
     │   │   ├── AppUserRepository.java
+    │   │   ├── ContactRepository.java
     │   │   ├── FoodOrderRepository.java
     │   │   ├── ItemListRepository.java
     │   │   ├── ItemRepository.java
@@ -419,6 +449,7 @@ Yatta-Yam-Yam/
     │   │   └── UserOrderSelectionRepository.java
     │   └── service/
     │       ├── AppUserService.java           # Nutzer anlegen, umbenennen, Statistiken
+    │       ├── ContactService.java           # Kontakte speichern (inkl. Bild-Upload), löschen
     │       └── OrderService.java             # Bestelllogik, Kostenberechnung, Zahlungen
     └── resources/
         ├── application.properties
@@ -442,6 +473,8 @@ Yatta-Yam-Yam/
             ├── order-edit.html               # Bestellung bearbeiten
             ├── order-close.html              # Bestellung schließen
             ├── item-edit.html                # Artikel bearbeiten
+            ├── contacts.html                 # Kontaktbuch (Liste mit Standortfilter)
+            ├── contact-edit.html             # Kontakt anlegen / bearbeiten
             ├── itemlists.html                # Versteckte Seite: alle Menülisten + Sichtbarkeitsschalter
             ├── users.html                    # Nutzerstatistiken
             └── version.html                  # Versionsinfo
