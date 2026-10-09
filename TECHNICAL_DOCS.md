@@ -1,7 +1,7 @@
 # Yatta-Yam-Yam – Technische Dokumentation
 
-**Version:** 1.8.0  
-**Stand:** September 2026
+**Version:** 1.9.0  
+**Stand:** Oktober 2026
 
 ---
 
@@ -123,7 +123,7 @@ ItemList ──── 1:n ──────────────────
 | `paypalLink`       | String           | PayPal.me-Link des Erstellers                        |
 | `weroLink`         | String           | Wero-Link des Erstellers                             |
 | `orderedByContact` | String           | Name der Person, die telefonisch bestellt hat        |
-| `paidByName`       | String           | Name der Person, die das Geld ausgelegt hat (im Bearbeiten-Formular änderbar, per Knopf "I'm paying" mit dem eigenen Namen vorbelegbar) |
+| `paidByName`       | String           | Name der Person, die das Geld ausgelegt hat (beim Anlegen, Schließen und Bearbeiten angebbar, per Knopf "I'm paying" mit dem eigenen Namen vorbelegbar) |
 
 **OrderStatus-Lebenszyklus:**
 
@@ -318,12 +318,13 @@ ARCHIVED
 ### Detaillierter Ablauf
 
 1. **Bestellung erstellen** — Ersteller wählt Restaurant, Datum, Menüliste und optional Standort.
-   - PayPal- und Wero-Links werden automatisch aus der letzten Bestellung des Erstellers übernommen.
+   - Optional können bereits hier „Paid By" sowie PayPal- und Wero-Link angegeben werden, falls schon bekannt.
+   - PayPal- und Wero-Link sind mit den Links aus der letzten Bestellung des Erstellers vorbelegt und können angepasst oder geleert werden.
    - Zur Auswahl werden nur **sichtbare** Menülisten angeboten.
    - Beim direkten Anlegen einer neuen Liste steuert eine Checkbox „Diese Artikelliste nächstes Mal verwenden" (vorausgewählt, aber abwählbar), ob die Liste für zukünftige Bestellungen sichtbar bleibt.
 2. **Teilnehmer wählen Speisen** — Jeder Nutzer wählt Menüpositionen mit Mengen aus. Die Auswahl wird als `UserOrderSelection` mit `SelectionItem`-Einträgen gespeichert.
 3. **Als bestellt markieren** (ORDERED) — Ersteller gibt an, wer telefonisch bestellt hat. Nutzer sehen eine Warnung, wenn sie danach noch ihre Auswahl ändern.
-4. **Bestellung schließen** (CLOSED) — Ersteller gibt optionales Gesamttrinkgeld ein. Das Trinkgeld wird gleichmäßig auf alle Teilnehmer mit mindestens einem Artikel aufgeteilt.
+4. **Bestellung schließen** (CLOSED) — Ersteller gibt optionales Gesamttrinkgeld ein und kann „Paid By" sowie PayPal- und Wero-Link ergänzen oder korrigieren. Das Trinkgeld wird gleichmäßig auf alle Teilnehmer mit mindestens einem Artikel aufgeteilt.
 5. **Zahlungen verwalten** — Nutzer markieren sich selbst als bezahlt; Ersteller kann Zahlungen bestätigen oder widerrufen.
 6. **Archivieren** (ARCHIVED) — Bestellung verschwindet aus dem Dashboard und landet im Archiv.
 
@@ -410,7 +411,7 @@ Anwendung erreichbar unter: `http://localhost:38443`
 
 ```bash
 mvn package
-java -DYATTA_YAM_YAM_PASSWORD=deinPasswort -jar target/yatta-yam-yam-1.8.0.jar
+java -DYATTA_YAM_YAM_PASSWORD=deinPasswort -jar target/yatta-yam-yam-1.9.0.jar
 ```
 
 ---

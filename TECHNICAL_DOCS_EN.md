@@ -1,7 +1,7 @@
 # Yatta-Yam-Yam – Technical Documentation
 
-**Version:** 1.8.0  
-**Date:** September 2026
+**Version:** 1.9.0  
+**Date:** October 2026
 
 ---
 
@@ -123,7 +123,7 @@ ItemList ──── 1:n ──────────────────
 | `paypalLink`       | String           | Creator's PayPal.me link                             |
 | `weroLink`         | String           | Creator's Wero link                                  |
 | `orderedByContact` | String           | Name of the person who called in the order           |
-| `paidByName`       | String           | Name of the person who advanced/fronted the money (editable in the edit form, pre-fillable with your own name via the "I'm paying" button) |
+| `paidByName`       | String           | Name of the person who advanced/fronted the money (can be set when creating, closing and editing the order, pre-fillable with your own name via the "I'm paying" button) |
 
 **OrderStatus lifecycle:**
 
@@ -318,12 +318,13 @@ ARCHIVED
 ### Detailed Flow
 
 1. **Create order** — Creator chooses restaurant, date, menu list, and optionally a location.
-   - PayPal and Wero links are pre-filled from the creator's most recent order.
+   - "Paid By" as well as the PayPal and Wero links can optionally be entered right away if already known.
+   - The PayPal and Wero links are pre-filled from the creator's most recent order and can be changed or cleared.
    - Only **visible** menu lists are offered for selection.
    - When creating a brand-new list inline, a "Use this item list next time" checkbox (preselected, but uncheckable) controls whether the list stays visible for future orders.
 2. **Participants select dishes** — Each user picks menu items with quantities. The selection is saved as a `UserOrderSelection` with `SelectionItem` entries.
 3. **Mark as ordered** (ORDERED) — Creator records who called in the order. Users see a warning if they try to change their selection afterwards.
-4. **Close order** (CLOSED) — Creator optionally enters a total tip. The tip is split evenly among all participants who have at least one item.
+4. **Close order** (CLOSED) — Creator optionally enters a total tip and can fill in or correct "Paid By" as well as the PayPal and Wero links. The tip is split evenly among all participants who have at least one item.
 5. **Manage payments** — Users mark themselves as paid; the creator can confirm or revoke payments.
 6. **Archive** (ARCHIVED) — Order disappears from the dashboard and moves to the archive.
 
@@ -410,7 +411,7 @@ Application available at: `http://localhost:38443`
 
 ```bash
 mvn package
-java -DYATTA_YAM_YAM_PASSWORD=yourPassword -jar target/yatta-yam-yam-1.8.0.jar
+java -DYATTA_YAM_YAM_PASSWORD=yourPassword -jar target/yatta-yam-yam-1.9.0.jar
 ```
 
 ---

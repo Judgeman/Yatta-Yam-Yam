@@ -99,6 +99,49 @@
                 </div>
             </div>
 
+            <hr class="my-4"/>
+
+            <h5 class="fw-semibold mb-1">Payment <span class="text-muted fw-normal small">(optional)</span></h5>
+            <p class="text-muted small mb-3">Fill in now if already known — otherwise later when closing the order.</p>
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold">
+                    <i class="bi bi-cash-coin"></i> Paid By
+                    <span class="text-muted fw-normal small">(who advanced the money)</span>
+                </label>
+                <div class="input-group">
+                    <input type="text" name="paidByName" id="paidByName" class="form-control"
+                           placeholder="e.g. Jane Doe" maxlength="100"/>
+                    <button type="button" class="btn btn-outline-secondary" id="iAmPayingBtn"
+                            th:data-username="${user.name}">
+                        I'm paying
+                    </button>
+                </div>
+                <small class="text-muted">Shown to others so they know who to pay back.</small>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold">
+                    <i class="bi bi-credit-card"></i> PayPal Link
+                </label>
+                <input type="url" name="paypalLink" class="form-control"
+                       th:value="${lastPaypalLink}" placeholder="https://paypal.me/yourname"/>
+                <small class="text-muted">
+                    The amount will be appended automatically per user.
+                </small>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-semibold">
+                    <i class="bi bi-phone"></i> Wero Link
+                </label>
+                <input type="url" name="weroLink" class="form-control"
+                       th:value="${lastWeroLink}" placeholder="https://wero.de/..."/>
+                <small class="text-muted" th:if="${lastPaypalLink != null or lastWeroLink != null}">
+                    Links pre-filled from your last order.
+                </small>
+            </div>
+
             <div class="d-grid">
                 <button type="submit" class="btn btn-primary btn-lg">Create Order →</button>
             </div>
@@ -109,5 +152,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.getElementById('iAmPayingBtn').addEventListener('click', function () {
+        document.getElementById('paidByName').value = this.dataset.username;
+    });
+</script>
 </body>
 </html>

@@ -214,10 +214,15 @@ public class OrderController {
         Optional<AppUser> user = currentUser(request);
         if (user.isEmpty()) return redirectToHome(request);
 
+        // Pre-fill PayPal and Wero links from the creator's last order
+        Optional<FoodOrder> lastOrder = orderService.findLastOrderByCreator(user.get());
+
         model.addAttribute("user", user.get());
         model.addAttribute("itemLists", orderService.getVisibleItemLists());
         model.addAttribute("today", LocalDate.now());
         model.addAttribute("locations", FoodOrder.Location.values());
+        model.addAttribute("lastPaypalLink", lastOrder.map(FoodOrder::getPaypalLink).orElse(null));
+        model.addAttribute("lastWeroLink", lastOrder.map(FoodOrder::getWeroLink).orElse(null));
         return "order-create";
     }
 
@@ -228,6 +233,9 @@ public class OrderController {
                               @RequestParam(required = false) String newListName,
                               @RequestParam(required = false, defaultValue = "false") boolean reuseList,
                               @RequestParam(required = false) String location,
+                              @RequestParam(required = false) String paypalLink,
+                              @RequestParam(required = false) String weroLink,
+                              @RequestParam(required = false) String paidByName,
                               HttpServletRequest request) {
         Optional<AppUser> user = currentUser(request);
         if (user.isEmpty()) return "redirect:/";
@@ -246,7 +254,8 @@ public class OrderController {
             try { loc = FoodOrder.Location.valueOf(location.toUpperCase()); } catch (IllegalArgumentException ignored) {}
         }
 
-        FoodOrder order = orderService.createOrder(placeName, orderDate, user.get(), listId, loc);
+        FoodOrder order = orderService.createOrder(placeName, orderDate, user.get(), listId, loc,
+                paypalLink, weroLink, paidByName);
         return "redirect:/orders/" + order.getId();
     }
 
@@ -330,13 +339,14 @@ public class OrderController {
                              @RequestParam(required = false) BigDecimal tipAmount,
                              @RequestParam(required = false) String paypalLink,
                              @RequestParam(required = false) String weroLink,
+                             @RequestParam(required = false) String paidByName,
                              HttpServletRequest request) {
         Optional<AppUser> user = currentUser(request);
         orderService.findOrder(id).ifPresent(order -> {
             if (user.isPresent() && order.getCreator().getId().equals(user.get().getId())) {
-                // Save tip and links before closing
+                // Save tip, links and payer before closing
                 orderService.updateOrder(order.getId(), order.getPlaceName(), order.getOrderDate(),
-                        tipAmount, paypalLink, weroLink);
+                        tipAmount, paypalLink, weroLink, order.getLocation(), paidByName);
                 orderService.closeOrder(id);
             }
         });
