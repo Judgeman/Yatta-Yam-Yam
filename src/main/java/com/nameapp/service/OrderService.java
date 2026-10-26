@@ -59,8 +59,14 @@ public class OrderService {
         return orderRepo.findById(id);
     }
 
+    // Creator's most recent order — its PayPal/Wero links pre-fill the create form
+    public Optional<FoodOrder> findLastOrderByCreator(AppUser creator) {
+        return orderRepo.findTopByCreatorOrderByOrderDateDesc(creator);
+    }
+
     public FoodOrder createOrder(String placeName, LocalDate date, AppUser creator, Long itemListId,
-                                 FoodOrder.Location location) {
+                                 FoodOrder.Location location, String paypalLink, String weroLink,
+                                 String paidByName) {
         FoodOrder order = new FoodOrder();
         order.setPlaceName(placeName);
         order.setOrderDate(date);
@@ -71,26 +77,11 @@ public class OrderService {
         if (itemListId != null) {
             itemListRepo.findById(itemListId).ifPresent(order::setItemList);
         }
-
-        // Pre-fill PayPal and Wero links from the creator's last order
-        orderRepo.findTopByCreatorOrderByOrderDateDesc(creator).ifPresent(last -> {
-            order.setPaypalLink(last.getPaypalLink());
-            order.setWeroLink(last.getWeroLink());
-        });
+        order.setPaypalLink(paypalLink != null && !paypalLink.isBlank() ? paypalLink.trim() : null);
+        order.setWeroLink(weroLink != null && !weroLink.isBlank() ? weroLink.trim() : null);
+        order.setPaidByName(paidByName != null && !paidByName.isBlank() ? paidByName.trim() : null);
 
         return orderRepo.save(order);
-    }
-
-    public void updateOrder(Long orderId, String placeName, LocalDate date, BigDecimal tip,
-                            String paypalLink, String weroLink) {
-        orderRepo.findById(orderId).ifPresent(order -> {
-            order.setPlaceName(placeName);
-            order.setOrderDate(date);
-            order.setTipAmount(tip != null ? tip : BigDecimal.ZERO);
-            order.setPaypalLink(paypalLink != null && !paypalLink.isBlank() ? paypalLink.trim() : null);
-            order.setWeroLink(weroLink != null && !weroLink.isBlank() ? weroLink.trim() : null);
-            orderRepo.save(order);
-        });
     }
 
     public void updateOrder(Long orderId, String placeName, LocalDate date, BigDecimal tip,
