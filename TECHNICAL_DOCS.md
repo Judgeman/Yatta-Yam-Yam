@@ -1,6 +1,6 @@
 # Yatta-Yam-Yam – Technische Dokumentation
 
-**Version:** 1.8.1  
+**Version:** 1.8.2  
 **Stand:** Oktober 2026
 
 ---
@@ -411,7 +411,7 @@ Anwendung erreichbar unter: `http://localhost:38443`
 
 ```bash
 mvn package
-java -DYATTA_YAM_YAM_PASSWORD=deinPasswort -jar target/yatta-yam-yam-1.8.1.jar
+java -DYATTA_YAM_YAM_PASSWORD=deinPasswort -jar target/yatta-yam-yam-1.8.2.jar
 ```
 
 ---
