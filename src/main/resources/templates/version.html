@@ -54,6 +54,21 @@
             <li class="list-group-item d-flex gap-2 align-items-start px-0">
                 <i class="bi bi-wrench-adjustable text-primary mt-1"></i>
                 <div>
+                    <strong>Fix: Correct amount in the PayPal link</strong><br/>
+                    <span class="text-muted small">The PayPal Android app read the amount in the generated link (e.g. "6.75") without its decimal point and charged 675 € instead of 6.75 €. The link now uses a decimal comma ("6,75"), which PayPal interprets correctly.</span>
+                </div>
+            </li>
+        </ul>
+
+        <h2 class="h5 fw-semibold mb-3 mt-4">
+            v1.8.1
+            <span class="text-muted fw-normal fs-6 ms-2">– Previous release</span>
+        </h2>
+
+        <ul class="list-group list-group-flush mb-3">
+            <li class="list-group-item d-flex gap-2 align-items-start px-0">
+                <i class="bi bi-wrench-adjustable text-primary mt-1"></i>
+                <div>
                     <strong>Fix: "Paid By" can be set when closing an order</strong><br/>
                     <span class="text-muted small">Until now, who advanced the money could only be added by editing the order afterwards. The close form now has the "Paid By" field with the "I'm paying" button, pre-filled with any name already entered.</span>
                 </div>

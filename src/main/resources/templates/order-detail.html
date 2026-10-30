@@ -471,12 +471,14 @@
                 <h5 class="modal-title fw-bold">💳 Pay via PayPal</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body text-center">
+            <!-- Amount with decimal comma: the PayPal Android app reads "6.75" as 675 -->
+            <div class="modal-body text-center"
+                 th:with="paypalUrl=${order.paypalLink + '/' + #numbers.formatDecimal(myTotal, 1, 2, 'COMMA')}">
                 <p class="text-muted mb-3">Scan the QR code or click the link to pay</p>
-                <img th:src="'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + ${order.paypalLink} + '/' + ${myTotal}"
+                <img th:src="'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + ${paypalUrl}"
                      alt="PayPal QR Code" class="mb-3 rounded" style="width:200px;height:200px;"/>
                 <div class="mb-3">
-                    <a th:href="${order.paypalLink} + '/' + ${myTotal}" target="_blank"
+                    <a th:href="${paypalUrl}" target="_blank"
                        class="btn btn-primary">Open PayPal link ↗</a>
                 </div>
                 <p class="text-muted small">After completing the payment, confirm below.</p>
