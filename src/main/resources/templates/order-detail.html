@@ -56,8 +56,11 @@
             <span class="order-status-badge align-self-center"
                   th:classappend="${order.status.name() == 'OPEN'} ? 'badge-open' : (${order.status.name() == 'ORDERED'} ? 'badge-ordered' : (${order.status.name() == 'CLOSED'} ? 'badge-closed' : 'badge-archived'))"
                   th:text="${order.status.name()}">OPEN</span>
+            <span th:if="${order.splitOrder}" class="badge text-bg-light border align-self-center">
+                <i class="bi bi-people"></i> Cost split
+            </span>
 
-            <button class="btn btn-outline-secondary btn-sm align-self-center"
+            <button th:if="${!order.splitOrder}" class="btn btn-outline-secondary btn-sm align-self-center"
                     data-bs-toggle="modal" data-bs-target="#phoneOrderModal">
                 <i class="bi bi-telephone"></i> Order
             </button>
@@ -100,8 +103,113 @@
         <!-- LEFT: Item selection -->
         <div class="col-lg-7">
 
+            <!-- Cost split: join / leave, current share, price-per-person calculator.
+                 While open, amounts are shown to the creator only; everyone else just joins. -->
+            <div th:if="${order.splitOrder}" class="card shadow-sm mb-3"
+                 th:with="closed=${order.status.name() == 'CLOSED' or order.status.name() == 'ARCHIVED'},
+                          showAmounts=${closed or isOwner}">
+                <div class="card-header fw-semibold">
+                    <i class="bi bi-people"></i> Cost split
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small mb-3">
+                        One person buys everything and the total is split equally among everyone who joins.
+                        The more people join, the less each one pays.
+                    </p>
+
+                    <div class="row g-2 text-center mb-3">
+                        <div th:class="${showAmounts} ? 'col-4' : 'col-12'">
+                            <div class="split-stat">
+                                <div class="split-stat-value" th:text="${selections.size()}">0</div>
+                                <div class="split-stat-label">participant(s)</div>
+                            </div>
+                        </div>
+                        <div class="col-4" th:if="${showAmounts}">
+                            <div class="split-stat">
+                                <div class="split-stat-value"
+                                     th:text="${order.splitTotal != null} ? '€' + ${#numbers.formatDecimal(order.splitTotal,1,2)} : '–'">–</div>
+                                <div class="split-stat-label">total amount</div>
+                            </div>
+                        </div>
+                        <div class="col-4" th:if="${showAmounts}">
+                            <div class="split-stat">
+                                <div class="split-stat-value text-primary"
+                                     th:text="${splitShare != null} ? '€' + ${#numbers.formatDecimal(splitShare,1,2)} : '–'">–</div>
+                                <div class="split-stat-label"
+                                     th:text="${closed} ? 'per person' : 'max. per person'">per person</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Open, total known: current share is only an upper bound -->
+                    <p th:if="${!closed and order.splitTotal != null and isOwner}" class="small text-muted mb-3">
+                        <i class="bi bi-arrow-down-circle"></i>
+                        <span th:if="${splitShare != null}">This is the current maximum — it drops with every person who joins.</span>
+                        <span th:if="${splitShare == null}">Nobody has joined yet.</span>
+                        The final amount and payment are shown once the order is closed.
+                    </p>
+
+                    <!-- Open, participant view: no amounts yet -->
+                    <p th:if="${!closed and !isOwner}" class="small text-muted mb-3">
+                        <i class="bi bi-info-circle"></i>
+                        Just join — your share is shown once the order is closed.
+                    </p>
+
+                    <!-- Open, no total yet: work out the total for a price per person -->
+                    <!-- Only the creator sees the calculator; everyone else just joins -->
+                    <div th:if="${!closed and order.splitTotal == null and isOwner}" class="split-calculator mb-3">
+                        <label for="pricePerPerson" class="form-label small fw-semibold mb-1">
+                            <i class="bi bi-calculator"></i> No total amount yet — try a price per person:
+                        </label>
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <div class="input-group input-group-sm" style="max-width: 140px;">
+                                <span class="input-group-text">€</span>
+                                <input type="number" id="pricePerPerson" class="form-control"
+                                       step="0.01" min="0" placeholder="0.00"
+                                       th:data-participants="${selections.size()}"/>
+                            </div>
+                            <span class="small text-muted"
+                                  th:text="'× ' + ${selections.size()} + ' participant(s) ='">× 0 participant(s) =</span>
+                            <span class="fw-bold text-primary" id="calculatedTotal">€0.00</span>
+                        </div>
+                        <small class="text-muted">The final amount is entered when the order is closed.</small>
+                    </div>
+
+                    <!-- Closed: final split -->
+                    <p th:if="${closed and splitShare != null}" class="small mb-3">
+                        <i class="bi bi-lock"></i>
+                        Final amount:
+                        <span th:text="'€' + ${#numbers.formatDecimal(order.splitTotal,1,2)} + ' ÷ ' + ${selections.size()} + ' = '"></span>
+                        <strong th:text="'€' + ${#numbers.formatDecimal(splitShare,1,2)} + ' per person'">€0.00</strong>
+                    </p>
+
+                    <!-- Join / leave while open -->
+                    <th:block th:if="${order.status.name() == 'OPEN'}">
+                        <form th:if="${!iParticipate}" th:action="@{'/orders/' + ${order.id} + '/join'}"
+                              method="post" class="mb-0">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-person-plus"></i> I'm in
+                            </button>
+                        </form>
+                        <div th:if="${iParticipate}" class="d-flex align-items-center gap-3 flex-wrap">
+                            <span class="text-success fw-semibold">
+                                <i class="bi bi-check-circle-fill"></i> You're in
+                            </span>
+                            <form th:action="@{'/orders/' + ${order.id} + '/leave'}" method="post" class="mb-0">
+                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                    <i class="bi bi-person-dash"></i> Leave
+                                </button>
+                            </form>
+                        </div>
+                    </th:block>
+                    <div th:if="${order.status.name() != 'OPEN' and !iParticipate}" class="text-muted small">
+                        You didn't join this cost split.
+                    </div>
+                </div>
+            </div>
+
             <!-- No item list warning -->
-            <div th:if="${order.itemList == null}" class="alert alert-warning">
+            <div th:if="${!order.splitOrder and order.itemList == null}" class="alert alert-warning">
                 <i class="bi bi-exclamation-triangle"></i>
                 No item list attached to this order.
                 <span th:if="${isOwner}">
@@ -109,7 +217,7 @@
                 </span>
             </div>
 
-            <div th:if="${order.itemList != null}">
+            <div th:if="${!order.splitOrder and order.itemList != null}">
                 <!-- Owner: add items -->
                 <div th:if="${isOwner}" class="card shadow-sm mb-3">
                     <div class="card-header">
@@ -273,35 +381,63 @@
         <div class="col-lg-5">
 
             <!-- My cost summary -->
-            <div class="summary-card mb-3">
+            <div class="summary-card mb-3"
+                 th:with="closed=${order.status.name() == 'CLOSED' or order.status.name() == 'ARCHIVED'}">
                 <h6 class="fw-bold mb-3"><i class="bi bi-receipt"></i> My Summary</h6>
 
-                <div th:if="${mySelection == null or mySelection.items.empty}" class="text-muted small">
+                <div th:if="${!iParticipate}" class="text-muted small"
+                     th:text="${order.splitOrder} ? 'You have not joined yet.' : 'No items selected yet.'">
                     No items selected yet.
                 </div>
 
-                <div th:if="${mySelection != null and !mySelection.items.empty}">
-                    <div th:each="si : ${mySelection.items}"
-                         class="d-flex justify-content-between small mb-1">
-                        <span th:text="${si.quantity} + 'x ' + ${si.item.name}">Item</span>
-                        <span th:text="'€' + ${#numbers.formatDecimal(si.item.price.multiply(new java.math.BigDecimal(si.quantity)),1,2)}">€0</span>
-                    </div>
-                    <div class="d-flex justify-content-between small border-top mt-2 pt-2">
-                        <span class="text-muted">Subtotal</span>
-                        <span th:text="'€' + ${#numbers.formatDecimal(mySelection.subtotal,1,2)}">€0</span>
-                    </div>
-                    <div class="d-flex justify-content-between small text-muted">
-                        <span>Tip (my share)</span>
-                        <span th:text="'€' + ${#numbers.formatDecimal(tipPerPerson,1,2)}">€0.00</span>
-                    </div>
-                    <div class="d-flex justify-content-between fw-bold border-top mt-2 pt-2">
-                        <span>Total</span>
-                        <span class="text-primary"
-                              th:text="'€' + ${#numbers.formatDecimal(myTotal,1,2)}">€0.00</span>
-                    </div>
+                <div th:if="${iParticipate}">
+                    <!-- Item order: items, subtotal, tip -->
+                    <th:block th:if="${!order.splitOrder}">
+                        <div th:each="si : ${mySelection.items}"
+                             class="d-flex justify-content-between small mb-1">
+                            <span th:text="${si.quantity} + 'x ' + ${si.item.name}">Item</span>
+                            <span th:text="'€' + ${#numbers.formatDecimal(si.item.price.multiply(new java.math.BigDecimal(si.quantity)),1,2)}">€0</span>
+                        </div>
+                        <div class="d-flex justify-content-between small border-top mt-2 pt-2">
+                            <span class="text-muted">Subtotal</span>
+                            <span th:text="'€' + ${#numbers.formatDecimal(mySelection.subtotal,1,2)}">€0</span>
+                        </div>
+                        <div class="d-flex justify-content-between small text-muted">
+                            <span>Tip (my share)</span>
+                            <span th:text="'€' + ${#numbers.formatDecimal(tipPerPerson,1,2)}">€0.00</span>
+                        </div>
+                        <div class="d-flex justify-content-between fw-bold border-top mt-2 pt-2">
+                            <span>Total</span>
+                            <span class="text-primary"
+                                  th:text="'€' + ${#numbers.formatDecimal(myTotal,1,2)}">€0.00</span>
+                        </div>
+                    </th:block>
 
-                    <!-- Payment status -->
-                    <div class="mt-3">
+                    <!-- Cost split: final share only once closed -->
+                    <th:block th:if="${order.splitOrder}">
+                        <div class="d-flex justify-content-between small mb-1">
+                            <span class="text-muted">Status</span>
+                            <span class="text-success fw-semibold"><i class="bi bi-check-circle-fill"></i> Joined</span>
+                        </div>
+                        <th:block th:if="${!closed}">
+                            <div th:if="${splitShare != null and isOwner}" class="d-flex justify-content-between small">
+                                <span class="text-muted">Currently at most</span>
+                                <span class="fw-semibold"
+                                      th:text="'€' + ${#numbers.formatDecimal(splitShare,1,2)}">€0.00</span>
+                            </div>
+                            <p class="small text-muted mt-2 mb-0">
+                                Your final share and the payment options appear once the order is closed.
+                            </p>
+                        </th:block>
+                        <div th:if="${closed}" class="d-flex justify-content-between fw-bold border-top mt-2 pt-2">
+                            <span>Your share</span>
+                            <span class="text-primary"
+                                  th:text="'€' + ${#numbers.formatDecimal(myTotal,1,2)}">€0.00</span>
+                        </div>
+                    </th:block>
+
+                    <!-- Payment status (cost split: only once closed) -->
+                    <div class="mt-3" th:if="${!order.splitOrder or closed}">
                         <div th:if="${mySelection.paid or mySelection.markedPaidByOwner}"
                              class="alert alert-success py-2 mb-2 small d-flex justify-content-between align-items-center">
                             <span>
@@ -377,10 +513,13 @@
             </div>
 
             <!-- All participants summary -->
-            <div class="summary-card">
+            <!-- Payment info is shown on cost splits only once the order is closed -->
+            <div class="summary-card"
+                 th:with="showPayment=${!order.splitOrder or order.status.name() == 'CLOSED' or order.status.name() == 'ARCHIVED'}">
                 <h6 class="fw-bold mb-3"><i class="bi bi-people"></i> All Participants</h6>
 
-                <div th:if="${selections.empty}" class="text-muted small">No orders placed yet.</div>
+                <div th:if="${selections.empty}" class="text-muted small"
+                     th:text="${order.splitOrder} ? 'Nobody has joined yet.' : 'No orders placed yet.'">No orders placed yet.</div>
 
                 <div th:each="sel : ${selections}" class="participant-row">
                     <div class="d-flex justify-content-between align-items-center">
@@ -393,16 +532,20 @@
                                     <span th:text="${si.quantity} + 'x ' + ${si.item.name}">item</span>
                                     <span th:text="'– €' + ${#numbers.formatDecimal(allLineTotals[si.id],1,2)}">€0</span>
                                 </div>
-                                <div th:if="${sel.items.empty}" style="font-size:11px" class="text-muted">No items</div>
+                                <div th:if="${!order.splitOrder and sel.items.empty}" style="font-size:11px" class="text-muted">No items</div>
                             </div>
                         </div>
-                        <div class="text-end">
-                            <div class="small text-muted"
-                                 th:text="'€' + ${#numbers.formatDecimal(sel.subtotal,1,2)}"></div>
-                            <div class="small text-muted"
-                                 th:text="'+ €' + ${#numbers.formatDecimal(tipPerPerson,1,2)} + ' tip'"></div>
-                            <div class="fw-bold small text-primary"
-                                 th:text="'= €' + ${#numbers.formatDecimal(participantTotals[sel.id],1,2)}">€0</div>
+                        <div class="text-end" th:if="${showPayment}">
+                            <th:block th:if="${!order.splitOrder}">
+                                <div class="small text-muted"
+                                     th:text="'€' + ${#numbers.formatDecimal(sel.subtotal,1,2)}"></div>
+                                <div class="small text-muted"
+                                     th:text="'+ €' + ${#numbers.formatDecimal(tipPerPerson,1,2)} + ' tip'"></div>
+                                <div class="fw-bold small text-primary"
+                                     th:text="'= €' + ${#numbers.formatDecimal(participantTotals[sel.id],1,2)}">€0</div>
+                            </th:block>
+                            <div th:if="${order.splitOrder}" class="fw-bold small text-primary"
+                                 th:text="'€' + ${#numbers.formatDecimal(participantTotals[sel.id],1,2)}">€0</div>
                             <span th:if="${sel.paid or sel.markedPaidByOwner}" class="badge bg-success" style="font-size:10px"
                                   th:text="${sel.paymentMethod}">PAID</span>
                             <span th:if="${!sel.paid and !sel.markedPaidByOwner}"
@@ -410,7 +553,7 @@
                         </div>
                     </div>
                     <!-- Owner: mark others as paid -->
-                    <div th:if="${isOwner and !sel.markedPaidByOwner and !sel.paid}" class="mt-1">
+                    <div th:if="${showPayment and isOwner and !sel.markedPaidByOwner and !sel.paid}" class="mt-1">
                         <p class="small text-muted mb-1" style="font-size:11px">Mark as paid via:</p>
                         <div class="d-flex gap-1 flex-wrap">
                             <form th:each="method : ${paymentMethods}"
@@ -424,7 +567,7 @@
                             </form>
                         </div>
                     </div>
-                    <div th:if="${isOwner and (sel.markedPaidByOwner or sel.paid)}" class="mt-1">
+                    <div th:if="${showPayment and isOwner and (sel.markedPaidByOwner or sel.paid)}" class="mt-1">
                         <form th:action="@{'/orders/selection/' + ${sel.id} + '/owner-unpaid'}" method="post" class="mb-0">
                             <input type="hidden" name="orderId" th:value="${order.id}"/>
                             <button type="submit" class="btn btn-outline-secondary btn-sm py-0" style="font-size:11px">
@@ -434,8 +577,25 @@
                     </div>
                 </div>
 
-                <!-- Grand total -->
-                <div th:if="${!selections.empty}" class="border-top mt-3 pt-3">
+                <!-- Grand total (cost split) -->
+                <div th:if="${order.splitOrder and !selections.empty and (showPayment or isOwner)}" class="border-top mt-3 pt-3">
+                    <div class="d-flex justify-content-between small text-muted mb-1">
+                        <span>Total amount</span>
+                        <span th:text="${order.splitTotal != null} ? '€' + ${#numbers.formatDecimal(order.splitTotal,1,2)} : 'not set yet'">–</span>
+                    </div>
+                    <div class="d-flex justify-content-between small text-muted mb-1">
+                        <span>Participants</span>
+                        <span th:text="${selections.size()}">0</span>
+                    </div>
+                    <div class="d-flex justify-content-between fw-bold border-top pt-2">
+                        <span th:text="${showPayment} ? 'Per person' : 'Per person (max.)'">Per person</span>
+                        <span class="text-primary"
+                              th:text="${splitShare != null} ? '€' + ${#numbers.formatDecimal(splitShare,1,2)} : '–'">–</span>
+                    </div>
+                </div>
+
+                <!-- Grand total (item order) -->
+                <div th:if="${!order.splitOrder and !selections.empty}" class="border-top mt-3 pt-3">
                     <div class="d-flex justify-content-between small text-muted mb-1">
                         <span>Subtotal</span>
                         <span th:text="'€' + ${#numbers.formatDecimal(total,1,2)}">€0</span>
@@ -773,6 +933,17 @@
                 if (submitBtn) submitBtn.disabled = false;
             }
         }
+    }
+
+    // Cost split without a total: total = price per person × participants
+    const pricePerPersonInput = document.getElementById('pricePerPerson');
+    if (pricePerPersonInput) {
+        pricePerPersonInput.addEventListener('input', function () {
+            const count = parseInt(this.dataset.participants, 10) || 0;
+            const price = parseFloat(this.value) || 0;
+            const total = Math.round(price * 100) * count / 100;
+            document.getElementById('calculatedTotal').textContent = '€' + total.toFixed(2);
+        });
     }
 
     window.addEventListener('load', function() {

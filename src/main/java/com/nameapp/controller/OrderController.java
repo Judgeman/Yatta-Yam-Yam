@@ -86,16 +86,25 @@ public class OrderController {
         Map<Long, java.math.BigDecimal> unpaidAmountForOwner = new java.util.HashMap<>();
         Map<Long, Integer> unpaidCountForNonOwner = new java.util.HashMap<>();
         Map<Long, java.math.BigDecimal> unpaidAmountForNonOwner = new java.util.HashMap<>();
+        // Open split orders: current (maximum) share per person, if a total is set.
+        // Only for the creator — participants just join and see their share once closed.
+        Map<Long, java.math.BigDecimal> splitShareMap = new java.util.HashMap<>();
 
         for (FoodOrder order : orders) {
+            if (order.isSplitOrder() && order.getStatus() != FoodOrder.OrderStatus.CLOSED
+                    && order.getCreator().getId().equals(currentUser.getId())) {
+                java.math.BigDecimal share = orderService.getSplitShare(order);
+                if (share != null) splitShareMap.put(order.getId(), share);
+            }
             if (order.getStatus() != FoodOrder.OrderStatus.CLOSED) continue;
 
-            java.math.BigDecimal tipPerPerson = orderService.getTipPerPerson(order);
+            java.math.BigDecimal tipPerPerson = orderService.getPerPersonCharge(order);
             List<UserOrderSelection> selections = orderService.getSelectionsForOrder(order);
 
             // Current user's info for this order
             selections.stream()
                     .filter(s -> s.getUser().getId().equals(currentUser.getId()))
+                    .filter(orderService::isParticipant)
                     .findFirst()
                     .ifPresent(sel -> {
                         java.math.BigDecimal total = sel.getSubtotal().add(tipPerPerson);
@@ -110,7 +119,7 @@ public class OrderController {
             int unpaidCount = 0;
             java.math.BigDecimal unpaidTotal = java.math.BigDecimal.ZERO;
             for (UserOrderSelection sel : selections) {
-                if (!sel.isPaid() && !sel.isMarkedPaidByOwner() && !sel.getItems().isEmpty()) {
+                if (!sel.isPaid() && !sel.isMarkedPaidByOwner() && orderService.isParticipant(sel)) {
                     unpaidCount++;
                     unpaidTotal = unpaidTotal.add(sel.getSubtotal().add(tipPerPerson));
                 }
@@ -133,6 +142,7 @@ public class OrderController {
         model.addAttribute("unpaidAmountForOwner", unpaidAmountForOwner);
         model.addAttribute("unpaidCountForNonOwner", unpaidCountForNonOwner);
         model.addAttribute("unpaidAmountForNonOwner", unpaidAmountForNonOwner);
+        model.addAttribute("splitShareMap", splitShareMap);
         model.addAttribute("locations", FoodOrder.Location.values());
         model.addAttribute("selectedLocation", location);
         return "dashboard";
@@ -160,14 +170,14 @@ public class OrderController {
 
         for (FoodOrder order : orders) {
             List<UserOrderSelection> selections = orderService.getSelectionsForOrder(order);
-            java.math.BigDecimal tipPerPerson = orderService.getTipPerPerson(order);
+            java.math.BigDecimal tipPerPerson = orderService.getPerPersonCharge(order);
 
             boolean allPaid = selections.stream()
-                    .filter(s -> !s.getItems().isEmpty())
+                    .filter(orderService::isParticipant)
                     .allMatch(s -> s.isPaid() || s.isMarkedPaidByOwner());
 
             java.math.BigDecimal openAmount = selections.stream()
-                    .filter(s -> !s.getItems().isEmpty() && !s.isPaid() && !s.isMarkedPaidByOwner())
+                    .filter(s -> orderService.isParticipant(s) && !s.isPaid() && !s.isMarkedPaidByOwner())
                     .map(s -> s.getSubtotal().add(tipPerPerson))
                     .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
 
@@ -236,15 +246,23 @@ public class OrderController {
                               @RequestParam(required = false) String paypalLink,
                               @RequestParam(required = false) String weroLink,
                               @RequestParam(required = false) String paidByName,
+                              @RequestParam(required = false) String orderType,
+                              @RequestParam(required = false) BigDecimal splitTotal,
                               HttpServletRequest request) {
         Optional<AppUser> user = currentUser(request);
         if (user.isEmpty()) return "redirect:/";
 
-        Long listId = itemListId;
+        FoodOrder.OrderType type = FoodOrder.OrderType.ITEMS;
+        if (orderType != null && !orderType.isBlank()) {
+            try { type = FoodOrder.OrderType.valueOf(orderType.toUpperCase()); } catch (IllegalArgumentException ignored) {}
+        }
+
+        Long listId = type == FoodOrder.OrderType.SPLIT ? null : itemListId;
 
         // Create a new item list if requested. The "use this list next time"
         // checkbox controls whether the new list shows up for future orders.
-        if ((itemListId == null || itemListId == 0) && newListName != null && !newListName.isBlank()) {
+        if (type == FoodOrder.OrderType.ITEMS
+                && (itemListId == null || itemListId == 0) && newListName != null && !newListName.isBlank()) {
             ItemList newList = orderService.createItemList(newListName.trim(), user.get(), reuseList);
             listId = newList.getId();
         }
@@ -255,7 +273,7 @@ public class OrderController {
         }
 
         FoodOrder order = orderService.createOrder(placeName, orderDate, user.get(), listId, loc,
-                paypalLink, weroLink, paidByName);
+                paypalLink, weroLink, paidByName, type, splitTotal);
         return "redirect:/orders/" + order.getId();
     }
 
@@ -297,6 +315,7 @@ public class OrderController {
                             @RequestParam(required = false) String weroLink,
                             @RequestParam(required = false) String location,
                             @RequestParam(required = false) String paidByName,
+                            @RequestParam(required = false) BigDecimal splitTotal,
                             HttpServletRequest request) {
         Optional<AppUser> user = currentUser(request);
         if (user.isEmpty()) return "redirect:/";
@@ -309,7 +328,8 @@ public class OrderController {
         final FoodOrder.Location finalLoc = loc;
         orderService.findOrder(id).ifPresent(order -> {
             if (order.getCreator().getId().equals(user.get().getId())) {
-                orderService.updateOrder(id, placeName, orderDate, tipAmount, paypalLink, weroLink, finalLoc, paidByName);
+                orderService.updateOrder(id, placeName, orderDate, tipAmount, paypalLink, weroLink, finalLoc,
+                        paidByName, splitTotal);
             }
         });
         return "redirect:/orders/" + id;
@@ -318,7 +338,9 @@ public class OrderController {
     // ── Close / Archive / Reopen ──────────────────────────────────────────────
 
     @GetMapping("/{id}/close")
-    public String closeOrderForm(@PathVariable Long id, HttpServletRequest request, Model model) {
+    public String closeOrderForm(@PathVariable Long id,
+                                 @RequestParam(required = false) String missingTotal,
+                                 HttpServletRequest request, Model model) {
         Optional<AppUser> user = currentUser(request);
         if (user.isEmpty()) return "redirect:/";
 
@@ -331,6 +353,9 @@ public class OrderController {
 
         model.addAttribute("user", user.get());
         model.addAttribute("order", order);
+        model.addAttribute("participantCount", orderService.getSelectionsForOrder(order).size());
+        model.addAttribute("missingTotal", missingTotal != null);
+        model.addAttribute("currentShare", orderService.getSplitShare(order));
         model.addAttribute("orderSubtotal", orderService.getTotalForOrder(order));
         return "order-close";
     }
@@ -342,22 +367,38 @@ public class OrderController {
                              @RequestParam(required = false) String paypalLink,
                              @RequestParam(required = false) String weroLink,
                              @RequestParam(required = false) String paidByName,
+                             @RequestParam(required = false) BigDecimal splitTotal,
+                             @RequestParam(required = false) BigDecimal splitPerPerson,
                              HttpServletRequest request) {
         Optional<AppUser> user = currentUser(request);
-        orderService.findOrder(id).ifPresent(order -> {
-            if (user.isPresent() && order.getCreator().getId().equals(user.get().getId())) {
-                // Only the total paid was entered: the tip is the difference to the order sum
-                BigDecimal tip = tipAmount;
-                if (tip == null && totalAmount != null) {
-                    BigDecimal diff = totalAmount.subtract(orderService.getTotalForOrder(order));
-                    if (diff.signum() >= 0) tip = diff;
-                }
-                // Save tip, links and payer before closing
-                orderService.updateOrder(order.getId(), order.getPlaceName(), order.getOrderDate(),
-                        tip, paypalLink, weroLink, order.getLocation(), paidByName);
-                orderService.closeOrder(id);
-            }
-        });
+        Optional<FoodOrder> orderOpt = orderService.findOrder(id);
+        if (orderOpt.isEmpty()) return "redirect:/orders/dashboard";
+
+        FoodOrder order = orderOpt.get();
+        if (user.isEmpty() || !order.getCreator().getId().equals(user.get().getId()))
+            return "redirect:/orders/" + id;
+
+        // Cost split where only a price per person was entered: total = price × participants
+        if (order.isSplitOrder() && splitTotal == null && splitPerPerson != null && splitPerPerson.signum() > 0) {
+            int participants = orderService.getSelectionsForOrder(order).size();
+            if (participants > 0) splitTotal = splitPerPerson.multiply(BigDecimal.valueOf(participants));
+        }
+
+        // A split order can only be closed once the total amount is known
+        if (order.isSplitOrder() && (splitTotal == null || splitTotal.compareTo(BigDecimal.ZERO) <= 0))
+            return "redirect:/orders/" + id + "/close?missingTotal";
+
+        // Item order where only the total paid was entered: the tip is the difference to the order sum
+        BigDecimal tip = tipAmount;
+        if (!order.isSplitOrder() && tip == null && totalAmount != null) {
+            BigDecimal diff = totalAmount.subtract(orderService.getTotalForOrder(order));
+            if (diff.signum() >= 0) tip = diff;
+        }
+
+        // Save tip / total, links and payer before closing
+        orderService.updateOrder(order.getId(), order.getPlaceName(), order.getOrderDate(),
+                tip, paypalLink, weroLink, order.getLocation(), paidByName, splitTotal);
+        orderService.closeOrder(id);
         return "redirect:/orders/" + id;
     }
 
@@ -436,50 +477,9 @@ public class OrderController {
             deleteFailed = true;
         }
 
-        if (deleteFailed && orderId != null) {
-            Optional<FoodOrder> orderOpt = orderService.findOrder(orderId);
-            if (orderOpt.isPresent()) {
-                FoodOrder order = orderOpt.get();
-                List<UserOrderSelection> selections = orderService.getSelectionsForOrder(order);
-                Optional<UserOrderSelection> mySelection = selections.stream()
-                        .filter(s -> s.getUser().getId().equals(user.get().getId()))
-                        .findFirst();
-                BigDecimal tipPerPerson = orderService.getTipPerPerson(order);
-
-                Map<Long, Integer> itemQuantities = new java.util.HashMap<>();
-                mySelection.ifPresent(sel ->
-                        sel.getItems().forEach(si ->
-                                itemQuantities.put(si.getItem().getId(), si.getQuantity()))
-                );
-                Map<Long, java.math.BigDecimal> lineTotals = new java.util.HashMap<>();
-                mySelection.ifPresent(sel ->
-                        sel.getItems().forEach(si ->
-                                lineTotals.put(si.getId(),
-                                        si.getItem().getPrice().multiply(java.math.BigDecimal.valueOf(si.getQuantity()))))
-                );
-                Map<Long, java.math.BigDecimal> participantTotals = new java.util.HashMap<>();
-                selections.forEach(sel ->
-                        participantTotals.put(sel.getId(), sel.getSubtotal().add(tipPerPerson))
-                );
-
-                model.addAttribute("user", user.get());
-                model.addAttribute("order", order);
-                model.addAttribute("selections", selections);
-                model.addAttribute("mySelection", mySelection.orElse(null));
-                model.addAttribute("total", orderService.getTotalForOrder(order));
-                model.addAttribute("tipPerPerson", tipPerPerson);
-                model.addAttribute("myTotal", orderService.getTotalWithTipForUser(order, user.get()));
-                model.addAttribute("itemQuantities", itemQuantities);
-                model.addAttribute("lineTotals", lineTotals);
-                model.addAttribute("participantTotals", participantTotals);
-                model.addAttribute("grandTotal", orderService.getTotalForOrder(order).add(
-                        order.getTipAmount() != null ? order.getTipAmount() : java.math.BigDecimal.ZERO));
-                model.addAttribute("isOwner", true);
-                model.addAttribute("paymentMethods", UserOrderSelection.PaymentMethod.values());
-                model.addAttribute("deleteError", true);
-                model.addAttribute("contacts", contactsForPhoneLookup(order));
-                return "order-detail";
-            }
+        if (deleteFailed && orderId != null && orderService.findOrder(orderId).isPresent()) {
+            model.addAttribute("deleteError", true);
+            return buildOrderDetailModel(orderId, user.get(), model, false);
         }
 
         if (orderId != null) return "redirect:/orders/" + orderId;
@@ -501,6 +501,7 @@ public class OrderController {
         if (orderOpt.isEmpty()) return "redirect:/orders/dashboard";
 
         FoodOrder order = orderOpt.get();
+        if (order.isSplitOrder()) return "redirect:/orders/" + id;
 
         // If order is ORDERED and user hasn't confirmed, show warning modal
         if (order.getStatus() == FoodOrder.OrderStatus.ORDERED
@@ -520,6 +521,24 @@ public class OrderController {
             }
         }
         orderService.saveSelection(id, user.get(), quantities);
+        return "redirect:/orders/" + id;
+    }
+
+    // ── Split orders: join / leave ────────────────────────────────────────────
+
+    @PostMapping("/{id}/join")
+    public String joinSplitOrder(@PathVariable Long id, HttpServletRequest request) {
+        Optional<AppUser> user = currentUser(request);
+        if (user.isEmpty()) return "redirect:/";
+        orderService.joinSplitOrder(id, user.get());
+        return "redirect:/orders/" + id;
+    }
+
+    @PostMapping("/{id}/leave")
+    public String leaveSplitOrder(@PathVariable Long id, HttpServletRequest request) {
+        Optional<AppUser> user = currentUser(request);
+        if (user.isEmpty()) return "redirect:/";
+        orderService.leaveSplitOrder(id, user.get());
         return "redirect:/orders/" + id;
     }
 
@@ -545,6 +564,8 @@ public class OrderController {
 
         BigDecimal total = orderService.getTotalForOrder(order);
         BigDecimal tipPerPerson = orderService.getTipPerPerson(order);
+        // Tip share on item orders, cost share on split orders
+        BigDecimal perPersonCharge = orderService.getPerPersonCharge(order);
         BigDecimal myTotal = orderService.getTotalWithTipForUser(order, currentUser);
 
         Map<Long, Integer> itemQuantities = new java.util.HashMap<>();
@@ -559,7 +580,7 @@ public class OrderController {
         );
         Map<Long, java.math.BigDecimal> participantTotals = new java.util.HashMap<>();
         selections.forEach(sel ->
-                participantTotals.put(sel.getId(), sel.getSubtotal().add(tipPerPerson))
+                participantTotals.put(sel.getId(), sel.getSubtotal().add(perPersonCharge))
         );
         Map<Long, java.math.BigDecimal> allLineTotals = new java.util.HashMap<>();
         selections.forEach(sel ->
@@ -591,11 +612,11 @@ public class OrderController {
         );
 
         long unpaidCount = selections.stream()
-                .filter(s -> !s.getItems().isEmpty() && !s.isPaid() && !s.isMarkedPaidByOwner())
+                .filter(s -> orderService.isParticipant(s) && !s.isPaid() && !s.isMarkedPaidByOwner())
                 .count();
         BigDecimal unpaidAmount = selections.stream()
-                .filter(s -> !s.getItems().isEmpty() && !s.isPaid() && !s.isMarkedPaidByOwner())
-                .map(s -> s.getSubtotal().add(tipPerPerson))
+                .filter(s -> orderService.isParticipant(s) && !s.isPaid() && !s.isMarkedPaidByOwner())
+                .map(s -> s.getSubtotal().add(perPersonCharge))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         model.addAttribute("user", currentUser);
@@ -605,6 +626,8 @@ public class OrderController {
         model.addAttribute("total", total);
         model.addAttribute("tipPerPerson", tipPerPerson);
         model.addAttribute("myTotal", myTotal);
+        model.addAttribute("iParticipate", mySelection.map(orderService::isParticipant).orElse(false));
+        model.addAttribute("splitShare", orderService.getSplitShare(order));
         model.addAttribute("itemQuantities", itemQuantities);
         model.addAttribute("lineTotals", lineTotals);
         model.addAttribute("participantTotals", participantTotals);
@@ -746,8 +769,8 @@ public class OrderController {
         Optional<AppUser> user = currentUser(request);
         if (user.isEmpty()) return "redirect:/";
         orderService.findOrder(id).ifPresent(order -> {
-            if (order.getStatus() == FoodOrder.OrderStatus.OPEN ||
-                    order.getStatus() == FoodOrder.OrderStatus.ORDERED)
+            if (!order.isSplitOrder() && (order.getStatus() == FoodOrder.OrderStatus.OPEN ||
+                    order.getStatus() == FoodOrder.OrderStatus.ORDERED))
                 orderService.markAsOrdered(id, contactName);
         });
         return "redirect:/orders/" + id;

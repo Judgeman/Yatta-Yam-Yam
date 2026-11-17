@@ -82,6 +82,9 @@
                               th:text="${#temporals.format(order.orderDate,'dd MMM yyyy')}">Date</span>
                     </div>
                     <h5 class="fw-bold mb-1" th:text="${order.placeName}">Place</h5>
+                    <div th:if="${order.splitOrder}" class="mb-1">
+                        <span class="badge text-bg-light border"><i class="bi bi-people"></i> Cost split</span>
+                    </div>
                     <div class="text-muted small mb-1">
                         <i class="bi bi-person"></i>
                         Created by <span th:text="${order.creator.name}">Owner</span>
@@ -100,6 +103,12 @@
             <span th:text="${order.selections.size()}">0</span> participant(s)
         </span>
                         <span class="text-primary fw-semibold small">View →</span>
+                    </div>
+
+                    <!-- Open cost split: current (maximum) share per person -->
+                    <div th:if="${splitShareMap[order.id] != null}" class="text-muted small mb-1">
+                        <i class="bi bi-arrow-down-circle"></i>
+                        currently max. <strong th:text="'€' + ${#numbers.formatDecimal(splitShareMap[order.id],1,2)}"></strong> per person
                     </div>
 
                     <!-- Closed order: my payment status -->

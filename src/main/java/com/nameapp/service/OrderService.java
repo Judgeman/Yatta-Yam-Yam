@@ -66,7 +66,7 @@ public class OrderService {
 
     public FoodOrder createOrder(String placeName, LocalDate date, AppUser creator, Long itemListId,
                                  FoodOrder.Location location, String paypalLink, String weroLink,
-                                 String paidByName) {
+                                 String paidByName, FoodOrder.OrderType orderType, BigDecimal splitTotal) {
         FoodOrder order = new FoodOrder();
         order.setPlaceName(placeName);
         order.setOrderDate(date);
@@ -74,7 +74,10 @@ public class OrderService {
         order.setStatus(FoodOrder.OrderStatus.OPEN);
         order.setTipAmount(BigDecimal.ZERO);
         order.setLocation(location);
-        if (itemListId != null) {
+        order.setOrderType(orderType != null ? orderType : FoodOrder.OrderType.ITEMS);
+        if (order.isSplitOrder()) {
+            order.setSplitTotal(positiveOrNull(splitTotal));
+        } else if (itemListId != null) {
             itemListRepo.findById(itemListId).ifPresent(order::setItemList);
         }
         order.setPaypalLink(paypalLink != null && !paypalLink.isBlank() ? paypalLink.trim() : null);
@@ -86,11 +89,23 @@ public class OrderService {
 
     public void updateOrder(Long orderId, String placeName, LocalDate date, BigDecimal tip,
                             String paypalLink, String weroLink, FoodOrder.Location location,
-                            String paidByName) {
+                            String paidByName, BigDecimal splitTotal) {
         orderRepo.findById(orderId).ifPresent(order -> {
             order.setPlaceName(placeName);
             order.setOrderDate(date);
-            order.setTipAmount(tip != null ? tip : BigDecimal.ZERO);
+            if (order.isSplitOrder()) {
+                // No tip on split orders: everything is part of the total amount
+                order.setTipAmount(BigDecimal.ZERO);
+                BigDecimal newTotal = positiveOrNull(splitTotal);
+                // Once closed, the total can be changed but no longer removed
+                boolean closed = order.getStatus() == FoodOrder.OrderStatus.CLOSED
+                        || order.getStatus() == FoodOrder.OrderStatus.ARCHIVED;
+                if (newTotal != null || !closed) {
+                    order.setSplitTotal(newTotal);
+                }
+            } else {
+                order.setTipAmount(tip != null ? tip : BigDecimal.ZERO);
+            }
             order.setPaypalLink(paypalLink != null && !paypalLink.isBlank() ? paypalLink.trim() : null);
             order.setWeroLink(weroLink != null && !weroLink.isBlank() ? weroLink.trim() : null);
             order.setLocation(location);
@@ -119,6 +134,10 @@ public class OrderService {
             order.setOrderedByContact(null);
             orderRepo.save(order);
         });
+    }
+
+    private static BigDecimal positiveOrNull(BigDecimal amount) {
+        return amount != null && amount.compareTo(BigDecimal.ZERO) > 0 ? amount : null;
     }
 
     // ── Item Lists ────────────────────────────────────────────────────────────
@@ -232,6 +251,24 @@ public class OrderService {
         selectionRepo.save(selection);
     }
 
+    // ── Split orders: join / leave ────────────────────────────────────────────
+
+    public void joinSplitOrder(Long orderId, AppUser user) {
+        orderRepo.findById(orderId).ifPresent(order -> {
+            if (order.isSplitOrder() && order.getStatus() == FoodOrder.OrderStatus.OPEN) {
+                getOrCreateSelection(order, user);
+            }
+        });
+    }
+
+    public void leaveSplitOrder(Long orderId, AppUser user) {
+        orderRepo.findById(orderId).ifPresent(order -> {
+            if (order.isSplitOrder() && order.getStatus() == FoodOrder.OrderStatus.OPEN) {
+                selectionRepo.findByOrderAndUser(order, user).ifPresent(selectionRepo::delete);
+            }
+        });
+    }
+
     public void markSelfPaid(Long selectionId, UserOrderSelection.PaymentMethod method) {
         selectionRepo.findById(selectionId).ifPresent(sel -> {
             sel.setPaid(true);
@@ -285,10 +322,43 @@ public class OrderService {
         return order.getTipAmount().divide(BigDecimal.valueOf(count), 2, RoundingMode.HALF_UP);
     }
 
+    /**
+     * Whether a selection counts as a participant who has to pay: on item orders
+     * only with at least one item, on split orders everyone who joined.
+     */
+    public boolean isParticipant(UserOrderSelection selection) {
+        return selection.getOrder().isSplitOrder() || !selection.getItems().isEmpty();
+    }
+
+    /**
+     * Split orders: total amount divided by the number of participants, rounded up
+     * to the cent so the person who paid never ends up short. Null if no total is
+     * set yet or nobody has joined. While the order is open this is the maximum
+     * share — it drops with every person who joins.
+     */
+    public BigDecimal getSplitShare(FoodOrder order) {
+        if (!order.isSplitOrder() || order.getSplitTotal() == null) return null;
+        long count = selectionRepo.findByOrder(order).size();
+        if (count == 0) return null;
+        return order.getSplitTotal().divide(BigDecimal.valueOf(count), 2, RoundingMode.UP);
+    }
+
+    /**
+     * Amount every participant pays on top of their own items: the tip share on
+     * item orders, the cost share on split orders (which have no items).
+     */
+    public BigDecimal getPerPersonCharge(FoodOrder order) {
+        if (order.isSplitOrder()) {
+            BigDecimal share = getSplitShare(order);
+            return share != null ? share : BigDecimal.ZERO;
+        }
+        return getTipPerPerson(order);
+    }
+
     public BigDecimal getTotalWithTipForUser(FoodOrder order, AppUser user) {
         Optional<UserOrderSelection> sel = selectionRepo.findByOrderAndUser(order, user);
-        if (sel.isEmpty() || sel.get().getItems().isEmpty()) return BigDecimal.ZERO;
-        return sel.get().getSubtotal().add(getTipPerPerson(order));
+        if (sel.isEmpty() || !isParticipant(sel.get())) return BigDecimal.ZERO;
+        return sel.get().getSubtotal().add(getPerPersonCharge(order));
     }
 
     public void unpaySelf(Long selectionId) {

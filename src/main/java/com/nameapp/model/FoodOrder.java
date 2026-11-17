@@ -40,6 +40,16 @@ public class FoodOrder {
     @Column(columnDefinition = "VARCHAR(255)")
     private Location location;
 
+    // Kind of order; null on rows created before the type existed (= ITEMS)
+    @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "VARCHAR(255)")
+    private OrderType orderType;
+
+    // SPLIT orders only: total amount that is split equally among all participants.
+    // Optional while the order is open, required when closing it.
+    @Column(precision = 10, scale = 2)
+    private BigDecimal splitTotal;
+
     private String orderedByContact;
 
     // Person who advanced/fronted the money for this order (editable by the owner)
@@ -58,6 +68,13 @@ public class FoodOrder {
 
     public enum Location {
         KASSEL, FRANKFURT
+    }
+
+    public enum OrderType {
+        // Participants pick items from an item list
+        ITEMS,
+        // One person buys everything; the total is split equally among all who join
+        SPLIT
     }
 
     public FoodOrder() {
@@ -166,5 +183,25 @@ public class FoodOrder {
 
     public void setPaidByName(String paidByName) {
         this.paidByName = paidByName;
+    }
+
+    public OrderType getOrderType() {
+        return orderType != null ? orderType : OrderType.ITEMS;
+    }
+
+    public void setOrderType(OrderType orderType) {
+        this.orderType = orderType;
+    }
+
+    public boolean isSplitOrder() {
+        return getOrderType() == OrderType.SPLIT;
+    }
+
+    public BigDecimal getSplitTotal() {
+        return splitTotal;
+    }
+
+    public void setSplitTotal(BigDecimal splitTotal) {
+        this.splitTotal = splitTotal;
     }
 }

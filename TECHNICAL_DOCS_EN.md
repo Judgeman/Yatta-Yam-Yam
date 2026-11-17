@@ -31,6 +31,7 @@ Yatta-Yam-Yam is an internal web application for collective food ordering. Users
 - Reusable menu lists with a visibility toggle (hidden lists are excluded from new orders)
 - Location filter (Kassel / Frankfurt)
 - Per-person tip distribution
+- "Cost split" order type: one person buys everything and the total is split equally among everyone who joins
 - Tracking of who advanced/fronted the money (with a quick self-fill button)
 - Payment tracking (Cash, PayPal, Wero)
 - Contact book (name, location, address, phone numbers, image) with a quick lookup in the phone-order dialog
@@ -124,6 +125,8 @@ ItemList ──── 1:n ──────────────────
 | `weroLink`         | String           | Creator's Wero link                                  |
 | `orderedByContact` | String           | Name of the person who called in the order           |
 | `paidByName`       | String           | Name of the person who advanced/fronted the money (can be set when creating, closing and editing the order, pre-fillable with your own name via the "I'm paying" button) |
+| `orderType`        | OrderType        | ITEMS (pick items from a menu list) or SPLIT (cost split); `null` on older rows = ITEMS |
+| `splitTotal`       | BigDecimal       | SPLIT only: total amount split among all participants. Optional when creating, required to close |
 
 **OrderStatus lifecycle:**
 
@@ -260,6 +263,8 @@ Remember-Me is enabled with a token validity of one year.
 | POST   | `/orders/{id}/reopen`        | Reopen order (status → OPEN)                     |
 | POST   | `/orders/{id}/mark-ordered`  | Mark as called in (status → ORDERED)             |
 | POST   | `/orders/{id}/select`        | Save user's item selection                       |
+| POST   | `/orders/{id}/join`          | Cost split: join (status OPEN only)              |
+| POST   | `/orders/{id}/leave`         | Cost split: leave again (status OPEN only)       |
 
 ### Items & Menu Lists
 
@@ -336,6 +341,19 @@ tipPerPerson = tipAmount / numberOfParticipantsWithItems
 
 // Only the total entered (totalAmount, no tipAmount):
 tipAmount = totalAmount - sumOfAllSelections   // only if >= 0
+```
+
+### "Cost split" Order Type (SPLIT)
+
+One person buys everything; there is no menu list and there are no items. Users join via "I'm in" (a `UserOrderSelection` without `SelectionItem`s) and can leave again while the order is OPEN. Everyone who joined is a paying participant.
+
+- **When creating**, the total amount (`splitTotal`) is optional. Tip, menu list, phone order and the ORDERED status do not apply.
+- **While open**, participants only see the number of participants and join. Only the creator sees amounts: the total and the *current maximum* per person (it drops with every person who joins; also on their dashboard tile), and without a total a calculator: price per person × participants = total. The final amount and payment options appear for everyone only after closing.
+- **When closing**, the creator enters either the total (`splitTotal`) or a price per person (`splitPerPerson`); the other field is calculated. If only `splitPerPerson` arrives, the server sets `splitTotal = splitPerPerson × participants`. The order is not closed without an amount.
+
+```java
+splitShare = splitTotal / numberOfParticipants
+// Rounding: UP to 2 decimal places, so the person who paid never loses cents
 ```
 
 ---
