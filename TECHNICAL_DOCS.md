@@ -348,7 +348,7 @@ tipAmount = totalAmount - summe_aller_auswahlen   // nur wenn >= 0
 Eine Person kauft alles ein; es gibt keine Menüliste und keine Artikel. Nutzer melden sich per „I'm in" an (eine `UserOrderSelection` ohne `SelectionItem`s) und können sich, solange die Bestellung OPEN ist, wieder abmelden. Jede angemeldete Person ist zahlungspflichtiger Teilnehmer.
 
 - **Beim Anlegen** ist der Gesamtbetrag (`splitTotal`) optional. Trinkgeld, Menüliste, Telefonbestellung und der Status ORDERED entfallen.
-- **Solange offen** wird nur der *aktuelle Höchstbetrag* pro Person angezeigt (sinkt mit jeder weiteren Anmeldung). Ohne Gesamtbetrag gibt es einen Rechner: Preis pro Person × Teilnehmer = Gesamtbetrag. Endbetrag und Bezahlmöglichkeiten erscheinen erst nach dem Schließen.
+- **Solange offen** wird nur der *aktuelle Höchstbetrag* pro Person angezeigt (sinkt mit jeder weiteren Anmeldung). Ohne Gesamtbetrag sieht nur der Ersteller einen Rechner: Preis pro Person × Teilnehmer = Gesamtbetrag. Endbetrag und Bezahlmöglichkeiten erscheinen erst nach dem Schließen.
 - **Beim Schließen** ist der Gesamtbetrag Pflicht; ohne ihn wird nicht geschlossen.
 
 ```java

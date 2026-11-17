@@ -148,7 +148,8 @@
                     </p>
 
                     <!-- Open, no total yet: work out the total for a price per person -->
-                    <div th:if="${!closed and order.splitTotal == null}" class="split-calculator mb-3">
+                    <!-- Only the creator sees the calculator; everyone else just joins -->
+                    <div th:if="${!closed and order.splitTotal == null and isOwner}" class="split-calculator mb-3">
                         <label for="pricePerPerson" class="form-label small fw-semibold mb-1">
                             <i class="bi bi-calculator"></i> No total amount yet — try a price per person:
                         </label>
