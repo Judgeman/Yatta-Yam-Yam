@@ -1,6 +1,6 @@
 # Yatta-Yam-Yam – Technical Documentation
 
-**Version:** 1.8.2  
+**Version:** 1.8.3  
 **Date:** October 2026
 
 ---
@@ -352,6 +352,7 @@ Supported payment methods (`PaymentMethod` enum):
 **Dashboard display:**
 - **For the creator:** Red alert showing number and total amount of outstanding payments
 - **For other users:** Grey info box showing open amounts for the order
+- **For everyone:** If a payer (`paidByName`) is set, the tile shows "Paid by <name>" below the creator
 
 ---
 
@@ -411,7 +412,7 @@ Application available at: `http://localhost:38443`
 
 ```bash
 mvn package
-java -DYATTA_YAM_YAM_PASSWORD=yourPassword -jar target/yatta-yam-yam-1.8.2.jar
+java -DYATTA_YAM_YAM_PASSWORD=yourPassword -jar target/yatta-yam-yam-1.8.3.jar
 ```
 
 ---

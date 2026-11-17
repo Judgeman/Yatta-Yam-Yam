@@ -1,6 +1,6 @@
 # Yatta-Yam-Yam – Technische Dokumentation
 
-**Version:** 1.8.2  
+**Version:** 1.8.3  
 **Stand:** Oktober 2026
 
 ---
@@ -352,6 +352,7 @@ Unterstützte Zahlungsmethoden (`PaymentMethod`-Enum):
 **Dashboard-Anzeige:**
 - **Für den Ersteller:** Rote Warnung mit Anzahl und Summe offener Zahlungen
 - **Für andere Nutzer:** Graue Info-Box mit offenen Beträgen in der Bestellung
+- **Für alle:** Ist ein Bezahler (`paidByName`) eingetragen, zeigt die Kachel „Paid by <Name>“ unter dem Ersteller
 
 ---
 
@@ -411,7 +412,7 @@ Anwendung erreichbar unter: `http://localhost:38443`
 
 ```bash
 mvn package
-java -DYATTA_YAM_YAM_PASSWORD=deinPasswort -jar target/yatta-yam-yam-1.8.2.jar
+java -DYATTA_YAM_YAM_PASSWORD=deinPasswort -jar target/yatta-yam-yam-1.8.3.jar
 ```
 
 ---

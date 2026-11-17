@@ -86,6 +86,10 @@
                         <i class="bi bi-person"></i>
                         Created by <span th:text="${order.creator.name}">Owner</span>
                     </div>
+                    <div th:if="${order.paidByName != null}" class="text-muted small mb-1">
+                        <i class="bi bi-cash-coin"></i>
+                        Paid by <span th:text="${order.paidByName}">Payer</span>
+                    </div>
                     <div th:if="${order.location != null}" class="text-muted small mb-2">
                         <i class="bi bi-geo-alt"></i>
                         <span th:text="${#strings.capitalize(#strings.toLowerCase(order.location.name()))}">Location</span>
