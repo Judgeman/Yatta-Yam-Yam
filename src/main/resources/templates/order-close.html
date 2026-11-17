@@ -32,19 +32,40 @@
 
         <form th:action="@{'/orders/' + ${order.id} + '/close'}" method="post">
 
-            <!-- Tip -->
+            <!-- Tip / total paid -->
             <div class="mb-4">
-                <label class="form-label fw-semibold">
-                    Tip Amount (€)
-                    <span class="text-muted fw-normal small">– split equally per person</span>
-                </label>
-                <div class="input-group">
-                    <span class="input-group-text">€</span>
-                    <input type="number" name="tipAmount" class="form-control form-control-lg"
-                           th:value="${order.tipAmount != null and order.tipAmount gt 0} ? ${order.tipAmount} : ''"
-                           step="0.01" min="0" placeholder="0.00"/>
+                <div class="d-flex justify-content-between align-items-baseline mb-2">
+                    <span class="form-label fw-semibold mb-0">Tip</span>
+                    <span class="text-muted small">
+                        Order sum:
+                        <strong th:text="'€' + ${#numbers.formatDecimal(orderSubtotal,1,2)}">€0.00</strong>
+                    </span>
                 </div>
-                <small class="text-muted">Leave empty if no tip was given.</small>
+                <div class="row g-2">
+                    <div class="col-sm-6">
+                        <label for="totalAmount" class="form-label small text-muted mb-1">Total paid (€)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">€</span>
+                            <input type="number" name="totalAmount" id="totalAmount" class="form-control form-control-lg"
+                                   th:value="${order.tipAmount != null and order.tipAmount gt 0} ? ${orderSubtotal.add(order.tipAmount)} : ''"
+                                   th:min="${orderSubtotal}" th:data-subtotal="${orderSubtotal}"
+                                   step="0.01" placeholder="0.00"/>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <label for="tipAmount" class="form-label small text-muted mb-1">Tip (€)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">€</span>
+                            <input type="number" name="tipAmount" id="tipAmount" class="form-control form-control-lg"
+                                   th:value="${order.tipAmount != null and order.tipAmount gt 0} ? ${order.tipAmount} : ''"
+                                   step="0.01" min="0" placeholder="0.00"/>
+                        </div>
+                    </div>
+                </div>
+                <small class="text-muted d-block mt-1">
+                    Enter either the total you paid or the tip — the other is calculated.
+                    The tip is split equally per person. Leave both empty if no tip was given.
+                </small>
             </div>
 
             <hr class="my-4"/>
@@ -109,6 +130,25 @@
     document.getElementById('iAmPayingBtn').addEventListener('click', function () {
         document.getElementById('paidByName').value = this.dataset.username;
     });
+
+    // Keep "Total paid" and "Tip" in sync: total = order sum + tip (calculated in cents)
+    (function () {
+        const totalInput = document.getElementById('totalAmount');
+        const tipInput = document.getElementById('tipAmount');
+        const subtotalCents = Math.round(parseFloat(totalInput.dataset.subtotal) * 100);
+        const toCents = v => Math.round(parseFloat(v) * 100);
+        const fmt = cents => (cents / 100).toFixed(2);
+
+        totalInput.addEventListener('input', function () {
+            if (totalInput.value === '') { tipInput.value = ''; return; }
+            const tipCents = toCents(totalInput.value) - subtotalCents;
+            tipInput.value = tipCents >= 0 ? fmt(tipCents) : '';
+        });
+        tipInput.addEventListener('input', function () {
+            if (tipInput.value === '') { totalInput.value = ''; return; }
+            totalInput.value = fmt(subtotalCents + toCents(tipInput.value));
+        });
+    })();
 </script>
 </body>
 </html>
