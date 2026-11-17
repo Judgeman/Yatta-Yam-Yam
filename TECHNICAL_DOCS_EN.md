@@ -1,6 +1,6 @@
 # Yatta-Yam-Yam – Technical Documentation
 
-**Version:** 1.8.2  
+**Version:** 1.9.0  
 **Date:** October 2026
 
 ---
@@ -31,6 +31,7 @@ Yatta-Yam-Yam is an internal web application for collective food ordering. Users
 - Reusable menu lists with a visibility toggle (hidden lists are excluded from new orders)
 - Location filter (Kassel / Frankfurt)
 - Per-person tip distribution
+- "Cost split" order type: one person buys everything and the total is split equally among everyone who joins
 - Tracking of who advanced/fronted the money (with a quick self-fill button)
 - Payment tracking (Cash, PayPal, Wero)
 - Contact book (name, location, address, phone numbers, image) with a quick lookup in the phone-order dialog
@@ -124,6 +125,8 @@ ItemList ──── 1:n ──────────────────
 | `weroLink`         | String           | Creator's Wero link                                  |
 | `orderedByContact` | String           | Name of the person who called in the order           |
 | `paidByName`       | String           | Name of the person who advanced/fronted the money (can be set when creating, closing and editing the order, pre-fillable with your own name via the "I'm paying" button) |
+| `orderType`        | OrderType        | ITEMS (pick items from a menu list) or SPLIT (cost split); `null` on older rows = ITEMS |
+| `splitTotal`       | BigDecimal       | SPLIT only: total amount split among all participants. Optional when creating, required to close |
 
 **OrderStatus lifecycle:**
 
@@ -260,6 +263,8 @@ Remember-Me is enabled with a token validity of one year.
 | POST   | `/orders/{id}/reopen`        | Reopen order (status → OPEN)                     |
 | POST   | `/orders/{id}/mark-ordered`  | Mark as called in (status → ORDERED)             |
 | POST   | `/orders/{id}/select`        | Save user's item selection                       |
+| POST   | `/orders/{id}/join`          | Cost split: join (status OPEN only)              |
+| POST   | `/orders/{id}/leave`         | Cost split: leave again (status OPEN only)       |
 
 ### Items & Menu Lists
 
@@ -333,6 +338,19 @@ ARCHIVED
 ```java
 tipPerPerson = tipAmount / numberOfParticipantsWithItems
 // Rounding: HALF_UP to 2 decimal places
+```
+
+### "Cost split" Order Type (SPLIT)
+
+One person buys everything; there is no menu list and there are no items. Users join via "I'm in" (a `UserOrderSelection` without `SelectionItem`s) and can leave again while the order is OPEN. Everyone who joined is a paying participant.
+
+- **When creating**, the total amount (`splitTotal`) is optional. Tip, menu list, phone order and the ORDERED status do not apply.
+- **While open**, only the *current maximum* per person is shown (it drops with every person who joins). Without a total there is a calculator: price per person × participants = total. The final amount and payment options only appear after closing.
+- **When closing**, the total amount is required; the order is not closed without it.
+
+```java
+splitShare = splitTotal / numberOfParticipants
+// Rounding: UP to 2 decimal places, so the person who paid never loses cents
 ```
 
 ---
@@ -411,7 +429,7 @@ Application available at: `http://localhost:38443`
 
 ```bash
 mvn package
-java -DYATTA_YAM_YAM_PASSWORD=yourPassword -jar target/yatta-yam-yam-1.8.2.jar
+java -DYATTA_YAM_YAM_PASSWORD=yourPassword -jar target/yatta-yam-yam-1.9.0.jar
 ```
 
 ---

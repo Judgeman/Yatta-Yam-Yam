@@ -1,6 +1,6 @@
 # Yatta-Yam-Yam – Technische Dokumentation
 
-**Version:** 1.8.2  
+**Version:** 1.9.0  
 **Stand:** Oktober 2026
 
 ---
@@ -31,6 +31,7 @@ Yatta-Yam-Yam ist eine interne Web-App zur kollektiven Essensbestellung. Nutzer 
 - Wiederverwendbare Menülisten mit Sichtbarkeitsschalter (ausgeblendete Listen erscheinen nicht bei neuen Bestellungen)
 - Standortfilter (Kassel / Frankfurt)
 - Trinkgeldverteilung pro Kopf
+- Bestellart „Cost split": eine Person kauft alles ein, der Gesamtbetrag wird gleichmäßig auf alle Angemeldeten verteilt
 - Erfassung, wer das Geld ausgelegt hat (mit Schnellauswahl per Knopf)
 - Zahlungsverfolgung (Bar, PayPal, Wero)
 - Kontaktbuch (Name, Standort, Adresse, Telefonnummern, Bild) mit Schnellnachschlagen im Telefonbestell-Dialog
@@ -124,6 +125,8 @@ ItemList ──── 1:n ──────────────────
 | `weroLink`         | String           | Wero-Link des Erstellers                             |
 | `orderedByContact` | String           | Name der Person, die telefonisch bestellt hat        |
 | `paidByName`       | String           | Name der Person, die das Geld ausgelegt hat (beim Anlegen, Schließen und Bearbeiten angebbar, per Knopf "I'm paying" mit dem eigenen Namen vorbelegbar) |
+| `orderType`        | OrderType        | ITEMS (Artikelauswahl aus Menüliste) oder SPLIT (Kostenaufteilung); `null` bei Altbestand = ITEMS |
+| `splitTotal`       | BigDecimal       | Nur SPLIT: Gesamtbetrag, der auf alle Teilnehmer aufgeteilt wird. Beim Anlegen optional, zum Schließen Pflicht |
 
 **OrderStatus-Lebenszyklus:**
 
@@ -260,6 +263,8 @@ Remember-Me ist aktiviert mit einer Token-Gültigkeit von einem Jahr.
 | POST    | `/orders/{id}/reopen`                       | Bestellung wiedereröffnen (Status → OPEN) |
 | POST    | `/orders/{id}/mark-ordered`                 | Als telefonisch bestellt markieren (Status → ORDERED) |
 | POST    | `/orders/{id}/select`                       | Artikelauswahl des Nutzers speichern      |
+| POST    | `/orders/{id}/join`                         | Cost split: teilnehmen (nur Status OPEN)  |
+| POST    | `/orders/{id}/leave`                        | Cost split: wieder abmelden (nur Status OPEN) |
 
 ### Artikel & Menülisten
 
@@ -333,6 +338,19 @@ ARCHIVED
 ```java
 tipPerPerson = tipAmount / anzahl_teilnehmer_mit_items
 // Rundung: HALF_UP auf 2 Nachkommastellen
+```
+
+### Bestellart „Cost split" (SPLIT)
+
+Eine Person kauft alles ein; es gibt keine Menüliste und keine Artikel. Nutzer melden sich per „I'm in" an (eine `UserOrderSelection` ohne `SelectionItem`s) und können sich, solange die Bestellung OPEN ist, wieder abmelden. Jede angemeldete Person ist zahlungspflichtiger Teilnehmer.
+
+- **Beim Anlegen** ist der Gesamtbetrag (`splitTotal`) optional. Trinkgeld, Menüliste, Telefonbestellung und der Status ORDERED entfallen.
+- **Solange offen** wird nur der *aktuelle Höchstbetrag* pro Person angezeigt (sinkt mit jeder weiteren Anmeldung). Ohne Gesamtbetrag gibt es einen Rechner: Preis pro Person × Teilnehmer = Gesamtbetrag. Endbetrag und Bezahlmöglichkeiten erscheinen erst nach dem Schließen.
+- **Beim Schließen** ist der Gesamtbetrag Pflicht; ohne ihn wird nicht geschlossen.
+
+```java
+splitShare = splitTotal / anzahl_teilnehmer
+// Rundung: UP auf 2 Nachkommastellen, damit die auslegende Person keine Cents verliert
 ```
 
 ---
@@ -411,7 +429,7 @@ Anwendung erreichbar unter: `http://localhost:38443`
 
 ```bash
 mvn package
-java -DYATTA_YAM_YAM_PASSWORD=deinPasswort -jar target/yatta-yam-yam-1.8.2.jar
+java -DYATTA_YAM_YAM_PASSWORD=deinPasswort -jar target/yatta-yam-yam-1.9.0.jar
 ```
 
 ---

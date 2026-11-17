@@ -203,6 +203,32 @@
     border-bottom: none;
 }
 
+/* ── Cost split ── */
+.split-stat {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 10px 6px;
+    height: 100%;
+}
+
+.split-stat-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.split-stat-label {
+    font-size: 11px;
+    color: #6c757d;
+}
+
+.split-calculator {
+    background: #f8f9fa;
+    border: 1px dashed #ced4da;
+    border-radius: 12px;
+    padding: 12px;
+}
+
 /* ── Item list option ── */
 .item-list-option {
     border: 1px solid #dee2e6;

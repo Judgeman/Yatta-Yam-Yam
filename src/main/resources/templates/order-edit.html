@@ -63,13 +63,32 @@
                 <small class="text-muted">Shown to others so they know who to pay back.</small>
             </div>
 
-            <div class="mb-4">
+            <div class="mb-4" th:if="${!order.splitOrder}">
                 <label class="form-label fw-semibold">Tip Amount (€) <span class="text-muted fw-normal small">– split equally per person</span></label>
                 <div class="input-group">
                     <span class="input-group-text">€</span>
                     <input type="number" name="tipAmount" class="form-control form-control-lg"
                            th:value="${order.tipAmount}" step="0.01" min="0" placeholder="0.00"/>
                 </div>
+            </div>
+
+            <!-- Cost split: total amount (optional while open, required once closed) -->
+            <div class="mb-4" th:if="${order.splitOrder}"
+                 th:with="closed=${order.status.name() == 'CLOSED' or order.status.name() == 'ARCHIVED'}">
+                <label class="form-label fw-semibold">
+                    Total Amount (€)
+                    <span class="text-muted fw-normal small"
+                          th:text="${closed} ? '– split equally per person' : '(optional)'">(optional)</span>
+                </label>
+                <div class="input-group">
+                    <span class="input-group-text">€</span>
+                    <input type="number" name="splitTotal" class="form-control form-control-lg"
+                           th:value="${order.splitTotal}" th:required="${closed}"
+                           step="0.01" min="0.01" placeholder="0.00"/>
+                </div>
+                <small class="text-muted" th:unless="${closed}">
+                    Leave empty if you don't know it yet — you enter it at the latest when closing the order.
+                </small>
             </div>
 
             <div class="mb-3">

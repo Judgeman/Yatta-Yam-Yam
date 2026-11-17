@@ -32,8 +32,31 @@
 
         <form th:action="@{'/orders/' + ${order.id} + '/close'}" method="post">
 
+            <!-- Cost split: total amount, required to close -->
+            <div class="mb-4" th:if="${order.splitOrder}">
+                <div th:if="${missingTotal}" class="alert alert-danger py-2 small">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    Please enter the total amount — it's needed to work out what everyone pays.
+                </div>
+                <label class="form-label fw-semibold">
+                    Total Amount (€)
+                    <span class="text-muted fw-normal small">– split equally per person</span>
+                </label>
+                <div class="input-group">
+                    <span class="input-group-text">€</span>
+                    <input type="number" name="splitTotal" id="splitTotal" class="form-control form-control-lg"
+                           th:value="${order.splitTotal}"
+                           th:data-participants="${participantCount}"
+                           step="0.01" min="0.01" placeholder="0.00" required/>
+                </div>
+                <small class="text-muted">
+                    <span th:text="${participantCount} + ' participant(s)'">0 participant(s)</span>
+                    <span id="splitSharePreview"></span>
+                </small>
+            </div>
+
             <!-- Tip -->
-            <div class="mb-4">
+            <div class="mb-4" th:if="${!order.splitOrder}">
                 <label class="form-label fw-semibold">
                     Tip Amount (€)
                     <span class="text-muted fw-normal small">– split equally per person</span>
@@ -109,6 +132,24 @@
     document.getElementById('iAmPayingBtn').addEventListener('click', function () {
         document.getElementById('paidByName').value = this.dataset.username;
     });
+
+    // Cost split: live preview of each person's share (rounded up to the cent)
+    const splitTotalInput = document.getElementById('splitTotal');
+    if (splitTotalInput) {
+        const updateSharePreview = function () {
+            const count = parseInt(splitTotalInput.dataset.participants, 10) || 0;
+            const total = parseFloat(splitTotalInput.value);
+            const preview = document.getElementById('splitSharePreview');
+            if (count > 0 && total > 0) {
+                const share = Math.ceil(Math.round(total * 100) / count) / 100;
+                preview.textContent = '→ €' + share.toFixed(2) + ' per person';
+            } else {
+                preview.textContent = '';
+            }
+        };
+        splitTotalInput.addEventListener('input', updateSharePreview);
+        updateSharePreview();
+    }
 </script>
 </body>
 </html>
