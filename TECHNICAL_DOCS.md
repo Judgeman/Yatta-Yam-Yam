@@ -1,6 +1,6 @@
 # Yatta-Yam-Yam – Technische Dokumentation
 
-**Version:** 1.8.3  
+**Version:** 1.9.0  
 **Stand:** Oktober 2026
 
 ---
@@ -255,7 +255,7 @@ Remember-Me ist aktiviert mit einer Token-Gültigkeit von einem Jahr.
 | GET     | `/orders/{id}/edit`                         | Formular: Bestellung bearbeiten (Ersteller) |
 | POST    | `/orders/{id}/edit`                         | Bestellung aktualisieren                  |
 | GET     | `/orders/{id}/close`                        | Formular: Bestellung schließen            |
-| POST    | `/orders/{id}/close`                        | Bestellung schließen (Status → CLOSED)    |
+| POST    | `/orders/{id}/close`                        | Bestellung schließen (Status → CLOSED); `tipAmount` oder `totalAmount` |
 | POST    | `/orders/{id}/archive`                      | Bestellung archivieren (Status → ARCHIVED)|
 | POST    | `/orders/{id}/reopen`                       | Bestellung wiedereröffnen (Status → OPEN) |
 | POST    | `/orders/{id}/mark-ordered`                 | Als telefonisch bestellt markieren (Status → ORDERED) |
@@ -324,7 +324,7 @@ ARCHIVED
    - Beim direkten Anlegen einer neuen Liste steuert eine Checkbox „Diese Artikelliste nächstes Mal verwenden" (vorausgewählt, aber abwählbar), ob die Liste für zukünftige Bestellungen sichtbar bleibt.
 2. **Teilnehmer wählen Speisen** — Jeder Nutzer wählt Menüpositionen mit Mengen aus. Die Auswahl wird als `UserOrderSelection` mit `SelectionItem`-Einträgen gespeichert.
 3. **Als bestellt markieren** (ORDERED) — Ersteller gibt an, wer telefonisch bestellt hat. Nutzer sehen eine Warnung, wenn sie danach noch ihre Auswahl ändern.
-4. **Bestellung schließen** (CLOSED) — Ersteller gibt optionales Gesamttrinkgeld ein und kann „Paid By" sowie PayPal- und Wero-Link ergänzen oder korrigieren. Das Trinkgeld wird gleichmäßig auf alle Teilnehmer mit mindestens einem Artikel aufgeteilt.
+4. **Bestellung schließen** (CLOSED) — Ersteller gibt optional das Gesamttrinkgeld **oder** den insgesamt bezahlten Betrag ein (das jeweils andere Feld wird berechnet: Trinkgeld = Gesamtbetrag − Bestellsumme) und kann „Paid By" sowie PayPal- und Wero-Link ergänzen oder korrigieren. Das Trinkgeld wird gleichmäßig auf alle Teilnehmer mit mindestens einem Artikel aufgeteilt.
 5. **Zahlungen verwalten** — Nutzer markieren sich selbst als bezahlt; Ersteller kann Zahlungen bestätigen oder widerrufen.
 6. **Archivieren** (ARCHIVED) — Bestellung verschwindet aus dem Dashboard und landet im Archiv.
 
@@ -333,6 +333,9 @@ ARCHIVED
 ```java
 tipPerPerson = tipAmount / anzahl_teilnehmer_mit_items
 // Rundung: HALF_UP auf 2 Nachkommastellen
+
+// Nur Gesamtbetrag angegeben (totalAmount, ohne tipAmount):
+tipAmount = totalAmount - summe_aller_auswahlen   // nur wenn >= 0
 ```
 
 ---
@@ -412,7 +415,7 @@ Anwendung erreichbar unter: `http://localhost:38443`
 
 ```bash
 mvn package
-java -DYATTA_YAM_YAM_PASSWORD=deinPasswort -jar target/yatta-yam-yam-1.8.3.jar
+java -DYATTA_YAM_YAM_PASSWORD=deinPasswort -jar target/yatta-yam-yam-1.9.0.jar
 ```
 
 ---

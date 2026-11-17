@@ -331,12 +331,14 @@ public class OrderController {
 
         model.addAttribute("user", user.get());
         model.addAttribute("order", order);
+        model.addAttribute("orderSubtotal", orderService.getTotalForOrder(order));
         return "order-close";
     }
 
     @PostMapping("/{id}/close")
     public String closeOrder(@PathVariable Long id,
                              @RequestParam(required = false) BigDecimal tipAmount,
+                             @RequestParam(required = false) BigDecimal totalAmount,
                              @RequestParam(required = false) String paypalLink,
                              @RequestParam(required = false) String weroLink,
                              @RequestParam(required = false) String paidByName,
@@ -344,9 +346,15 @@ public class OrderController {
         Optional<AppUser> user = currentUser(request);
         orderService.findOrder(id).ifPresent(order -> {
             if (user.isPresent() && order.getCreator().getId().equals(user.get().getId())) {
+                // Only the total paid was entered: the tip is the difference to the order sum
+                BigDecimal tip = tipAmount;
+                if (tip == null && totalAmount != null) {
+                    BigDecimal diff = totalAmount.subtract(orderService.getTotalForOrder(order));
+                    if (diff.signum() >= 0) tip = diff;
+                }
                 // Save tip, links and payer before closing
                 orderService.updateOrder(order.getId(), order.getPlaceName(), order.getOrderDate(),
-                        tipAmount, paypalLink, weroLink, order.getLocation(), paidByName);
+                        tip, paypalLink, weroLink, order.getLocation(), paidByName);
                 orderService.closeOrder(id);
             }
         });
