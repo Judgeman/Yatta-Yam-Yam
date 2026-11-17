@@ -32,26 +32,42 @@
 
         <form th:action="@{'/orders/' + ${order.id} + '/close'}" method="post">
 
-            <!-- Cost split: total amount, required to close -->
+            <!-- Cost split: total amount or price per person, one is required to close -->
             <div class="mb-4" th:if="${order.splitOrder}">
                 <div th:if="${missingTotal}" class="alert alert-danger py-2 small">
                     <i class="bi bi-exclamation-triangle"></i>
-                    Please enter the total amount — it's needed to work out what everyone pays.
+                    Please enter the total amount or a price per person — it's needed to work out what everyone pays.
                 </div>
-                <label class="form-label fw-semibold">
-                    Total Amount (€)
-                    <span class="text-muted fw-normal small">– split equally per person</span>
-                </label>
-                <div class="input-group">
-                    <span class="input-group-text">€</span>
-                    <input type="number" name="splitTotal" id="splitTotal" class="form-control form-control-lg"
-                           th:value="${order.splitTotal}"
-                           th:data-participants="${participantCount}"
-                           step="0.01" min="0.01" placeholder="0.00" required/>
+                <div class="d-flex justify-content-between align-items-baseline mb-2">
+                    <span class="form-label fw-semibold mb-0">Amount</span>
+                    <span class="text-muted small"
+                          th:text="${participantCount} + ' participant(s)'">0 participant(s)</span>
                 </div>
-                <small class="text-muted">
-                    <span th:text="${participantCount} + ' participant(s)'">0 participant(s)</span>
-                    <span id="splitSharePreview"></span>
+                <div class="row g-2">
+                    <div class="col-sm-6">
+                        <label for="splitTotal" class="form-label small text-muted mb-1">Total amount (€)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">€</span>
+                            <input type="number" name="splitTotal" id="splitTotal" class="form-control form-control-lg"
+                                   th:value="${order.splitTotal}"
+                                   th:data-participants="${participantCount}"
+                                   step="0.01" min="0.01" placeholder="0.00" required/>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <label for="splitPerPerson" class="form-label small text-muted mb-1">Per person (€)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">€</span>
+                            <input type="number" name="splitPerPerson" id="splitPerPerson" class="form-control form-control-lg"
+                                   th:value="${currentShare}"
+                                   th:disabled="${participantCount == 0}"
+                                   step="0.01" min="0.01" placeholder="0.00"/>
+                        </div>
+                    </div>
+                </div>
+                <small class="text-muted d-block mt-1">
+                    Enter either the total or the price per person — the other is calculated.
+                    Shares are rounded up to the cent.
                 </small>
             </div>
 
@@ -154,23 +170,25 @@
         document.getElementById('paidByName').value = this.dataset.username;
     });
 
-    // Cost split: live preview of each person's share (rounded up to the cent)
-    const splitTotalInput = document.getElementById('splitTotal');
-    if (splitTotalInput) {
-        const updateSharePreview = function () {
-            const count = parseInt(splitTotalInput.dataset.participants, 10) || 0;
-            const total = parseFloat(splitTotalInput.value);
-            const preview = document.getElementById('splitSharePreview');
-            if (count > 0 && total > 0) {
-                const share = Math.ceil(Math.round(total * 100) / count) / 100;
-                preview.textContent = '→ €' + share.toFixed(2) + ' per person';
-            } else {
-                preview.textContent = '';
-            }
-        };
-        splitTotalInput.addEventListener('input', updateSharePreview);
-        updateSharePreview();
-    }
+    // Cost split: keep "Total amount" and "Per person" in sync (calculated in cents).
+    // Total → per person is rounded up to the cent, like the server does.
+    (function () {
+        const totalInput = document.getElementById('splitTotal');
+        const perPersonInput = document.getElementById('splitPerPerson');
+        if (!totalInput || !perPersonInput) return; // item order: no cost-split fields
+        const count = parseInt(totalInput.dataset.participants, 10) || 0;
+        const toCents = v => Math.round(parseFloat(v) * 100);
+        const fmt = cents => (cents / 100).toFixed(2);
+
+        totalInput.addEventListener('input', function () {
+            const totalCents = toCents(totalInput.value);
+            perPersonInput.value = count > 0 && totalCents > 0 ? fmt(Math.ceil(totalCents / count)) : '';
+        });
+        perPersonInput.addEventListener('input', function () {
+            const perPersonCents = toCents(perPersonInput.value);
+            totalInput.value = perPersonCents > 0 ? fmt(perPersonCents * count) : '';
+        });
+    })();
 
     // Keep "Total paid" and "Tip" in sync: total = order sum + tip (calculated in cents)
     (function () {

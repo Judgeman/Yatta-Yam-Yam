@@ -348,8 +348,8 @@ tipAmount = totalAmount - sumOfAllSelections   // only if >= 0
 One person buys everything; there is no menu list and there are no items. Users join via "I'm in" (a `UserOrderSelection` without `SelectionItem`s) and can leave again while the order is OPEN. Everyone who joined is a paying participant.
 
 - **When creating**, the total amount (`splitTotal`) is optional. Tip, menu list, phone order and the ORDERED status do not apply.
-- **While open**, only the *current maximum* per person is shown (it drops with every person who joins). Without a total only the creator sees a calculator: price per person × participants = total. The final amount and payment options only appear after closing.
-- **When closing**, the total amount is required; the order is not closed without it.
+- **While open**, participants only see the number of participants and join. Only the creator sees amounts: the total and the *current maximum* per person (it drops with every person who joins; also on their dashboard tile), and without a total a calculator: price per person × participants = total. The final amount and payment options appear for everyone only after closing.
+- **When closing**, the creator enters either the total (`splitTotal`) or a price per person (`splitPerPerson`); the other field is calculated. If only `splitPerPerson` arrives, the server sets `splitTotal = splitPerPerson × participants`. The order is not closed without an amount.
 
 ```java
 splitShare = splitTotal / numberOfParticipants

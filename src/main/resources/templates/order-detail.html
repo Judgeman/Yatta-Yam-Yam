@@ -103,9 +103,11 @@
         <!-- LEFT: Item selection -->
         <div class="col-lg-7">
 
-            <!-- Cost split: join / leave, current share, price-per-person calculator -->
+            <!-- Cost split: join / leave, current share, price-per-person calculator.
+                 While open, amounts are shown to the creator only; everyone else just joins. -->
             <div th:if="${order.splitOrder}" class="card shadow-sm mb-3"
-                 th:with="closed=${order.status.name() == 'CLOSED' or order.status.name() == 'ARCHIVED'}">
+                 th:with="closed=${order.status.name() == 'CLOSED' or order.status.name() == 'ARCHIVED'},
+                          showAmounts=${closed or isOwner}">
                 <div class="card-header fw-semibold">
                     <i class="bi bi-people"></i> Cost split
                 </div>
@@ -116,20 +118,20 @@
                     </p>
 
                     <div class="row g-2 text-center mb-3">
-                        <div class="col-4">
+                        <div th:class="${showAmounts} ? 'col-4' : 'col-12'">
                             <div class="split-stat">
                                 <div class="split-stat-value" th:text="${selections.size()}">0</div>
                                 <div class="split-stat-label">participant(s)</div>
                             </div>
                         </div>
-                        <div class="col-4">
+                        <div class="col-4" th:if="${showAmounts}">
                             <div class="split-stat">
                                 <div class="split-stat-value"
                                      th:text="${order.splitTotal != null} ? '€' + ${#numbers.formatDecimal(order.splitTotal,1,2)} : '–'">–</div>
                                 <div class="split-stat-label">total amount</div>
                             </div>
                         </div>
-                        <div class="col-4">
+                        <div class="col-4" th:if="${showAmounts}">
                             <div class="split-stat">
                                 <div class="split-stat-value text-primary"
                                      th:text="${splitShare != null} ? '€' + ${#numbers.formatDecimal(splitShare,1,2)} : '–'">–</div>
@@ -140,11 +142,17 @@
                     </div>
 
                     <!-- Open, total known: current share is only an upper bound -->
-                    <p th:if="${!closed and order.splitTotal != null}" class="small text-muted mb-3">
+                    <p th:if="${!closed and order.splitTotal != null and isOwner}" class="small text-muted mb-3">
                         <i class="bi bi-arrow-down-circle"></i>
                         <span th:if="${splitShare != null}">This is the current maximum — it drops with every person who joins.</span>
                         <span th:if="${splitShare == null}">Nobody has joined yet.</span>
                         The final amount and payment are shown once the order is closed.
+                    </p>
+
+                    <!-- Open, participant view: no amounts yet -->
+                    <p th:if="${!closed and !isOwner}" class="small text-muted mb-3">
+                        <i class="bi bi-info-circle"></i>
+                        Just join — your share is shown once the order is closed.
                     </p>
 
                     <!-- Open, no total yet: work out the total for a price per person -->
@@ -412,7 +420,7 @@
                             <span class="text-success fw-semibold"><i class="bi bi-check-circle-fill"></i> Joined</span>
                         </div>
                         <th:block th:if="${!closed}">
-                            <div th:if="${splitShare != null}" class="d-flex justify-content-between small">
+                            <div th:if="${splitShare != null and isOwner}" class="d-flex justify-content-between small">
                                 <span class="text-muted">Currently at most</span>
                                 <span class="fw-semibold"
                                       th:text="'€' + ${#numbers.formatDecimal(splitShare,1,2)}">€0.00</span>
@@ -570,7 +578,7 @@
                 </div>
 
                 <!-- Grand total (cost split) -->
-                <div th:if="${order.splitOrder and !selections.empty}" class="border-top mt-3 pt-3">
+                <div th:if="${order.splitOrder and !selections.empty and (showPayment or isOwner)}" class="border-top mt-3 pt-3">
                     <div class="d-flex justify-content-between small text-muted mb-1">
                         <span>Total amount</span>
                         <span th:text="${order.splitTotal != null} ? '€' + ${#numbers.formatDecimal(order.splitTotal,1,2)} : 'not set yet'">–</span>

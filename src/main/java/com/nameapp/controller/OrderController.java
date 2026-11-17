@@ -86,11 +86,13 @@ public class OrderController {
         Map<Long, java.math.BigDecimal> unpaidAmountForOwner = new java.util.HashMap<>();
         Map<Long, Integer> unpaidCountForNonOwner = new java.util.HashMap<>();
         Map<Long, java.math.BigDecimal> unpaidAmountForNonOwner = new java.util.HashMap<>();
-        // Open split orders: current (maximum) share per person, if a total is set
+        // Open split orders: current (maximum) share per person, if a total is set.
+        // Only for the creator — participants just join and see their share once closed.
         Map<Long, java.math.BigDecimal> splitShareMap = new java.util.HashMap<>();
 
         for (FoodOrder order : orders) {
-            if (order.isSplitOrder() && order.getStatus() != FoodOrder.OrderStatus.CLOSED) {
+            if (order.isSplitOrder() && order.getStatus() != FoodOrder.OrderStatus.CLOSED
+                    && order.getCreator().getId().equals(currentUser.getId())) {
                 java.math.BigDecimal share = orderService.getSplitShare(order);
                 if (share != null) splitShareMap.put(order.getId(), share);
             }
@@ -353,6 +355,7 @@ public class OrderController {
         model.addAttribute("order", order);
         model.addAttribute("participantCount", orderService.getSelectionsForOrder(order).size());
         model.addAttribute("missingTotal", missingTotal != null);
+        model.addAttribute("currentShare", orderService.getSplitShare(order));
         model.addAttribute("orderSubtotal", orderService.getTotalForOrder(order));
         return "order-close";
     }
@@ -365,6 +368,7 @@ public class OrderController {
                              @RequestParam(required = false) String weroLink,
                              @RequestParam(required = false) String paidByName,
                              @RequestParam(required = false) BigDecimal splitTotal,
+                             @RequestParam(required = false) BigDecimal splitPerPerson,
                              HttpServletRequest request) {
         Optional<AppUser> user = currentUser(request);
         Optional<FoodOrder> orderOpt = orderService.findOrder(id);
@@ -373,6 +377,12 @@ public class OrderController {
         FoodOrder order = orderOpt.get();
         if (user.isEmpty() || !order.getCreator().getId().equals(user.get().getId()))
             return "redirect:/orders/" + id;
+
+        // Cost split where only a price per person was entered: total = price × participants
+        if (order.isSplitOrder() && splitTotal == null && splitPerPerson != null && splitPerPerson.signum() > 0) {
+            int participants = orderService.getSelectionsForOrder(order).size();
+            if (participants > 0) splitTotal = splitPerPerson.multiply(BigDecimal.valueOf(participants));
+        }
 
         // A split order can only be closed once the total amount is known
         if (order.isSplitOrder() && (splitTotal == null || splitTotal.compareTo(BigDecimal.ZERO) <= 0))
