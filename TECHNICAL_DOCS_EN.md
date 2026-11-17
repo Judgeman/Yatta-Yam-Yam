@@ -258,7 +258,7 @@ Remember-Me is enabled with a token validity of one year.
 | GET    | `/orders/{id}/edit`          | Form: edit order (creator only)                  |
 | POST   | `/orders/{id}/edit`          | Update order                                     |
 | GET    | `/orders/{id}/close`         | Form: close order                                |
-| POST   | `/orders/{id}/close`         | Close order (status → CLOSED)                    |
+| POST   | `/orders/{id}/close`         | Close order (status → CLOSED); `tipAmount` or `totalAmount` |
 | POST   | `/orders/{id}/archive`       | Archive order (status → ARCHIVED)                |
 | POST   | `/orders/{id}/reopen`        | Reopen order (status → OPEN)                     |
 | POST   | `/orders/{id}/mark-ordered`  | Mark as called in (status → ORDERED)             |
@@ -329,7 +329,7 @@ ARCHIVED
    - When creating a brand-new list inline, a "Use this item list next time" checkbox (preselected, but uncheckable) controls whether the list stays visible for future orders.
 2. **Participants select dishes** — Each user picks menu items with quantities. The selection is saved as a `UserOrderSelection` with `SelectionItem` entries.
 3. **Mark as ordered** (ORDERED) — Creator records who called in the order. Users see a warning if they try to change their selection afterwards.
-4. **Close order** (CLOSED) — Creator optionally enters a total tip and can fill in or correct "Paid By" as well as the PayPal and Wero links. The tip is split evenly among all participants who have at least one item.
+4. **Close order** (CLOSED) — Creator optionally enters the total tip **or** the total amount paid (the other field is calculated: tip = total paid − order sum) and can fill in or correct "Paid By" as well as the PayPal and Wero links. The tip is split evenly among all participants who have at least one item.
 5. **Manage payments** — Users mark themselves as paid; the creator can confirm or revoke payments.
 6. **Archive** (ARCHIVED) — Order disappears from the dashboard and moves to the archive.
 
@@ -338,6 +338,9 @@ ARCHIVED
 ```java
 tipPerPerson = tipAmount / numberOfParticipantsWithItems
 // Rounding: HALF_UP to 2 decimal places
+
+// Only the total entered (totalAmount, no tipAmount):
+tipAmount = totalAmount - sumOfAllSelections   // only if >= 0
 ```
 
 ### "Cost split" Order Type (SPLIT)
@@ -370,6 +373,7 @@ Supported payment methods (`PaymentMethod` enum):
 **Dashboard display:**
 - **For the creator:** Red alert showing number and total amount of outstanding payments
 - **For other users:** Grey info box showing open amounts for the order
+- **For everyone:** If a payer (`paidByName`) is set, the tile shows "Paid by <name>" below the creator
 
 ---
 

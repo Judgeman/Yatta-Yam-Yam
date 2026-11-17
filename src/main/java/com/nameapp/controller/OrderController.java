@@ -353,12 +353,14 @@ public class OrderController {
         model.addAttribute("order", order);
         model.addAttribute("participantCount", orderService.getSelectionsForOrder(order).size());
         model.addAttribute("missingTotal", missingTotal != null);
+        model.addAttribute("orderSubtotal", orderService.getTotalForOrder(order));
         return "order-close";
     }
 
     @PostMapping("/{id}/close")
     public String closeOrder(@PathVariable Long id,
                              @RequestParam(required = false) BigDecimal tipAmount,
+                             @RequestParam(required = false) BigDecimal totalAmount,
                              @RequestParam(required = false) String paypalLink,
                              @RequestParam(required = false) String weroLink,
                              @RequestParam(required = false) String paidByName,
@@ -376,9 +378,16 @@ public class OrderController {
         if (order.isSplitOrder() && (splitTotal == null || splitTotal.compareTo(BigDecimal.ZERO) <= 0))
             return "redirect:/orders/" + id + "/close?missingTotal";
 
+        // Item order where only the total paid was entered: the tip is the difference to the order sum
+        BigDecimal tip = tipAmount;
+        if (!order.isSplitOrder() && tip == null && totalAmount != null) {
+            BigDecimal diff = totalAmount.subtract(orderService.getTotalForOrder(order));
+            if (diff.signum() >= 0) tip = diff;
+        }
+
         // Save tip / total, links and payer before closing
         orderService.updateOrder(order.getId(), order.getPlaceName(), order.getOrderDate(),
-                tipAmount, paypalLink, weroLink, order.getLocation(), paidByName, splitTotal);
+                tip, paypalLink, weroLink, order.getLocation(), paidByName, splitTotal);
         orderService.closeOrder(id);
         return "redirect:/orders/" + id;
     }
