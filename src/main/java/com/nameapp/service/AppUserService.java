@@ -15,11 +15,14 @@ public class AppUserService {
 
     private final AppUserRepository repository;
     private final UserOrderSelectionRepository selectionRepository;
+    private final OrderService orderService;
 
     public AppUserService(AppUserRepository repository,
-                          UserOrderSelectionRepository selectionRepository) {
+                          UserOrderSelectionRepository selectionRepository,
+                          OrderService orderService) {
         this.repository = repository;
         this.selectionRepository = selectionRepository;
+        this.orderService = orderService;
     }
 
     /**
@@ -50,31 +53,10 @@ public class AppUserService {
                 .filter(s -> !s.getItems().isEmpty())
                 .count();
 
-        long openPayments = selections.stream()
-                .filter(s -> !s.getItems().isEmpty()
-                        && !s.isPaid()
-                        && !s.isMarkedPaidByOwner()
-                        && s.getOrder().getStatus() == com.nameapp.model.FoodOrder.OrderStatus.CLOSED)
-                .count();
-
-        BigDecimal openAmount = selections.stream()
-                .filter(s -> !s.getItems().isEmpty()
-                        && !s.isPaid()
-                        && !s.isMarkedPaidByOwner()
-                        && s.getOrder().getStatus() == com.nameapp.model.FoodOrder.OrderStatus.CLOSED)
-                .map(s -> {
-                    com.nameapp.model.FoodOrder order = s.getOrder();
-                    List<com.nameapp.model.UserOrderSelection> orderSelections = selectionRepository.findByOrder(order);
-                    long participantCount = orderSelections.stream()
-                            .filter(os -> !os.getItems().isEmpty())
-                            .count();
-                    BigDecimal tip = (order.getTipAmount() != null && participantCount > 0)
-                            ? order.getTipAmount().divide(
-                            BigDecimal.valueOf(participantCount), 2, java.math.RoundingMode.HALF_UP)
-                            : BigDecimal.ZERO;
-                    return s.getSubtotal().add(tip);
-                })
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        // Same figures as the red badge next to the name in the navbar
+        List<OrderService.OpenDebt> openDebts = orderService.getOpenDebts(user);
+        long openPayments = openDebts.size();
+        BigDecimal openAmount = OrderService.totalOf(openDebts);
 
         stats.put("registeredAt", user.getRegisteredAt());
         stats.put("participated", participated);

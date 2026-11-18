@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Red badge next to the user's name in the navbar: what they still owe from closed orders.
+     openDebts / openDebtTotal are added to every page by OpenDebtInterceptor. -->
+<span th:fragment="badge"
+      th:if="${openDebtTotal != null and openDebtTotal.signum() > 0}"
+      class="badge rounded-pill bg-danger open-debt-badge"
+      th:title="|You still owe €${#numbers.formatDecimal(openDebtTotal,1,2)} from ${openDebts.size()} order(s)|">
+    <span class="visually-hidden">You still owe </span><span
+        th:text="'€' + ${#numbers.formatDecimal(openDebtTotal,1,2)}">€0.00</span>
+</span>
+
+</body>
+</html>

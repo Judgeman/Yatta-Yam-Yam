@@ -1,7 +1,7 @@
 # Yatta-Yam-Yam – Technical Documentation
 
-**Version:** 1.9.0  
-**Date:** October 2026
+**Version:** 1.10.0  
+**Date:** November 2026
 
 ---
 
@@ -36,6 +36,7 @@ Yatta-Yam-Yam is an internal web application for collective food ordering. Users
 - Payment tracking (Cash, PayPal, Wero)
 - Contact book (name, location, address, phone numbers, image) with a quick lookup in the phone-order dialog
 - User statistics (total spend, open amounts)
+- Red badge with the open amount next to your own name in the navbar
 
 ---
 
@@ -375,6 +376,17 @@ Supported payment methods (`PaymentMethod` enum):
 - **For other users:** Grey info box showing open amounts for the order
 - **For everyone:** If a payer (`paidByName`) is set, the tile shows "Paid by <name>" below the creator
 
+### Open amounts in the navbar
+
+If a user still owes money, a red badge with the total open amount appears next to their name in the navbar (dashboard, order detail, archive, contacts). That way they are reminded even when a shared link takes them straight to a new order. Clicking the name or the badge leads to the personal overview (`/`), which lists every open order under "Still to pay" with amount and payee and links to the order.
+
+Every participation (`isParticipant`, so cost splits too) counts if it
+- belongs to an order with status **CLOSED** (archived orders don't count, since participants can no longer mark them as paid there),
+- is neither marked as paid by the user nor confirmed by the creator, and
+- doesn't belong to the payee themselves. The payee is the payer (`paidByName`, case-insensitive), or the creator if no payer is set.
+
+Amount per order = own items + tip share or cost share (`OrderService.getOpenDebts`). The "Open payments" and "Amount due" tiles on the overview use the same calculation. `OpenDebtInterceptor` puts `openDebts` and `openDebtTotal` into the model of every page that contains a `user`. The badge itself is the fragment `fragments/open-debt-badge.html`.
+
 ---
 
 ## 9. Configuration
@@ -433,7 +445,7 @@ Application available at: `http://localhost:38443`
 
 ```bash
 mvn package
-java -DYATTA_YAM_YAM_PASSWORD=yourPassword -jar target/yatta-yam-yam-1.9.0.jar
+java -DYATTA_YAM_YAM_PASSWORD=yourPassword -jar target/yatta-yam-yam-1.10.0.jar
 ```
 
 ---
@@ -448,6 +460,7 @@ Yatta-Yam-Yam/
     │   ├── YattaYamYamApplication.java       # Spring Boot entry point
     │   ├── config/
     │   │   ├── DatabaseMigration.java        # Database migration logic
+    │   │   ├── OpenDebtInterceptor.java      # The user's open amounts for the navbar badge
     │   │   ├── SecurityConfig.java           # Spring Security configuration
     │   │   └── WebConfig.java                # Web configuration (e.g. static resources)
     │   ├── controller/
@@ -487,7 +500,7 @@ Yatta-Yam-Yam/
             ├── index.html                    # Name input
             ├── confirm.html                  # Confirm existing user
             ├── confirm-new.html              # Confirm new account
-            ├── welcome.html                  # Welcome screen after login
+            ├── welcome.html                  # Welcome screen after login (with list of open payments)
             ├── login.html                    # Spring Security login
             ├── dashboard.html                # Open orders overview
             ├── archive.html                  # Archive
@@ -500,5 +513,7 @@ Yatta-Yam-Yam/
             ├── contact-edit.html             # Create / edit contact
             ├── itemlists.html                # Hidden page: all menu lists + visibility toggle
             ├── users.html                    # User statistics
-            └── version.html                  # Version info
+            ├── version.html                  # Version info
+            └── fragments/
+                └── open-debt-badge.html      # Red badge with the open amount next to the name
 ```

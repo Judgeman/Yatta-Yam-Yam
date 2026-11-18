@@ -1,7 +1,7 @@
 # Yatta-Yam-Yam – Technische Dokumentation
 
-**Version:** 1.9.0  
-**Stand:** Oktober 2026
+**Version:** 1.10.0  
+**Stand:** November 2026
 
 ---
 
@@ -36,6 +36,7 @@ Yatta-Yam-Yam ist eine interne Web-App zur kollektiven Essensbestellung. Nutzer 
 - Zahlungsverfolgung (Bar, PayPal, Wero)
 - Kontaktbuch (Name, Standort, Adresse, Telefonnummern, Bild) mit Schnellnachschlagen im Telefonbestell-Dialog
 - Benutzerstatistiken (Gesamtausgaben, offene Beträge)
+- Rotes Badge mit dem offenen Betrag neben dem eigenen Namen in der Menüleiste
 
 ---
 
@@ -375,6 +376,17 @@ Unterstützte Zahlungsmethoden (`PaymentMethod`-Enum):
 - **Für andere Nutzer:** Graue Info-Box mit offenen Beträgen in der Bestellung
 - **Für alle:** Ist ein Bezahler (`paidByName`) eingetragen, zeigt die Kachel „Paid by <Name>“ unter dem Ersteller
 
+### Offene Beträge in der Menüleiste
+
+Schuldet ein Nutzer noch Geld, steht neben seinem Namen in der Menüleiste (Dashboard, Bestelldetail, Archiv, Kontakte) ein rotes Badge mit dem offenen Gesamtbetrag. So wird er auch dann erinnert, wenn er nur über einen geteilten Link auf eine neue Bestellung kommt. Ein Klick auf Name oder Badge führt zur persönlichen Übersicht (`/`), die unter „Still to pay“ jede offene Bestellung mit Betrag und Empfänger auflistet und auf die Bestellung verlinkt.
+
+Gezählt wird jede Teilnahme (`isParticipant`, also auch Cost splits), die
+- zu einer Bestellung im Status **CLOSED** gehört (archivierte zählen nicht, dort kann man sich nicht mehr selbst als bezahlt markieren),
+- weder selbst als bezahlt markiert noch vom Ersteller bestätigt ist und
+- nicht dem Empfänger selbst gehört. Empfänger ist der Bezahler (`paidByName`, ohne Beachtung der Groß-/Kleinschreibung), ohne eingetragenen Bezahler der Ersteller.
+
+Betrag je Bestellung = eigene Artikel + Trinkgeldanteil bzw. Kostenanteil (`OrderService.getOpenDebts`). Die Kacheln „Open payments“ und „Amount due“ auf der Übersicht nutzen dieselbe Berechnung. Der `OpenDebtInterceptor` legt `openDebts` und `openDebtTotal` in das Model jeder Seite, die einen `user` enthält. Das Badge selbst ist das Fragment `fragments/open-debt-badge.html`.
+
 ---
 
 ## 9. Konfiguration
@@ -433,7 +445,7 @@ Anwendung erreichbar unter: `http://localhost:38443`
 
 ```bash
 mvn package
-java -DYATTA_YAM_YAM_PASSWORD=deinPasswort -jar target/yatta-yam-yam-1.9.0.jar
+java -DYATTA_YAM_YAM_PASSWORD=deinPasswort -jar target/yatta-yam-yam-1.10.0.jar
 ```
 
 ---
@@ -448,6 +460,7 @@ Yatta-Yam-Yam/
     │   ├── YattaYamYamApplication.java       # Spring Boot Entry Point
     │   ├── config/
     │   │   ├── DatabaseMigration.java        # Datenbankmigrationslogik
+    │   │   ├── OpenDebtInterceptor.java      # Offene Beträge des Nutzers für das Badge in der Menüleiste
     │   │   ├── SecurityConfig.java           # Spring Security Konfiguration
     │   │   └── WebConfig.java                # Web-Konfiguration (z. B. statische Ressourcen)
     │   ├── controller/
@@ -487,7 +500,7 @@ Yatta-Yam-Yam/
             ├── index.html                    # Namenseingabe
             ├── confirm.html                  # Bestehenden Nutzer bestätigen
             ├── confirm-new.html              # Neuen Account bestätigen
-            ├── welcome.html                  # Willkommensseite nach Login
+            ├── welcome.html                  # Willkommensseite nach Login (mit Liste offener Zahlungen)
             ├── login.html                    # Spring Security Login
             ├── dashboard.html                # Übersicht offener Bestellungen
             ├── archive.html                  # Archiv
@@ -500,5 +513,7 @@ Yatta-Yam-Yam/
             ├── contact-edit.html             # Kontakt anlegen / bearbeiten
             ├── itemlists.html                # Versteckte Seite: alle Menülisten + Sichtbarkeitsschalter
             ├── users.html                    # Nutzerstatistiken
-            └── version.html                  # Versionsinfo
+            ├── version.html                  # Versionsinfo
+            └── fragments/
+                └── open-debt-badge.html      # Rotes Badge mit offenem Betrag neben dem Namen
 ```

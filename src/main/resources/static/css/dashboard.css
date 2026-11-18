@@ -15,6 +15,13 @@
     color: white;
 }
 
+/* Red amount next to the name when the user still owes money; the light ring
+   keeps it readable on the purple navbar */
+.open-debt-badge {
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.7);
+    white-space: nowrap;
+}
+
 .mini-avatar {
     width: 30px; height: 30px;
     border-radius: 50%;
