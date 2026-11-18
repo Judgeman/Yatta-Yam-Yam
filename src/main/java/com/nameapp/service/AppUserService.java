@@ -7,8 +7,11 @@ import com.nameapp.repository.UserOrderSelectionRepository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class AppUserService {
@@ -44,13 +47,14 @@ public class AppUserService {
         return repository.save(new AppUser(trimmed));
     }
 
-    public java.util.Map<String, Object> getStatsForUser(AppUser user) {
-        java.util.Map<String, Object> stats = new java.util.HashMap<>();
+    public Map<String, Object> getStatsForUser(AppUser user) {
+        Map<String, Object> stats = new HashMap<>();
 
         List<UserOrderSelection> selections = selectionRepository.findByUser(user);
 
+        // Item orders with at least one item plus every cost split the user joined
         long participated = selections.stream()
-                .filter(s -> !s.getItems().isEmpty())
+                .filter(orderService::isParticipant)
                 .count();
 
         // Same figures as the red badge next to the name in the navbar
@@ -76,66 +80,33 @@ public class AppUserService {
         return repository.save(user);
     }
 
-    public List<java.util.Map<String, Object>> getAllUserStats() {
+    public List<Map<String, Object>> getAllUserStats() {
         return repository.findAll().stream().map(user -> {
-                    java.util.Map<String, Object> stats = new java.util.HashMap<>();
-                    List<com.nameapp.model.UserOrderSelection> selections = selectionRepository.findByUser(user);
+                    Map<String, Object> stats = new HashMap<>();
+                    List<UserOrderSelection> selections = selectionRepository.findByUser(user);
 
                     long participated = selections.stream()
-                            .filter(s -> !s.getItems().isEmpty())
+                            .filter(orderService::isParticipant)
                             .count();
 
-                    java.math.BigDecimal totalSpent = selections.stream()
-                            .filter(s -> !s.getItems().isEmpty()
+                    // Own items plus tip share (item orders) or cost share (cost splits)
+                    BigDecimal totalSpent = selections.stream()
+                            .filter(s -> orderService.isParticipant(s)
                                     && (s.isPaid() || s.isMarkedPaidByOwner()))
-                            .map(s -> {
-                                com.nameapp.model.FoodOrder order = s.getOrder();
-                                List<com.nameapp.model.UserOrderSelection> orderSelections =
-                                        selectionRepository.findByOrder(order);
-                                long count = orderSelections.stream()
-                                        .filter(os -> !os.getItems().isEmpty()).count();
-                                java.math.BigDecimal tip = (order.getTipAmount() != null && count > 0)
-                                        ? order.getTipAmount().divide(java.math.BigDecimal.valueOf(count),
-                                        2, java.math.RoundingMode.HALF_UP)
-                                        : java.math.BigDecimal.ZERO;
-                                return s.getSubtotal().add(tip);
-                            })
-                            .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+                            .map(s -> s.getSubtotal().add(orderService.getPerPersonCharge(s.getOrder())))
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-                    long openPayments = selections.stream()
-                            .filter(s -> !s.getItems().isEmpty()
-                                    && !s.isPaid()
-                                    && !s.isMarkedPaidByOwner()
-                                    && s.getOrder().getStatus() == com.nameapp.model.FoodOrder.OrderStatus.CLOSED)
-                            .count();
-
-                    java.math.BigDecimal openAmount = selections.stream()
-                            .filter(s -> !s.getItems().isEmpty()
-                                    && !s.isPaid()
-                                    && !s.isMarkedPaidByOwner()
-                                    && s.getOrder().getStatus() == com.nameapp.model.FoodOrder.OrderStatus.CLOSED)
-                            .map(s -> {
-                                com.nameapp.model.FoodOrder order = s.getOrder();
-                                List<com.nameapp.model.UserOrderSelection> orderSelections =
-                                        selectionRepository.findByOrder(order);
-                                long count = orderSelections.stream()
-                                        .filter(os -> !os.getItems().isEmpty()).count();
-                                java.math.BigDecimal tip = (order.getTipAmount() != null && count > 0)
-                                        ? order.getTipAmount().divide(java.math.BigDecimal.valueOf(count),
-                                        2, java.math.RoundingMode.HALF_UP)
-                                        : java.math.BigDecimal.ZERO;
-                                return s.getSubtotal().add(tip);
-                            })
-                            .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+                    // Same figures as the overview and the red badge in the navbar
+                    List<OrderService.OpenDebt> openDebts = orderService.getOpenDebts(user);
 
                     stats.put("name", user.getName());
                     stats.put("registeredAt", user.getRegisteredAt());
                     stats.put("participated", participated);
                     stats.put("totalSpent", totalSpent);
-                    stats.put("openPayments", openPayments);
-                    stats.put("openAmount", openAmount);
+                    stats.put("openPayments", (long) openDebts.size());
+                    stats.put("openAmount", OrderService.totalOf(openDebts));
                     return stats;
                 }).sorted((a, b) -> ((String) a.get("name")).compareToIgnoreCase((String) b.get("name")))
-                .collect(java.util.stream.Collectors.toList());
+                .collect(Collectors.toList());
     }
 }
