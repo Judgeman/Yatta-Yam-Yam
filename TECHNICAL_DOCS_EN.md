@@ -385,7 +385,15 @@ Every participation (`isParticipant`, so cost splits too) counts if it
 - is neither marked as paid by the user nor confirmed by the creator, and
 - doesn't belong to the payee themselves. The payee is the payer (`paidByName`, case-insensitive), or the creator if no payer is set.
 
-Amount per order = own items + tip share or cost share (`OrderService.getOpenDebts`). The "Open payments" and "Amount due" tiles on the overview use the same calculation. `OpenDebtInterceptor` puts `openDebts` and `openDebtTotal` into the model of every page that contains a `user`. The badge itself is the fragment `fragments/open-debt-badge.html`.
+Amount per order = own items + tip share or cost share (`OrderService.getOpenDebts`). The "Open payments" and "Amount due" tiles on the overview and the columns of the same name on `/users` use the same calculation. `OpenDebtInterceptor` puts `openDebts` and `openDebtTotal` into the model of every page that contains a `user`. The badge itself is the fragment `fragments/open-debt-badge.html`.
+
+### User statistics
+
+The overview (`/`, `AppUserService.getStatsForUser`) and the `/users` page (`getAllUserStats`) count an order when `OrderService.isParticipant` is true: on item orders with at least one item, on cost splits every person who joined (they have no items).
+
+- **Orders joined:** number of these participations
+- **Total spent** (`/users` only): sum of the paid participations, each own items + `getPerPersonCharge` (tip share or cost share)
+- **Open payments / Amount due:** from `getOpenDebts`, so the same figures as the badge in the navbar
 
 ---
 

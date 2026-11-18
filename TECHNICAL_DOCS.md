@@ -385,7 +385,15 @@ Gezählt wird jede Teilnahme (`isParticipant`, also auch Cost splits), die
 - weder selbst als bezahlt markiert noch vom Ersteller bestätigt ist und
 - nicht dem Empfänger selbst gehört. Empfänger ist der Bezahler (`paidByName`, ohne Beachtung der Groß-/Kleinschreibung), ohne eingetragenen Bezahler der Ersteller.
 
-Betrag je Bestellung = eigene Artikel + Trinkgeldanteil bzw. Kostenanteil (`OrderService.getOpenDebts`). Die Kacheln „Open payments“ und „Amount due“ auf der Übersicht nutzen dieselbe Berechnung. Der `OpenDebtInterceptor` legt `openDebts` und `openDebtTotal` in das Model jeder Seite, die einen `user` enthält. Das Badge selbst ist das Fragment `fragments/open-debt-badge.html`.
+Betrag je Bestellung = eigene Artikel + Trinkgeldanteil bzw. Kostenanteil (`OrderService.getOpenDebts`). Die Kacheln „Open payments“ und „Amount due“ auf der Übersicht und die gleichnamigen Spalten unter `/users` nutzen dieselbe Berechnung. Der `OpenDebtInterceptor` legt `openDebts` und `openDebtTotal` in das Model jeder Seite, die einen `user` enthält. Das Badge selbst ist das Fragment `fragments/open-debt-badge.html`.
+
+### Nutzerstatistiken
+
+Die Übersicht (`/`, `AppUserService.getStatsForUser`) und die Seite `/users` (`getAllUserStats`) zählen eine Bestellung, wenn `OrderService.isParticipant` zutrifft: bei Artikelbestellungen mit mindestens einem Artikel, bei Cost splits jede Anmeldung (die keine Artikel hat).
+
+- **Orders joined:** Anzahl dieser Teilnahmen
+- **Total spent** (nur `/users`): Summe der bezahlten Teilnahmen, je eigene Artikel + `getPerPersonCharge` (Trinkgeldanteil bzw. Kostenanteil)
+- **Open payments / Amount due:** aus `getOpenDebts`, also dieselben Werte wie das Badge in der Menüleiste
 
 ---
 
