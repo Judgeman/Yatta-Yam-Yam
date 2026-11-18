@@ -15,7 +15,8 @@
 <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
     <div class="container">
         <a class="navbar-brand fw-bold" th:href="@{/orders/dashboard}">Yatta-Yam-Yam</a>
-        <div class="d-flex align-items-center gap-3">
+        <!-- flex-wrap: on narrow phones the buttons move to a second line instead of overflowing -->
+        <div class="d-flex align-items-center justify-content-end flex-wrap row-gap-2 gap-3">
             <a th:href="@{/contacts}" class="btn btn-outline-light btn-sm" title="Contacts">
                 <i class="bi bi-person-rolodex"></i> Contacts
             </a>
@@ -26,8 +27,9 @@
                 <div class="user-badge">
                     <span th:text="${#strings.toUpperCase(#strings.substring(user.name,0,1))}">A</span>
                 </div>
+                <span class="text-white fw-semibold" th:text="${user.name}">Name</span>
+                <span th:replace="~{fragments/open-debt-badge :: badge}"></span>
             </a>
-            <span class="text-white fw-semibold" th:text="${user.name}">Name</span>
             <form th:action="@{/switch-account}" method="post" class="mb-0">
                 <button type="submit" class="btn btn-outline-light btn-sm">Switch</button>
             </form>

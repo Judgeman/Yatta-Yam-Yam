@@ -36,9 +36,12 @@
             color: #adb5bd;
             margin-top: 2px;
         }
+        .open-debt-list .list-group-item {
+            border-color: #ffe082;
+        }
     </style>
 </head>
-<body class="bg-light d-flex align-items-center justify-content-center vh-100">
+<body class="bg-light d-flex align-items-center justify-content-center min-vh-100 py-4">
 
 <div class="card shadow-lg p-5 text-center" style="width: 100%; max-width: 480px;">
 
@@ -84,6 +87,23 @@
                      th:text="'€' + ${#numbers.formatDecimal(stats.openAmount,1,2)}">€0</div>
                 <div class="stat-label">Amount due</div>
             </div>
+        </div>
+    </div>
+
+    <!-- What the user still owes, one row per closed order; the red badge in the navbar links here -->
+    <div th:if="${openDebts != null and !openDebts.empty}" class="text-start mb-4">
+        <div class="fw-semibold text-danger small mb-2">Still to pay</div>
+        <div class="list-group open-debt-list">
+            <a th:each="debt : ${openDebts}" th:href="@{'/orders/' + ${debt.order.id}}"
+               class="list-group-item list-group-item-action d-flex justify-content-between align-items-center gap-2">
+                <div>
+                    <div class="fw-semibold" th:text="${debt.order.placeName}">Place</div>
+                    <small class="text-muted"
+                           th:text="${#temporals.format(debt.order.orderDate,'dd MMM yyyy')} + ' · to ' + ${debt.payee}">01 Jan 2026 · to Name</small>
+                </div>
+                <span class="badge rounded-pill bg-danger"
+                      th:text="'€' + ${#numbers.formatDecimal(debt.amount,1,2)}">€0.00</span>
+            </a>
         </div>
     </div>
 

@@ -361,6 +361,54 @@ public class OrderService {
         return sel.get().getSubtotal().add(getPerPersonCharge(order));
     }
 
+    // ── Open debts: what a user still owes others ─────────────────────────────
+
+    /** A closed order the user still has to pay for: the amount and whom to pay. */
+    public static class OpenDebt {
+        private final FoodOrder order;
+        private final BigDecimal amount;
+        private final String payee;
+
+        public OpenDebt(FoodOrder order, BigDecimal amount, String payee) {
+            this.order = order;
+            this.amount = amount;
+            this.payee = payee;
+        }
+
+        public FoodOrder getOrder() { return order; }
+        public BigDecimal getAmount() { return amount; }
+        public String getPayee() { return payee; }
+    }
+
+    /**
+     * Closed orders the user takes part in but hasn't paid for yet (and the creator
+     * hasn't marked as paid either), newest first. Orders the user advanced the
+     * money for themselves are left out — nobody owes themselves. Archived orders
+     * don't count, since participants can no longer mark them as paid.
+     */
+    public List<OpenDebt> getOpenDebts(AppUser user) {
+        List<OpenDebt> debts = new ArrayList<>();
+        for (UserOrderSelection sel : selectionRepo.findByUserAndOrder_Status(user, FoodOrder.OrderStatus.CLOSED)) {
+            if (sel.isPaid() || sel.isMarkedPaidByOwner() || !isParticipant(sel)) continue;
+            FoodOrder order = sel.getOrder();
+            String payee = getPayee(order);
+            if (payee.equalsIgnoreCase(user.getName())) continue;
+            debts.add(new OpenDebt(order, sel.getSubtotal().add(getPerPersonCharge(order)), payee));
+        }
+        debts.sort(Comparator.comparing((OpenDebt d) -> d.getOrder().getOrderDate()).reversed());
+        return debts;
+    }
+
+    public static BigDecimal totalOf(List<OpenDebt> debts) {
+        return debts.stream().map(OpenDebt::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    /** Who gets the money: the person who advanced it, or the creator if nobody is set. */
+    private static String getPayee(FoodOrder order) {
+        String paidBy = order.getPaidByName();
+        return paidBy != null && !paidBy.isBlank() ? paidBy.trim() : order.getCreator().getName();
+    }
+
     public void unpaySelf(Long selectionId) {
         selectionRepo.findById(selectionId).ifPresent(sel -> {
             sel.setPaid(false);

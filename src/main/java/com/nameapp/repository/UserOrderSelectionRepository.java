@@ -11,4 +11,5 @@ public interface UserOrderSelectionRepository extends JpaRepository<UserOrderSel
     Optional<UserOrderSelection> findByOrderAndUser(FoodOrder order, AppUser user);
     List<UserOrderSelection> findByOrder(FoodOrder order);
     List<UserOrderSelection> findByUser(AppUser user);
+    List<UserOrderSelection> findByUserAndOrder_Status(AppUser user, FoodOrder.OrderStatus status);
 }

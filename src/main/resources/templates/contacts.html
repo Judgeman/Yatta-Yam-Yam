@@ -21,6 +21,7 @@
                     <span th:text="${#strings.toUpperCase(#strings.substring(user.name,0,1))}">A</span>
                 </div>
                 <span class="text-white fw-semibold" th:text="${user.name}">Name</span>
+                <span th:replace="~{fragments/open-debt-badge :: badge}"></span>
             </a>
         </div>
     </div>
