@@ -84,8 +84,9 @@
         },
         pelmeni: {
             emoji: '\uD83E\uDD5F',
-            title: 'Pelmeni',
-            when: 'This look has no season. It only comes by special link, on days worth celebrating.',
+            title: 'Triple-T (Teig-Taschen-Tag)',
+            when: null,                 // no line about the look and no preview note: just the surprise
+            previewNote: false,
             text: 'Today is Triple-T (\u201CTeig-Taschen-Tag\u201D) \u2013 get ready to be surprised!',
             tip: 'Pelmeni and their dumpling friends drop by now and then. Type \u201Cpelmeni\u201D to call them.'
         },
@@ -312,7 +313,9 @@
         ['emoji', 'title', 'when', 'text', 'tip'].forEach(function (field) {
             el.querySelector('[data-field="' + field + '"]').textContent = info[field];
         });
-        el.querySelector('[data-field="preview"]').hidden = !isPreview();
+        // A look may leave out the "when" line and the preview note (Triple-T does)
+        el.querySelector('[data-field="when"]').parentNode.hidden = !info.when;
+        el.querySelector('[data-field="preview"]').hidden = !isPreview() || info.previewNote === false;
 
         // In Symbolics mode: point to the seasonal look it hides
         var season = hiddenSeason();
