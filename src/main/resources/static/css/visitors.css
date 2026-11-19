@@ -1,0 +1,196 @@
+/*
+ * Seasonal visitors (built and moved by visitors.js, drawn by christmas.js and
+ * easter.js): the stage, the actors and the animations of their arms, legs, ears
+ * and wings. The stage only shows while a seasonal look is on.
+ */
+
+.yy-visitors {
+    display: none;
+}
+
+html[data-yy-theme="christmas"] .yy-visitors,
+html[data-yy-theme="easter"] .yy-visitors {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 1080;                       /* above menu bar and modals, below toasts */
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.yy-visitor {
+    position: absolute;
+    left: 0;
+    top: 0;
+    will-change: transform;
+}
+
+.yy-visitor div,
+.yy-visitor svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+.yy-visitor svg {
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.18));
+}
+
+.yy-v-flip {
+    transform: scaleX(-1);
+}
+
+/* ── Shared: waving (peeking visitors), dancing (Santa, the chick) ── */
+
+.yy-v-wave {
+    animation: yy-v-wave 0.42s ease-in-out infinite alternate;
+}
+
+@keyframes yy-v-wave {
+    from { transform: rotate(-22deg); }
+    to   { transform: rotate(18deg); }
+}
+
+/* Dancing: hop and sway; arms up and legs kicking for whoever has them */
+.yy-v-dance {
+    transform-origin: 50% 100%;
+    animation: yy-v-hop 0.9s ease-in-out infinite;
+}
+
+@keyframes yy-v-hop {
+    0%, 100% { transform: translateY(0) rotate(-7deg); }
+    25%      { transform: translateY(-18%) rotate(0deg); }
+    50%      { transform: translateY(0) rotate(7deg); }
+    75%      { transform: translateY(-18%) rotate(0deg); }
+}
+
+.yy-v-arm-l { animation: yy-v-arm-l 0.45s ease-in-out infinite alternate; }
+.yy-v-arm-r { animation: yy-v-arm-r 0.45s ease-in-out infinite alternate-reverse; }
+.yy-v-leg-l { animation: yy-v-kick-l 0.45s ease-in-out infinite alternate; }
+.yy-v-leg-r { animation: yy-v-kick-r 0.45s ease-in-out infinite alternate-reverse; }
+
+@keyframes yy-v-arm-l {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(135deg); }
+}
+
+@keyframes yy-v-arm-r {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(-135deg); }
+}
+
+@keyframes yy-v-kick-l {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(22deg); }
+}
+
+@keyframes yy-v-kick-r {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(-22deg); }
+}
+
+/* ── Christmas ── */
+
+/* Reindeer legs: a gallop in the air, a prance on the ground */
+.yy-v-gallop .yy-v-leg-front { animation: yy-v-gallop-front 0.6s ease-in-out infinite; }
+.yy-v-gallop .yy-v-leg-back  { animation: yy-v-gallop-back 0.6s ease-in-out infinite; }
+.yy-v-prance .yy-v-leg-front { animation: yy-v-prance 0.5s ease-in-out infinite alternate; }
+.yy-v-prance .yy-v-leg-back  { animation: yy-v-prance 0.5s ease-in-out infinite alternate-reverse; }
+.yy-v-deer .yy-v-far         { animation-delay: -0.15s; }
+
+@keyframes yy-v-gallop-front {
+    0%, 100% { transform: rotate(-42deg); }
+    50%      { transform: rotate(14deg); }
+}
+
+@keyframes yy-v-gallop-back {
+    0%, 100% { transform: rotate(38deg); }
+    50%      { transform: rotate(-16deg); }
+}
+
+@keyframes yy-v-prance {
+    from { transform: rotate(-24deg); }
+    to   { transform: rotate(20deg); }
+}
+
+.yy-v-bob {
+    animation: yy-v-bob 0.6s ease-in-out infinite;
+}
+
+@keyframes yy-v-bob {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-5px); }
+}
+
+.yy-v-sparkle {
+    animation: yy-v-sparkle 0.9s ease-in-out infinite;
+}
+
+@keyframes yy-v-sparkle {
+    0%, 100% { opacity: 0.2; transform: scale(0.6); }
+    50%      { opacity: 1; transform: scale(1.1); }
+}
+
+/* ── Easter ── */
+
+/* The bunny hops: crouch, jump, land */
+.yy-v-bunny-hop {
+    transform-origin: 50% 100%;
+    animation: yy-v-bunny-hop 0.7s ease-in-out infinite;
+}
+
+@keyframes yy-v-bunny-hop {
+    0%   { transform: translateY(0) scale(1.06, 0.9); }
+    18%  { transform: translateY(-12%) scale(0.95, 1.06) rotate(-8deg); }
+    45%  { transform: translateY(-40%) scale(1, 1) rotate(-3deg); }
+    75%  { transform: translateY(-8%) scale(1, 1) rotate(6deg); }
+    90%  { transform: translateY(0) scale(1.06, 0.9) rotate(0deg); }
+    100% { transform: translateY(0) scale(1.06, 0.9); }
+}
+
+.yy-v-ear {
+    animation: yy-v-ear 0.6s ease-in-out infinite alternate;
+}
+
+.yy-v-ear-alt {
+    animation-delay: -0.3s;
+}
+
+@keyframes yy-v-ear {
+    from { transform: rotate(-7deg); }
+    to   { transform: rotate(9deg); }
+}
+
+/* The chick flaps its wings */
+.yy-v-wing-l { animation: yy-v-wing-l 0.25s ease-in-out infinite alternate; }
+.yy-v-wing-r { animation: yy-v-wing-r 0.25s ease-in-out infinite alternate; }
+
+@keyframes yy-v-wing-l {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(40deg); }
+}
+
+@keyframes yy-v-wing-r {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(-40deg); }
+}
+
+/* The balloon swings gently on its way */
+.yy-v-sway {
+    transform-origin: 50% 0;
+    animation: yy-v-sway 3s ease-in-out infinite alternate;
+}
+
+@keyframes yy-v-sway {
+    from { transform: rotate(-4deg); }
+    to   { transform: rotate(4deg); }
+}
+
+/* No visitors for people who asked their system for less motion (visitors.js does not
+   call any; this is a safety net) */
+@media (prefers-reduced-motion: reduce) {
+    .yy-visitors {
+        display: none !important;
+    }
+}

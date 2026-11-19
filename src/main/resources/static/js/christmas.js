@@ -1,252 +1,54 @@
 /*
- * Christmas visitors: while the Christmas look is on (see theme.js), something festive
- * crosses the screen every 1 to 5 minutes, picked at random:
+ * Christmas visitors (see visitors.js for when and how they appear):
  *   - Santa in his sleigh, pulled by two reindeer, flies across the upper half,
  *   - Santa or a reindeer dances along the bottom edge,
  *   - Santa or a reindeer peeks in from the left, right or bottom edge and waves.
- *
- * The next appearance is kept in sessionStorage, so the 1-5 minute rhythm carries
- * across page loads instead of starting over on every click. When it falls due while
- * the tab is in the background, it shows a moment after the tab is visible again.
- * Opening a ?theme=christmas preview shows the first visitor after a few seconds.
  * Typing "hohoho" outside a form field calls one at once.
- *
- * Nothing appears with "reduce motion" switched on in the OS. The figures are inline
- * SVG, ignore the mouse (pointer-events: none) and are removed when they are done.
- * Styles: css/christmas.css.
  */
 (function () {
     'use strict';
 
-    var root = document.documentElement;
-    var NEXT_KEY = 'yy-xmas-next';          // sessionStorage: when the next visitor is due (ms)
-    var PREVIEW_KEY = 'yy-theme-preview';   // set by theme.js while a preview is on
-    var MIN_MS = 60 * 1000;
-    var MAX_MS = 5 * 60 * 1000;
-    var SOON_MS = 3000;                     // overdue, back in the tab, or a fresh preview
-    var CALL = 'hohoho';
-
-    var reduced = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
-    var timer = null;
-    var busy = false;
-    var last = null;
-
-    var VISITORS = [
-        { name: 'sleigh', weight: 2, play: flySleigh },
-        { name: 'dance-santa', weight: 1, play: function (stage) { return dance(stage, true); } },
-        { name: 'dance-reindeer', weight: 1, play: function (stage) { return dance(stage, false); } },
-        { name: 'peek-santa', weight: 1, play: function (stage) { return peek(stage, true); } },
-        { name: 'peek-reindeer', weight: 1, play: function (stage) { return peek(stage, false); } }
-    ];
-
-    // ── Schedule ──
-
-    function active() {
-        return root.getAttribute('data-yy-theme') === 'christmas' && !(reduced && reduced.matches);
+    if (!window.yyVisitors) {
+        return;
     }
+    var clamp = window.yyVisitors.clamp;
 
-    function readStore(key) {
-        try {
-            return window.sessionStorage.getItem(key);
-        } catch (e) {
-            return null;
-        }
-    }
-
-    function schedule(at) {
-        window.clearTimeout(timer);
-        try {
-            window.sessionStorage.setItem(NEXT_KEY, String(at));
-        } catch (e) {
-            // Blocked storage: the rhythm then restarts on every page
-        }
-        timer = window.setTimeout(due, Math.max(0, at - Date.now()));
-    }
-
-    function scheduleRandom() {
-        schedule(Date.now() + Math.round(MIN_MS + Math.random() * (MAX_MS - MIN_MS)));
-    }
-
-    function due() {
-        if (document.hidden) {
-            document.addEventListener('visibilitychange', onVisible);
-            return;
-        }
-        show();
-        scheduleRandom();
-    }
-
-    function onVisible() {
-        if (!document.hidden) {
-            document.removeEventListener('visibilitychange', onVisible);
-            schedule(Date.now() + SOON_MS);
-        }
-    }
-
-    function start() {
-        var next = parseInt(readStore(NEXT_KEY), 10);
-        if (isNaN(next)) {
-            if (readStore(PREVIEW_KEY)) {
-                schedule(Date.now() + SOON_MS); // first page of a preview: show one right away
-            } else {
-                scheduleRandom();
-            }
-        } else if (next > Date.now() + MAX_MS) {
-            scheduleRandom(); // the clock was turned back
-        } else {
-            schedule(Math.max(next, Date.now() + SOON_MS));
-        }
-    }
-
-    // Typing "hohoho" anywhere except in form fields
-    var typed = '';
-    document.addEventListener('keydown', function (e) {
-        if (e.ctrlKey || e.metaKey || e.altKey || !e.key || e.key.length !== 1) {
-            return;
-        }
-        var t = e.target;
-        if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) {
-            return;
-        }
-        typed = (typed + e.key.toLowerCase()).slice(-CALL.length);
-        if (typed === CALL) {
-            typed = '';
-            show();
-        }
+    window.yyVisitors.add('christmas', {
+        call: 'hohoho',
+        visitors: [
+            {
+                name: 'sleigh', weight: 2, motion: 'fly', facesRight: true, svg: sleighSvg,
+                size: function (vw) {
+                    var w = clamp(vw * 0.42, 240, 520);
+                    return [w, w * 150 / 600];
+                },
+                speed: 0.24, minMs: 4500, maxMs: 11000
+            },
+            {
+                name: 'dance-santa', weight: 1, motion: 'walk', svg: santaSvg, inner: 'yy-v-dance',
+                size: function (vw, vh) {
+                    var h = clamp(vh * 0.2, 110, 170);
+                    return [h * 100 / 150, h];
+                },
+                speed: 0.16, minMs: 6000, maxMs: 11000
+            },
+            {
+                name: 'dance-reindeer', weight: 1, motion: 'walk', facesRight: true, inner: 'yy-v-dance',
+                svg: function () {
+                    return reindeerSvg('yy-v-prance');
+                },
+                size: function (vw, vh) {
+                    var h = clamp(vh * 0.17, 90, 135);
+                    return [h * 130 / 100, h];
+                },
+                speed: 0.16, minMs: 6000, maxMs: 11000
+            },
+            { name: 'peek-santa', weight: 1, motion: 'peek', svg: santaPeekSvg },
+            { name: 'peek-reindeer', weight: 1, motion: 'peek', svg: reindeerPeekSvg }
+        ]
     });
 
-    // ── Show one visitor ──
-
-    function pick() {
-        var pool = VISITORS.filter(function (v) {
-            return v.name !== last;
-        });
-        var total = pool.reduce(function (sum, v) {
-            return sum + v.weight;
-        }, 0);
-        var r = Math.random() * total;
-        for (var i = 0; i < pool.length; i++) {
-            r -= pool[i].weight;
-            if (r < 0) {
-                return pool[i];
-            }
-        }
-        return pool[pool.length - 1];
-    }
-
-    function show() {
-        if (busy || !active() || !document.body || !document.body.animate) {
-            return;
-        }
-        var visitor = pick();
-        var stage = document.createElement('div');
-        stage.className = 'yy-xmas-stage';
-        stage.setAttribute('aria-hidden', 'true');
-        stage.setAttribute('data-visitor', visitor.name);
-        document.body.appendChild(stage);
-        busy = true;
-        last = visitor.name;
-
-        var animation = visitor.play(stage);
-        var done = function () {
-            if (stage.parentNode) {
-                stage.parentNode.removeChild(stage);
-            }
-            busy = false;
-        };
-        animation.onfinish = done;
-        animation.oncancel = done;
-    }
-
-    function clamp(value, min, max) {
-        return Math.min(max, Math.max(min, value));
-    }
-
-    function actor(stage, width, height, html) {
-        var el = document.createElement('div');
-        el.className = 'yy-xmas-actor';
-        el.style.width = width + 'px';
-        el.style.height = height + 'px';
-        el.innerHTML = html;
-        stage.appendChild(el);
-        return el;
-    }
-
-    function wrap(html, flip, extraClass) {
-        var inner = extraClass ? '<div class="' + extraClass + '">' + html + '</div>' : html;
-        return flip ? '<div class="yy-xd-flip">' + inner + '</div>' : inner;
-    }
-
-    // Santa in his sleigh with two reindeer, across the upper half on a gentle wave
-    function flySleigh(stage) {
-        var vw = window.innerWidth;
-        var vh = window.innerHeight;
-        var w = clamp(vw * 0.42, 240, 520);
-        var h = w * 150 / 600;
-        var ltr = Math.random() < 0.5;
-        var el = actor(stage, w, h, wrap(sleighSvg(), !ltr));
-        var from = ltr ? -w : vw;
-        var to = ltr ? vw : -w;
-        var y0 = vh * (0.12 + Math.random() * 0.22);
-        var frames = [];
-        for (var i = 0; i <= 10; i++) {
-            var t = i / 10;
-            var x = from + (to - from) * t;
-            var y = y0 - 60 * t + Math.sin(t * Math.PI * 2) * 22;
-            var dy = -60 + 22 * Math.PI * 2 * Math.cos(t * Math.PI * 2);
-            var angle = Math.atan(dy / (to - from)) * 180 / Math.PI;
-            frames.push({ transform: 'translate(' + x + 'px,' + y + 'px) rotate(' + angle.toFixed(2) + 'deg)' });
-        }
-        return el.animate(frames, { duration: clamp(Math.abs(to - from) / 0.24, 4500, 11000), easing: 'linear' });
-    }
-
-    // Santa or a reindeer hops along the bottom edge
-    function dance(stage, santa) {
-        var vw = window.innerWidth;
-        var vh = window.innerHeight;
-        var h = santa ? clamp(vh * 0.2, 110, 170) : clamp(vh * 0.17, 90, 135);
-        var w = santa ? h * 100 / 150 : h * 130 / 100;
-        var ltr = Math.random() < 0.5;
-        // Santa faces the viewer; the reindeer is drawn facing right
-        var el = actor(stage, w, h, wrap(santa ? santaSvg() : reindeerSvg('yy-xd-prance'), !santa && !ltr, 'yy-xd-dance'));
-        var from = ltr ? -w : vw;
-        var to = ltr ? vw : -w;
-        var y = vh - h - 6;
-        return el.animate([
-            { transform: 'translate(' + from + 'px,' + y + 'px)' },
-            { transform: 'translate(' + to + 'px,' + y + 'px)' }
-        ], { duration: clamp(Math.abs(to - from) / 0.16, 6000, 11000), easing: 'linear' });
-    }
-
-    // Santa or a reindeer leans in from an edge, waves and goes again
-    function peek(stage, santa) {
-        var vw = window.innerWidth;
-        var vh = window.innerHeight;
-        var w = clamp(Math.min(vw, vh) * 0.24, 110, 170);
-        var h = w * 110 / 120;
-        var edge = ['left', 'right', 'bottom'][Math.floor(Math.random() * 3)];
-        var turn = edge === 'left' ? 90 : edge === 'right' ? -90 : 0;
-        // The figure's lower edge sits on the screen edge at (x, y)
-        var x = edge === 'left' ? 0 : edge === 'right' ? vw : vw * (0.15 + Math.random() * 0.7);
-        var y = edge === 'bottom' ? vh : vh * (0.3 + Math.random() * 0.45);
-        var el = actor(stage, w, h, santa ? santaPeekSvg() : reindeerPeekSvg());
-        el.style.left = (x - w / 2) + 'px';
-        el.style.top = (y - h) + 'px';
-        el.style.transformOrigin = '50% 100%';
-        var at = function (tilt, shift) {
-            return 'rotate(' + (turn + tilt) + 'deg) translateY(' + shift + '%)';
-        };
-        return el.animate([
-            { transform: at(0, 100), offset: 0, easing: 'cubic-bezier(.2,.9,.3,1.2)' },
-            { transform: at(0, 16), offset: 0.16 },
-            { transform: at(7, 14), offset: 0.4 },
-            { transform: at(-6, 16), offset: 0.66 },
-            { transform: at(0, 16), offset: 0.84, easing: 'ease-in' },
-            { transform: at(0, 100), offset: 1 }
-        ], { duration: 5200 });
-    }
-
-    // ── Figures (inline SVG; animated parts carry yy-xd-* classes, see christmas.css) ──
+    // ── Figures (inline SVG; animated parts carry yy-v-* classes, see visitors.css) ──
 
     function svg(viewBox, body) {
         return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="' + viewBox + '">' + body + '</svg>';
@@ -255,18 +57,18 @@
     // Reindeer seen from the side, facing right, in a 130 x 100 box
     function reindeerBody(extraClass) {
         function leg(cls, x, fill, hoof) {
-            return '<g class="yy-xd-leg ' + cls + '" style="transform-origin:' + (x + 3) + 'px 62px">'
+            return '<g class="yy-v-leg ' + cls + '" style="transform-origin:' + (x + 3) + 'px 62px">'
                 + '<rect x="' + x + '" y="60" width="6.5" height="29" rx="3.2" fill="' + fill + '"/>'
                 + '<rect x="' + (x - 1) + '" y="86" width="8.5" height="5.5" rx="2" fill="' + hoof + '"/></g>';
         }
-        return '<g class="yy-xd-deer ' + (extraClass || '') + '">'
-            + leg('yy-xd-leg-back yy-xd-far', 40, '#6e4520', '#2b1b10')
-            + leg('yy-xd-leg-front yy-xd-far', 78, '#6e4520', '#2b1b10')
+        return '<g class="yy-v-deer ' + (extraClass || '') + '">'
+            + leg('yy-v-leg-back yy-v-far', 40, '#6e4520', '#2b1b10')
+            + leg('yy-v-leg-front yy-v-far', 78, '#6e4520', '#2b1b10')
             + '<ellipse cx="22" cy="46" rx="7" ry="4.5" fill="#efe0c4" transform="rotate(-35 22 46)"/>'
             + '<ellipse cx="55" cy="55" rx="34" ry="17" fill="#8b5a2b"/>'
             + '<ellipse cx="58" cy="63" rx="22" ry="7.5" fill="#b8854f"/>'
-            + leg('yy-xd-leg-back', 31, '#8b5a2b', '#3a2414')
-            + leg('yy-xd-leg-front', 70, '#8b5a2b', '#3a2414')
+            + leg('yy-v-leg-back', 31, '#8b5a2b', '#3a2414')
+            + leg('yy-v-leg-front', 70, '#8b5a2b', '#3a2414')
             + '<path d="M70 46 Q82 34 91 24 L106 33 Q96 48 88 63 Z" fill="#8b5a2b"/>'
             + '<path d="M79 52 Q90 46 97 37" stroke="#c8102e" stroke-width="5" fill="none" stroke-linecap="round"/>'
             + '<circle cx="85" cy="54" r="3.6" fill="#f2c230" stroke="#b8860b"/>'
@@ -290,7 +92,7 @@
 
     function sleighSvg() {
         function star(x, y, r, delay) {
-            return '<path class="yy-xd-sparkle" style="transform-origin:' + x + 'px ' + y + 'px;animation-delay:' + delay + 's" d="M'
+            return '<path class="yy-v-sparkle" style="transform-origin:' + x + 'px ' + y + 'px;animation-delay:' + delay + 's" d="M'
                 + x + ' ' + (y - r) + ' Q' + x + ' ' + y + ' ' + (x + r) + ' ' + y + ' Q' + x + ' ' + y + ' ' + x + ' ' + (y + r)
                 + ' Q' + x + ' ' + y + ' ' + (x - r) + ' ' + y + ' Q' + x + ' ' + y + ' ' + x + ' ' + (y - r) + 'Z" fill="#ffd95a"/>';
         }
@@ -308,7 +110,7 @@
             + '<path d="M120 62 L134 66" stroke="#c8102e" stroke-width="8" stroke-linecap="round"/>'
             + '<circle cx="137" cy="66" r="5" fill="#1f6b43"/>'
             // waving arm
-            + '<g class="yy-xd-wave" style="transform-origin:116px 54px">'
+            + '<g class="yy-v-wave" style="transform-origin:116px 54px">'
             + '<path d="M116 54 L128 34" stroke="#c8102e" stroke-width="9" stroke-linecap="round"/>'
             + '<path d="M127 36 L130 31" stroke="#fff" stroke-width="10" stroke-linecap="round"/>'
             + '<ellipse cx="132" cy="26" rx="5.5" ry="6.5" fill="#1f6b43"/></g>'
@@ -335,24 +137,24 @@
         return svg('0 0 600 150', sparkles
             + '<path d="M177 76 Q260 92 336 76 Q420 66 505 64" stroke="#5b3a1a" stroke-width="1.8" fill="none"/>'
             + '<g transform="translate(40 10)">' + santa + sleigh + '</g>'
-            + '<g transform="translate(250 22)"><g class="yy-xd-bob" style="animation-delay:-.25s">' + reindeerBody('yy-xd-gallop') + '</g></g>'
-            + '<g transform="translate(420 10)"><g class="yy-xd-bob">' + reindeerBody('yy-xd-gallop') + '</g></g>');
+            + '<g transform="translate(250 22)"><g class="yy-v-bob" style="animation-delay:-.25s">' + reindeerBody('yy-v-gallop') + '</g></g>'
+            + '<g transform="translate(420 10)"><g class="yy-v-bob">' + reindeerBody('yy-v-gallop') + '</g></g>');
     }
 
     // Santa from the front, dancing; 100 x 150 box
     function santaSvg() {
         return svg('0 0 100 150', ''
-            + '<g class="yy-xd-leg-l" style="transform-origin:41px 106px">'
+            + '<g class="yy-v-leg-l" style="transform-origin:41px 106px">'
             + '<rect x="35" y="102" width="12" height="28" rx="5" fill="#c8102e"/>'
             + '<ellipse cx="38" cy="133" rx="11" ry="6.5" fill="#222"/></g>'
-            + '<g class="yy-xd-leg-r" style="transform-origin:59px 106px">'
+            + '<g class="yy-v-leg-r" style="transform-origin:59px 106px">'
             + '<rect x="53" y="102" width="12" height="28" rx="5" fill="#c8102e"/>'
             + '<ellipse cx="62" cy="133" rx="11" ry="6.5" fill="#222"/></g>'
-            + '<g class="yy-xd-arm-l" style="transform-origin:27px 72px">'
+            + '<g class="yy-v-arm-l" style="transform-origin:27px 72px">'
             + '<path d="M27 72 L13 94" stroke="#c8102e" stroke-width="11" stroke-linecap="round"/>'
             + '<path d="M14.5 92 L12 96" stroke="#fff" stroke-width="12" stroke-linecap="round"/>'
             + '<circle cx="10" cy="101" r="6.5" fill="#1f6b43"/></g>'
-            + '<g class="yy-xd-arm-r" style="transform-origin:73px 72px">'
+            + '<g class="yy-v-arm-r" style="transform-origin:73px 72px">'
             + '<path d="M73 72 L87 94" stroke="#c8102e" stroke-width="11" stroke-linecap="round"/>'
             + '<path d="M85.5 92 L88 96" stroke="#fff" stroke-width="12" stroke-linecap="round"/>'
             + '<circle cx="90" cy="101" r="6.5" fill="#1f6b43"/></g>'
@@ -378,7 +180,7 @@
         return svg('0 0 120 110', ''
             + '<path d="M12 110 Q14 76 60 72 Q106 76 108 110 Z" fill="#c8102e"/>'
             + '<rect x="56" y="76" width="8" height="34" fill="#fff"/>'
-            + '<g class="yy-xd-wave" style="transform-origin:94px 94px">'
+            + '<g class="yy-v-wave" style="transform-origin:94px 94px">'
             + '<path d="M94 94 L105 62" stroke="#c8102e" stroke-width="13" stroke-linecap="round"/>'
             + '<path d="M105 61 L107 55" stroke="#fff" stroke-width="15" stroke-linecap="round"/>'
             + '<ellipse cx="109" cy="45" rx="7.5" ry="9" fill="#1f6b43"/>'
@@ -402,7 +204,7 @@
             + '<path d="M28 110 Q30 80 60 78 Q90 80 92 110 Z" fill="#8b5a2b"/>'
             + '<path d="M36 92 Q60 103 84 92" stroke="#c8102e" stroke-width="6" fill="none" stroke-linecap="round"/>'
             + '<circle cx="60" cy="99.5" r="4.8" fill="#f2c230" stroke="#b8860b"/>'
-            + '<g class="yy-xd-wave" style="transform-origin:86px 98px">'
+            + '<g class="yy-v-wave" style="transform-origin:86px 98px">'
             + '<path d="M86 98 L100 64" stroke="#8b5a2b" stroke-width="10" stroke-linecap="round"/>'
             + '<ellipse cx="102" cy="58" rx="6.5" ry="5.5" fill="#3a2414" transform="rotate(20 102 58)"/></g>'
             + '<g fill="none" stroke="#dcbc8c" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">'
@@ -418,6 +220,4 @@
             + '<circle cx="52" cy="46" r="3.3" fill="#1d1d1d"/><circle cx="53" cy="45" r="1.1" fill="#fff"/>'
             + '<circle cx="68" cy="46" r="3.3" fill="#1d1d1d"/><circle cx="69" cy="45" r="1.1" fill="#fff"/>');
     }
-
-    start();
 })();

@@ -5,14 +5,19 @@
  * 1. Light / dark: follows the operating system (prefers-color-scheme) and switches
  *    live when the OS setting changes. Bootstrap 5.3 reads data-bs-theme on <html>.
  *
- * 2. Christmas: a festive look (fir-green menu bar with fairy lights, red buttons,
- *    falling snow, Santa hats on the avatars) that switches itself on from the Monday
- *    after Totensonntag until 26 December and is off again from 27 December, by the
- *    browser's local date. It follows light / dark like the normal look. Every few
- *    minutes Santa or a reindeer drops by (js/christmas.js).
- *    Preview at any time: append ?theme=christmas to any page URL. The preview lasts
- *    until the browser tab is closed (sessionStorage), ?theme=default ends it.
- *    Styles: css/christmas.css.
+ * 2. Seasonal looks, switched on by the browser's local date and following light /
+ *    dark like the normal look. Every few minutes a visitor drops by (js/visitors.js).
+ *    - Christmas: fir-green menu bar with fairy lights, red buttons, falling snow,
+ *      Santa hats on the avatars; from the Monday after Totensonntag up to and
+ *      including 26 December. Visitors: Santa and his reindeer (js/christmas.js).
+ *      Styles: css/christmas.css.
+ *    - Easter: sky-blue menu bar with a string of painted eggs, pink buttons, falling
+ *      blossom petals, a meadow along the bottom edge, bunny ears on the avatars;
+ *      from the Monday two weeks before Easter up to and including Easter Monday.
+ *      Visitors: the Easter bunny and a chick (js/easter.js). Styles: css/easter.css.
+ *    Preview at any time: append ?theme=christmas or ?theme=easter to any page URL.
+ *    The preview lasts until the browser tab is closed (sessionStorage),
+ *    ?theme=default ends it.
  *
  * 3. Easter egg "Symbolics": a neon retro-terminal look styled after symbolics.com,
  *    the first .com domain ever registered. Toggle it by typing "symbolics" anywhere
@@ -21,17 +26,19 @@
  *    (?theme=default switches back). The choice is kept per browser in localStorage.
  *    Styles: css/symbolics.css.
  *
- * Which look applies: a Christmas preview in this tab, else Symbolics if switched on,
- * else Christmas during the season, else the normal look.
+ * Which look applies: a seasonal preview in this tab, else Symbolics if switched on,
+ * else the season's look, else the normal look.
  */
 (function () {
     'use strict';
 
     var root = document.documentElement;
     var STORAGE_KEY = 'yy-theme';           // localStorage: "symbolics" while the easter egg is on
-    var PREVIEW_KEY = 'yy-theme-preview';   // sessionStorage: "christmas" while previewing it in this tab
-    var EGG = 'symbolics';
+    var PREVIEW_KEY = 'yy-theme-preview';   // sessionStorage: the seasonal look previewed in this tab
+    var SYMBOLICS = 'symbolics';
     var XMAS = 'christmas';
+    var EASTER = 'easter';
+    var SEASONS = [XMAS, EASTER];
     var URL_PARAM = 'theme';
     var URL_OFF = 'default';
     var TAPS_NEEDED = 7;
@@ -39,11 +46,11 @@
     var IDLE_TEXT = "READY FOR INPUT... (TYPE 'SYMBOLICS' TO EXIT)";
 
     var media = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
-    var symbolics = readEgg();
+    var symbolics = readSymbolics();
     var preview = readPreview();
-    var theme = null; // the look shown right now: EGG, XMAS or null
+    var theme = null; // the look shown right now: SYMBOLICS, XMAS, EASTER or null
 
-    // A shared link like /orders/12?theme=symbolics (or ?theme=christmas) switches the
+    // A shared link like /orders/12?theme=symbolics (or ?theme=easter) switches the
     // look before the first paint. Once the choice is stored, the parameter is removed
     // from the address bar, so reloading or copying the URL does not switch it again.
     (function themeFromUrl() {
@@ -54,18 +61,18 @@
             return;
         }
         var value = (url.searchParams.get(URL_PARAM) || '').toLowerCase();
-        if (value !== EGG && value !== XMAS && value !== URL_OFF) {
+        if (value !== SYMBOLICS && value !== URL_OFF && SEASONS.indexOf(value) < 0) {
             return;
         }
         var stored;
-        if (value === XMAS) {
-            preview = true;
-            stored = writePreview(true);
+        if (SEASONS.indexOf(value) >= 0) {
+            preview = value;
+            stored = writePreview(value);
         } else {
-            symbolics = value === EGG;
-            preview = false;
-            var eggStored = writeEgg(symbolics);
-            stored = writePreview(false) && eggStored;
+            symbolics = value === SYMBOLICS;
+            preview = null;
+            var symbolicsStored = writeSymbolics(symbolics);
+            stored = writePreview(null) && symbolicsStored;
         }
         if (stored && window.history.replaceState) {
             url.searchParams.delete(URL_PARAM);
@@ -73,19 +80,19 @@
         }
     })();
 
-    function readEgg() {
+    function readSymbolics() {
         try {
-            return window.localStorage.getItem(STORAGE_KEY) === EGG;
+            return window.localStorage.getItem(STORAGE_KEY) === SYMBOLICS;
         } catch (e) {
             return false;
         }
     }
 
     // Returns false if the choice could not be stored
-    function writeEgg(on) {
+    function writeSymbolics(on) {
         try {
             if (on) {
-                window.localStorage.setItem(STORAGE_KEY, EGG);
+                window.localStorage.setItem(STORAGE_KEY, SYMBOLICS);
             } else {
                 window.localStorage.removeItem(STORAGE_KEY);
             }
@@ -98,17 +105,18 @@
 
     function readPreview() {
         try {
-            return window.sessionStorage.getItem(PREVIEW_KEY) === XMAS;
+            var value = window.sessionStorage.getItem(PREVIEW_KEY);
+            return SEASONS.indexOf(value) >= 0 ? value : null;
         } catch (e) {
-            return false;
+            return null;
         }
     }
 
     // Returns false if the preview could not be stored
-    function writePreview(on) {
+    function writePreview(value) {
         try {
-            if (on) {
-                window.sessionStorage.setItem(PREVIEW_KEY, XMAS);
+            if (value) {
+                window.sessionStorage.setItem(PREVIEW_KEY, value);
             } else {
                 window.sessionStorage.removeItem(PREVIEW_KEY);
             }
@@ -128,19 +136,56 @@
         return now >= start && now < end;
     }
 
-    function currentTheme() {
-        if (preview) {
+    // Easter Sunday in the Gregorian calendar (anonymous Gregorian algorithm)
+    function easterSunday(year) {
+        var a = year % 19;
+        var b = Math.floor(year / 100);
+        var c = year % 100;
+        var d = Math.floor(b / 4);
+        var e = b % 4;
+        var f = Math.floor((b + 8) / 25);
+        var g = Math.floor((b - f + 1) / 3);
+        var h = (19 * a + b - d - g + 15) % 30;
+        var i = Math.floor(c / 4);
+        var k = c % 4;
+        var l = (32 + 2 * e + 2 * i - h - k) % 7;
+        var m = Math.floor((a + 11 * h + 22 * l) / 451);
+        var n = h + l - 7 * m + 114;
+        return new Date(year, Math.floor(n / 31) - 1, n % 31 + 1);
+    }
+
+    // Easter season: from the Monday two weeks before Easter Sunday (the Monday before
+    // Palm Sunday) up to and including Easter Monday.
+    function isEasterSeason(now) {
+        var easter = easterSunday(now.getFullYear());
+        var y = easter.getFullYear();
+        var mo = easter.getMonth();
+        var d = easter.getDate();
+        var start = new Date(y, mo, d - 13);
+        var end = new Date(y, mo, d + 2); // off again from the Tuesday after Easter
+        return now >= start && now < end;
+    }
+
+    function seasonOf(now) {
+        if (isChristmasSeason(now)) {
             return XMAS;
         }
-        if (symbolics) {
-            return EGG;
+        return isEasterSeason(now) ? EASTER : null;
+    }
+
+    function currentTheme() {
+        if (preview) {
+            return preview;
         }
-        return isChristmasSeason(new Date()) ? XMAS : null;
+        if (symbolics) {
+            return SYMBOLICS;
+        }
+        return seasonOf(new Date());
     }
 
     function applyTheme() {
         theme = currentTheme();
-        if (theme === EGG) {
+        if (theme === SYMBOLICS) {
             root.setAttribute('data-bs-theme', 'dark'); // Symbolics is always dark
         } else {
             root.setAttribute('data-bs-theme', media && media.matches ? 'dark' : 'light');
@@ -249,7 +294,7 @@
     }
 
     function syncChrome() {
-        if (theme === EGG) {
+        if (theme === SYMBOLICS) {
             buildChrome();
         } else {
             removeChrome();
@@ -259,10 +304,10 @@
     function setSymbolics(on, persist) {
         symbolics = on;
         if (persist) {
-            writeEgg(on);
-            // Switching the easter egg by hand ends a Christmas preview, so the change shows
-            preview = false;
-            writePreview(false);
+            writeSymbolics(on);
+            // Switching the easter egg by hand ends a seasonal preview, so the change shows
+            preview = null;
+            writePreview(null);
         }
         applyTheme();
         syncChrome();
@@ -283,10 +328,10 @@
         if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) {
             return;
         }
-        typed = (typed + e.key.toLowerCase()).slice(-EGG.length);
-        if (typed === EGG) {
+        typed = (typed + e.key.toLowerCase()).slice(-SYMBOLICS.length);
+        if (typed === SYMBOLICS) {
             typed = '';
-            setSymbolics(theme !== EGG, true);
+            setSymbolics(theme !== SYMBOLICS, true);
         }
     });
 
@@ -303,14 +348,14 @@
         lastTap = now;
         if (taps >= TAPS_NEEDED) {
             taps = 0;
-            setSymbolics(theme !== EGG, true);
+            setSymbolics(theme !== SYMBOLICS, true);
         }
     });
 
     // Keep other open tabs in step
     window.addEventListener('storage', function (e) {
         if (e.key === STORAGE_KEY) {
-            setSymbolics(readEgg(), false);
+            setSymbolics(readSymbolics(), false);
         }
     });
 

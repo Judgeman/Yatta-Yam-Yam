@@ -39,7 +39,7 @@ Yatta-Yam-Yam is an internal web application for collective food ordering. Users
 - User statistics (total spend, open amounts)
 - Red badge with the open amount next to your own name in the navbar
 - Dark mode that follows the operating system setting
-- Christmas look from the Monday after Totensonntag until 26 December
+- Christmas look from the Monday after Totensonntag until 26 December, Easter look in the two weeks before Easter until Easter Monday – each with occasional visitors (Santa and his reindeer, the Easter bunny and a chick)
 
 ---
 
@@ -508,14 +508,18 @@ Yatta-Yam-Yam/
         │   ├── css/
         │   │   ├── christmas.css             # Christmas look (inert outside the season)
         │   │   ├── dashboard.css
+        │   │   ├── easter.css                # Easter look (inert outside the season)
         │   │   ├── style.css                 # Base styles + colour tokens (--yy-*) for light/dark
-        │   │   └── symbolics.css             # Easter egg: Symbolics mode (inert unless enabled)
+        │   │   ├── symbolics.css             # Easter egg: Symbolics mode (inert unless enabled)
+        │   │   └── visitors.css              # Visitors: stage and animations
         │   ├── images/
         │   │   ├── favicon.svg
         │   │   └── logo.png
         │   └── js/
         │       ├── christmas.js              # Christmas visitors: Santa and the reindeer
-        │       └── theme.js                  # Light/dark from the OS setting, Christmas look, Symbolics easter egg
+        │       ├── easter.js                 # Easter visitors: the Easter bunny and a chick
+        │       ├── theme.js                  # Light/dark from the OS setting, seasonal looks, Symbolics easter egg
+        │       └── visitors.js               # Visitors: schedule, motions, call words
         └── templates/                        # Thymeleaf HTML templates
             ├── index.html                    # Name input
             ├── confirm.html                  # Confirm existing user
@@ -536,7 +540,7 @@ Yatta-Yam-Yam/
             ├── version.html                  # Version info
             └── fragments/
                 ├── open-debt-badge.html      # Red badge with the open amount next to the name
-                └── theme.html                # <head> include: theme.js, christmas.js, christmas.css, symbolics.css
+                └── theme.html                # <head> include: theme scripts and styles
 ```
 
 ---
@@ -554,28 +558,40 @@ The app follows the light/dark setting of the operating system; there is no togg
 - No hard-coded colours: use the `--yy-*` tokens or Bootstrap variables (`--bs-body-bg`, `--bs-border-color`, `--bs-secondary-color`, …).
 - Avoid `bg-light` and `text-bg-light`, which stay light in dark mode; use `bg-body-tertiary` and `text-body-emphasis`. Centred single-card pages use `<body class="page-muted">`.
 
-### Christmas look
+### Seasonal looks: Christmas and Easter
 
-From the Monday after Totensonntag up to and including 26 December the app dresses up for Christmas: a fir-green menu bar with twinkling fairy lights (along the top edge on pages without a menu bar), red buttons and avatars, Santa hats on every avatar, gently falling snow behind the content and a 🎄 next to the app name. Light and dark each have their own palette (snowy day / winter night); the look still follows the OS setting.
+At two times of the year the app dresses up by itself. `theme.js` checks the browser's local date on every page load and sets `data-yy-theme="christmas"` or `"easter"` on `<html>`; no server code, no configuration. Both looks still follow the OS light/dark setting and have their own light and dark palette.
 
-- **Automatic:** `theme.js` checks the browser's local date on every page load. Totensonntag (the Sunday of the Dead) is the last Sunday before the first Sunday of Advent, so always between 20 and 26 November; the look starts on the Monday after it at 0:00 (2026: 23 November) and is off again from 27 December, 0:00. No server code, no configuration.
-- **Preview via link:** append `?theme=christmas` to any page URL (e.g. `/orders/dashboard?theme=christmas`, or `&theme=christmas`). The parameter survives both login steps and is then removed from the address bar. The preview only applies to this browser tab until it is closed (`sessionStorage`, `yy-theme-preview` = `christmas`), so a forgotten preview does not linger past Christmas. `?theme=default` ends it earlier.
-- **Precedence:** preview in this tab › Symbolics mode switched on › Christmas season › normal look. Anyone using Symbolics keeps it during Advent; switching it off (typing `symbolics` or `?theme=default`) returns to the Christmas look in season. There is no switch to opt out of the Christmas look during the season.
-- **Visitors** (`static/js/christmas.js`): every 1–5 minutes (at random) one of five appearances comes along, never the same one twice in a row:
-  - Santa flies through the upper half of the screen in his sleigh with two reindeer, on a gentle wave (from the left or the right, twice as often as the others),
-  - Santa or a reindeer dances along the bottom edge,
-  - Santa or a reindeer peeks in from the left, right or bottom edge and waves.
+**Christmas** – from the Monday after Totensonntag, 0:00, up to and including 26 December (off again from 27 December, 0:00). Totensonntag (the Sunday of the Dead) is the last Sunday before the first Sunday of Advent, so always between 20 and 26 November (2026: starts on 23 November). Fir-green menu bar with twinkling fairy lights (along the top edge on pages without a menu bar), red buttons and avatars, Santa hats on every avatar, gently falling snow behind the content, a 🎄 next to the app name; palettes "snowy day" / "winter night". Styles: `static/css/christmas.css`.
 
-  The next due time is kept in `sessionStorage` (`yy-xmas-next`), so the rhythm carries on across page loads instead of restarting on every click; if it is already due when a page loads, the visit comes 3 seconds later. If it falls due while the tab is in the background, it comes 3 seconds after the tab is visible again. On the first page of a `?theme=christmas` preview the first visitor appears after 3 seconds. Typing `hohoho` outside a form field calls one at once. The figures are inline SVGs, ignore clicks (`pointer-events: none`) and are removed afterwards; they move with the Web Animations API, arms and legs with CSS (`.yy-xd-*` in `christmas.css`).
-- With "reduce motion" enabled in the OS (`prefers-reduced-motion`) the snow does not fall, the lights do not twinkle and no visitors come.
-- Styles: `static/css/christmas.css`, every rule scoped to `html[data-yy-theme="christmas"]`. Hat, lights and snow are inline SVGs in CSS variables (no extra requests). The snow sits behind every card with `z-index: -1` and does not catch clicks.
+**Easter** – from the Monday two weeks before Easter Sunday (the Monday before Palm Sunday), 0:00, up to and including Easter Monday (off again from the Tuesday after, 0:00). Easter Sunday is computed with the Gregorian computus (anonymous Gregorian algorithm); in 2027 the look runs from 15 to 29 March. Sky-blue menu bar with a string of painted Easter eggs that swing gently, pink buttons and avatars, bunny ears on every avatar, blossom petals drifting down behind the content, a meadow with hidden eggs and flowers along the bottom edge (every page gets 40 px of room at the bottom for it), a 🐣 next to the app name; palettes "spring morning" / "spring night". Styles: `static/css/easter.css`.
+
+- **Preview via link:** append `?theme=christmas` or `?theme=easter` to any page URL (e.g. `/orders/dashboard?theme=easter`, or `&theme=easter`). The parameter survives both login steps and is then removed from the address bar. The preview only applies to this browser tab until it is closed (`sessionStorage`, `yy-theme-preview` = `christmas`/`easter`), so a forgotten preview does not linger past the holiday. `?theme=default` ends it earlier.
+- **Precedence:** preview in this tab › Symbolics mode switched on › seasonal look › normal look. Anyone using Symbolics keeps it during Advent and before Easter; switching it off (typing `symbolics` or `?theme=default`) returns to the seasonal look in season. There is no switch to opt out of a seasonal look.
+- With "reduce motion" enabled in the OS (`prefers-reduced-motion`) no snow falls and no petals drift, lights and eggs stay still and no visitors come.
+- Every rule is scoped to `html[data-yy-theme="christmas"]` or `"easter"`, so the files have no effect otherwise. Hat, ears, lights, eggs, snow, petals and meadow are inline SVGs in CSS variables (no extra requests). Snow and petals sit behind every card with `z-index: -1`; none of it catches clicks.
+
+### Visitors
+
+During a seasonal look a visitor crosses the screen every 1–5 minutes (at random), never the same one twice in a row:
+
+| | Christmas (`static/js/christmas.js`) | Easter (`static/js/easter.js`) |
+|---|---|---|
+| Flying through the upper half (twice as often) | Santa in his sleigh with two reindeer | the Easter bunny in the basket of an egg-shaped hot-air balloon |
+| Along the bottom edge | Santa or a reindeer dances | the Easter bunny hops with a basket of eggs; a chick with an eggshell cap dances |
+| Peeking in from the left, right or bottom edge and waving | Santa or a reindeer | the Easter bunny or a chick in its egg |
+| Call one at once: type outside a form field | `hohoho` | `hoppel` |
+
+- Schedule, motions and call words are handled by `static/js/visitors.js`; `christmas.js` and `easter.js` only draw the figures and register them with `yyVisitors.add(...)` (the scripts load with `defer` in this order).
+- The next due time is kept in `sessionStorage` (`yy-visitor-next`), so the rhythm carries on across page loads instead of restarting on every click; if it is already due when a page loads, the visit comes 3 seconds later. If it falls due while the tab is in the background, it comes 3 seconds after the tab is visible again. On the first page of a preview (`?theme=…`) the first visitor appears after 3 seconds.
+- The figures are inline SVGs, ignore clicks (`pointer-events: none`) and are removed afterwards. They move with the Web Animations API; arms, legs, ears and wings with CSS (`.yy-v-*` in `static/css/visitors.css`).
 
 ### Easter egg: Symbolics mode
 
 A hidden third look styled after symbolics.com, the first .com domain ever registered: a neon retro terminal with scanlines on black, glowing cyan headings and frames, green monospace text, magenta and yellow accents, window title bars with three dots, and a command line at the bottom (`C:\YATTA-YAM-YAM\ORDERS\DASHBOARD>`) that shows the command a click on the item under the mouse would run.
 
 - **On/off:** type `symbolics` anywhere outside a form field, or tap the version badge on `/version` 7 times in a row (works on phones, too).
-- **Via link:** append `?theme=symbolics` to any page URL (e.g. `/orders/12?theme=symbolics`, or `&theme=symbolics` if the URL already has parameters); `?theme=default` switches back (and also ends a Christmas preview). The parameter survives both login steps. Once the choice is stored, `theme.js` removes the parameter from the address bar, so reloading or copying the URL does not switch it again.
+- **Via link:** append `?theme=symbolics` to any page URL (e.g. `/orders/12?theme=symbolics`, or `&theme=symbolics` if the URL already has parameters); `?theme=default` switches back (and also ends a seasonal preview). The parameter survives both login steps. Once the choice is stored, `theme.js` removes the parameter from the address bar, so reloading or copying the URL does not switch it again.
 - The choice is stored per browser in `localStorage` (`yy-theme` = `symbolics`); other open tabs follow. If storage is blocked, the mode lasts for the current page only.
 - Styles: `static/css/symbolics.css`. Every rule is scoped to `html[data-yy-theme="symbolics"]`, so the file has no effect otherwise. In this mode `data-bs-theme` is always `dark`, regardless of the OS setting.
 - Deliberately not mentioned in the release notes.
