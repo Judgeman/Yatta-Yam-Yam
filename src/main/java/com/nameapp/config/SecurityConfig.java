@@ -13,6 +13,11 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                // No CSRF check on the login form: the token lives in the server-side session,
+                // so a login page that outlived its session (timeout, restart, restored tab)
+                // was rejected silently and sent people back to /login. With a single shared
+                // account, login CSRF gives an attacker nothing; all other forms stay protected.
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/login"))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/uploads/**", "/version").permitAll()
                         .anyRequest().authenticated()

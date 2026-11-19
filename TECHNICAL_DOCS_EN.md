@@ -27,7 +27,7 @@
 Yatta-Yam-Yam is an internal web application for collective food ordering. Users select dishes from predefined menu lists, the order creator calls the restaurant to place the combined order, and then manages incoming payments.
 
 **Core features:**
-- Name-based login without a password (cookie session)
+- Shared access password for the app, then name-based sign-in without a personal password (cookie)
 - Order management with a status lifecycle
 - Reusable menu lists with a visibility toggle (hidden lists are excluded from new orders)
 - Location filter (Kassel / Frankfurt)
@@ -79,12 +79,12 @@ Spring Data JPA Repository
 H2 Database (file: ./data/yatta_yam_yam_db)
 ```
 
-**Two parallel authentication paths:**
+**Two sign-in steps, one after the other:**
 
-| Path | Mechanism | User Group |
-|------|-----------|------------|
-| Cookie (`nameapp_user`) | Custom implementation via `LoginController` | All app users |
-| HTTP login (`/login`) | Spring Security form login | Admin access (e.g. H2 console) |
+| Step | Mechanism | Purpose |
+|------|-----------|---------|
+| 1. Access password (`/login`) | Spring Security form login with remember-me | Unlocks the app – one shared account `yatta` for all users |
+| 2. Name (`nameapp_user`) | Custom implementation via `LoginController` | Determines who you are in the app (no personal password) |
 
 ---
 
@@ -201,9 +201,29 @@ Contact book entry (e.g. a restaurant or delivery service). Independent of the o
 
 ## 5. Authentication & Session
 
-### Cookie Login (Users)
+Access works in two steps: first a shared access password unlocks the app (Spring Security), then each user identifies themselves by name (custom cookie). The password protects the app from the outside; the name only determines who you are in the app and is not protected by a personal password.
 
-The primary login path uses an HttpOnly cookie `nameapp_user` containing the URL-encoded username.
+### Step 1: Access Password (Spring Security)
+
+Spring Security protects all routes. Only these are publicly accessible (without the password):
+- `/css/**`, `/js/**`, `/images/**`, `/uploads/**`
+- `/version`
+
+Every other request – including the name entry on `/` and the H2 console – redirects visitors who have not entered the password to `/login`. There they enter the shared access password; the username `yatta` is a hidden field in the form. The account is configured in `application.properties`:
+```
+spring.security.user.name=yatta
+spring.security.user.password=${YATTA_YAM_YAM_PASSWORD}
+```
+
+After a successful login, Spring Security redirects to the originally requested URL, otherwise to `/`.
+
+Remember-Me is always on (hidden field `remember-me=true`) with a token validity of one year, so each browser only needs the password once a year. The UI has no logout button; "Switch Account" only clears the name cookie from step 2, not the password login.
+
+CSRF protection is disabled for `POST /login` (`csrf.ignoringRequestMatchers("/login")`). The CSRF token lives in the server-side session; if that session had expired by the time the form was submitted (timeout, restart, restored tab), the login was rejected silently and the user ended up on `/login` again. With a single shared account, login CSRF gives an attacker nothing. All other forms remain CSRF-protected.
+
+### Step 2: Name Login (Cookie)
+
+After the password, each user identifies themselves by name. The identity is stored in an HttpOnly cookie `nameapp_user` containing the URL-encoded username. The controllers read this cookie themselves; if it is missing or the name is unknown, they redirect to `/` for name entry.
 
 **Flow:**
 1. `GET /` — Cookie present with a known name → logged in immediately
@@ -212,23 +232,7 @@ The primary login path uses an HttpOnly cookie `nameapp_user` containing the URL
 
 The cookie has an expiry of `Integer.MAX_VALUE` seconds (~68 years), is `HttpOnly`, and applies to path `/`.
 
-**Redirect preservation:** When an unauthenticated user accesses a protected URL, it is stored in the session under `redirectAfterLogin` and restored after login.
-
-### Spring Security (Admin)
-
-Spring Security protects all routes. Publicly accessible (without login):
-- `/css/**`, `/js/**`, `/images/**`, `/uploads/**`
-- `/version`
-
-The cookie-based user login does not require a Spring Security login, as the routes are secured by the `LoginController` and the cookie check within the controllers themselves.
-
-Admin access (e.g. for the H2 console) goes through `/login` and is configured in `application.properties`:
-```
-spring.security.user.name=yatta
-spring.security.user.password=${YATTA_YAM_YAM_PASSWORD}
-```
-
-Remember-Me is enabled with a token validity of one year.
+**Redirect preservation:** When someone without a name cookie opens an order or contact page (`/orders/**`, `/contacts/**`), the URL is stored in the session under `redirectAfterLogin` and restored after name entry. Together with the redirect from step 1, a shared link ends up on the right page after the password and name entry.
 
 ---
 
@@ -244,7 +248,7 @@ Remember-Me is enabled with a token validity of one year.
 | POST   | `/not-me`            | Return to name input                                |
 | POST   | `/confirm-new-login` | Log in new user, set cookie                         |
 | POST   | `/switch-account`    | Clear cookie, redirect to `/`                       |
-| GET    | `/login`             | Spring Security login page                          |
+| GET    | `/login`             | Enter the access password (Spring Security)         |
 | POST   | `/rename`            | Rename user, update cookie                          |
 | GET    | `/version`           | Version page (public)                               |
 | GET    | `/users`             | User statistics (logged-in users only)              |
@@ -417,7 +421,7 @@ All settings are in `src/main/resources/application.properties`.
 
 | Variable                   | Required | Description                         |
 |----------------------------|----------|-------------------------------------|
-| `YATTA_YAM_YAM_PASSWORD`   | Yes      | Admin password for Spring Security  |
+| `YATTA_YAM_YAM_PASSWORD`   | Yes      | Shared access password for all users (Spring Security) |
 
 ### File Uploads
 
