@@ -6,6 +6,13 @@
  *
  * The button follows the look: it appears, changes or disappears when data-yy-theme
  * on <html> changes (e.g. typing "symbolics", or a ?theme=... link).
+ *
+ * Symbolics hides the seasonal looks. So that its users notice them anyway, a small
+ * note ("Incoming message") appears on every page while Symbolics is on and the date
+ * calls for a seasonal look, with a button that switches to the standard look in place
+ * (no reload, like typing "symbolics" again). "Not now" hides the note for the rest of
+ * that occasion (localStorage, yy-season-hint-dismissed); the Symbolics info modal keeps
+ * the same way back. Styles: css/symbolics.css.
  */
 (function () {
     'use strict';
@@ -13,6 +20,8 @@
     var root = document.documentElement;
     var PREVIEW_KEY = 'yy-theme-preview';
     var MODAL_ID = 'yy-theme-info';
+    var HINT_ID = 'yy-season-hint';
+    var DISMISS_KEY = 'yy-season-hint-dismissed';
 
     var INFO = {
         christmas: {
@@ -126,7 +135,108 @@
         return b;
     }
 
+    // ── The note about a seasonal look that Symbolics hides ──
+
+    // The seasonal look the date calls for, while Symbolics is in front of it
+    function hiddenSeason() {
+        if (root.getAttribute('data-yy-theme') !== 'symbolics' || !window.yyTheme) {
+            return null;
+        }
+        var season = window.yyTheme.season();
+        return season && INFO.hasOwnProperty(season) ? season : null;
+    }
+
+    // One key per occasion, so "Not now" lasts until the next one (garlic comes twice a year)
+    function occasionKey(season) {
+        var now = new Date();
+        return season + ':' + now.getFullYear() + (season === 'garlic' ? '-' + (now.getMonth() + 1) : '');
+    }
+
+    function isDismissed(season) {
+        try {
+            return window.localStorage.getItem(DISMISS_KEY) === occasionKey(season);
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function dismiss(season) {
+        try {
+            window.localStorage.setItem(DISMISS_KEY, occasionKey(season));
+        } catch (e) {
+            // Blocked storage: the note comes back on the next page
+        }
+    }
+
+    // A link to the standard look; with JavaScript it switches in place
+    function standardLink(className, text, after) {
+        var url = new URL(window.location.href);
+        url.searchParams.set('theme', 'default');
+        var a = document.createElement('a');
+        a.className = className;
+        a.href = url.pathname + url.search + url.hash;
+        a.textContent = text;
+        a.addEventListener('click', function (e) {
+            if (window.yyTheme) {
+                e.preventDefault();
+                window.yyTheme.useStandard();
+                if (after) {
+                    after();
+                }
+            }
+        });
+        return a;
+    }
+
+    function syncHint() {
+        var season = hiddenSeason();
+        var hint = document.getElementById(HINT_ID);
+        if (!season || isDismissed(season)) {
+            if (hint) {
+                hint.parentNode.removeChild(hint);
+            }
+            return;
+        }
+        if (hint && hint.getAttribute('data-season') === season) {
+            return;
+        }
+        if (hint) {
+            hint.parentNode.removeChild(hint);
+        }
+        var info = INFO[season];
+        hint = document.createElement('div');
+        hint.id = HINT_ID;
+        hint.className = 'yy-season-hint card shadow';
+        hint.setAttribute('role', 'status');
+        hint.setAttribute('data-season', season);
+        hint.innerHTML = ''
+            + '<div class="card-header d-flex align-items-center justify-content-between gap-2">'
+            + '<span>Incoming message</span>'
+            + '<button type="button" class="btn-close" aria-label="Not now" title="Not now"></button>'
+            + '</div>'
+            + '<div class="card-body">'
+            + '<p class="mb-1 fw-semibold"><span class="me-1" data-field="emoji"></span><span data-field="headline"></span></p>'
+            + '<p class="small mb-3" data-field="text"></p>'
+            + '<div data-field="action"></div>'
+            + '<p class="small text-muted mt-2 mb-0">Type \u201Csymbolics\u201D to come back any time.</p>'
+            + '</div>';
+        hint.querySelector('[data-field="emoji"]').textContent = info.emoji;
+        hint.querySelector('[data-field="headline"]').textContent = info.title + ' in Yatta-Yam-Yam!';
+        hint.querySelector('[data-field="text"]').textContent = 'There is a special ' + info.title
+            + ' look right now, with a few surprises. Symbolics mode hides it.';
+        hint.querySelector('[data-field="action"]').appendChild(
+            standardLink('btn btn-primary btn-sm', 'Switch to the standard look'));
+        hint.querySelector('.btn-close').addEventListener('click', function () {
+            dismiss(season);
+            syncHint();
+        });
+        document.body.appendChild(hint);
+    }
+
+    // ── The (i) button ──
+
     function sync() {
+        syncHint();
         var info = currentInfo();
         if (!info) {
             if (button) {
@@ -176,6 +286,7 @@
             + 'or with ?theme=default in the address bar.</p>'
             + '<p data-field="text"></p>'
             + '<p class="small text-muted mb-0"><i class="bi bi-stars me-1" aria-hidden="true"></i><span data-field="tip"></span></p>'
+            + '<div class="alert alert-warning small mt-3 mb-0" data-field="season" hidden></div>'
             + '</div>'
             + '<div class="modal-footer">'
             + '<button type="button" class="btn btn-primary" data-bs-dismiss="modal">Got it</button>'
@@ -195,6 +306,18 @@
             el.querySelector('[data-field="' + field + '"]').textContent = info[field];
         });
         el.querySelector('[data-field="preview"]').hidden = !isPreview();
+
+        // In Symbolics mode: point to the seasonal look it hides
+        var season = hiddenSeason();
+        var box = el.querySelector('[data-field="season"]');
+        box.hidden = !season;
+        box.textContent = '';
+        if (season) {
+            box.appendChild(document.createTextNode(INFO[season].emoji + ' Right now it\u2019s ' + INFO[season].title + '. '));
+            box.appendChild(standardLink('alert-link', 'Switch to the standard look to see it.', function () {
+                window.bootstrap.Modal.getOrCreateInstance(el).hide();
+            }));
+        }
         window.bootstrap.Modal.getOrCreateInstance(el).show();
     }
 

@@ -597,3 +597,33 @@ html[data-yy-theme="symbolics"] .yy-terminal-status::after {
         animation: none;
     }
 }
+
+/* ── Note about a seasonal look that Symbolics hides (built by theme-info.js) ── */
+.yy-season-hint {
+    display: none;
+}
+
+html[data-yy-theme="symbolics"] .yy-season-hint {
+    display: block;
+    position: fixed;
+    right: 16px;
+    bottom: 56px;                        /* above the command line */
+    width: min(360px, calc(100vw - 32px));
+    z-index: 1045;                       /* above the page and the menu bar, below modals */
+    animation: yy-hint-in 0.4s ease-out both;
+}
+
+html[data-yy-theme="symbolics"] .yy-season-hint .card-header {
+    font-size: 13px;
+}
+
+@keyframes yy-hint-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html[data-yy-theme="symbolics"] .yy-season-hint {
+        animation: none;
+    }
+}

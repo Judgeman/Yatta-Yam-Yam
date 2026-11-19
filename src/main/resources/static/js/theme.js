@@ -48,7 +48,8 @@
  *    Styles: css/symbolics.css.
  *
  * Which look applies: a seasonal preview in this tab, else Symbolics if switched on,
- * else the season's look, else the normal look.
+ * else the season's look, else the normal look. While Symbolics hides a seasonal look,
+ * theme-info.js shows a note with a way back to the standard look.
  */
 (function () {
     'use strict';
@@ -426,4 +427,15 @@
     } else {
         syncChrome();
     }
+
+    // For theme-info.js: which seasonal look the date calls for (whatever is shown right
+    // now), and switching Symbolics off in place, like typing "symbolics" or ?theme=default
+    window.yyTheme = {
+        season: function () {
+            return seasonOf(new Date());
+        },
+        useStandard: function () {
+            setSymbolics(false, true);
+        }
+    };
 })();
