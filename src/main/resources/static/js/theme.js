@@ -37,17 +37,24 @@
  *      (js/pizza.js). Styles: css/pizza.css.
  *    Preview at any time: append ?theme=christmas, ?theme=easter, ?theme=halloween,
  *    ?theme=muertos, ?theme=garlic or ?theme=pizza to any page URL.
+ *
+ * 3. Link-only looks have no season and only ever show as a preview, for links shared
+ *    on purpose on a particular day:
+ *    - Pelmeni (?theme=pelmeni): dumplings, Gzhel-blue menu bar with a lace border,
+ *      beetroot buttons, plate-with-smetana avatars, falling pelmeni and dill, a pastry
+ *      board along the bottom edge. Visitors: pelmeni and their dumpling friends
+ *      (js/pelmeni.js). Styles: css/pelmeni.css.
  *    The preview lasts until the browser tab is closed (sessionStorage),
  *    ?theme=default ends it.
  *
- * 3. Easter egg "Symbolics": a neon retro-terminal look styled after symbolics.com,
+ * 4. Easter egg "Symbolics": a neon retro-terminal look styled after symbolics.com,
  *    the first .com domain ever registered. Toggle it by typing "symbolics" anywhere
  *    outside a form field, or by tapping the version badge on the release notes page
  *    7 times. A link can switch it, too: append ?theme=symbolics to any page URL
  *    (?theme=default switches back). The choice is kept per browser in localStorage.
  *    Styles: css/symbolics.css.
  *
- * Which look applies: a seasonal preview in this tab, else Symbolics if switched on,
+ * Which look applies: a preview in this tab, else Symbolics if switched on,
  * else the season's look, else the normal look. While Symbolics hides a seasonal look,
  * theme-info.js shows a note with a way back to the standard look.
  */
@@ -64,7 +71,10 @@
     var MUERTOS = 'muertos';
     var GARLIC = 'garlic';
     var PIZZA = 'pizza';
+    var PELMENI = 'pelmeni';
     var SEASONS = [XMAS, EASTER, HALLOWEEN, MUERTOS, GARLIC, PIZZA];
+    var LINK_ONLY = [PELMENI];                    // no season: only ever shown as a preview
+    var PREVIEWABLE = SEASONS.concat(LINK_ONLY);
     var URL_PARAM = 'theme';
     var URL_OFF = 'default';
     var TAPS_NEEDED = 7;
@@ -74,7 +84,7 @@
     var media = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
     var symbolics = readSymbolics();
     var preview = readPreview();
-    var theme = null; // the look shown right now: SYMBOLICS, one of SEASONS, or null
+    var theme = null; // the look shown right now: SYMBOLICS, one of PREVIEWABLE, or null
 
     // A shared link like /orders/12?theme=symbolics (or ?theme=easter) switches the
     // look before the first paint. Once the choice is stored, the parameter is removed
@@ -87,11 +97,11 @@
             return;
         }
         var value = (url.searchParams.get(URL_PARAM) || '').toLowerCase();
-        if (value !== SYMBOLICS && value !== URL_OFF && SEASONS.indexOf(value) < 0) {
+        if (value !== SYMBOLICS && value !== URL_OFF && PREVIEWABLE.indexOf(value) < 0) {
             return;
         }
         var stored;
-        if (SEASONS.indexOf(value) >= 0) {
+        if (PREVIEWABLE.indexOf(value) >= 0) {
             preview = value;
             stored = writePreview(value);
         } else {
@@ -132,7 +142,7 @@
     function readPreview() {
         try {
             var value = window.sessionStorage.getItem(PREVIEW_KEY);
-            return SEASONS.indexOf(value) >= 0 ? value : null;
+            return PREVIEWABLE.indexOf(value) >= 0 ? value : null;
         } catch (e) {
             return null;
         }
