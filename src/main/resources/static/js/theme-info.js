@@ -86,11 +86,7 @@
             emoji: '\uD83E\uDD5F',
             title: 'Pelmeni',
             when: 'This look has no season. It only comes by special link, on days worth celebrating.',
-            text: 'Pelmeni are small dumplings from Russian and Siberian cooking: thin dough folded around minced '
-                + 'meat into a little \u201Cear\u201D, which is what the name means in the Komi and Udmurt languages. '
-                + 'In the Siberian winter they were frozen outdoors by the sackful and boiled when needed, then eaten '
-                + 'with smetana, butter or dill. Their relatives are everywhere: vareniki, pierogi, Maultaschen, '
-                + 'ravioli, gyoza and many more.',
+            text: 'Today is Triple-T (\u201CTeig-Taschen-Tag\u201D) \u2013 get ready to be surprised!',
             tip: 'Pelmeni and their dumpling friends drop by now and then. Type \u201Cpelmeni\u201D to call them.'
         },
         symbolics: {
