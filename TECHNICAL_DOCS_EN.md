@@ -514,6 +514,7 @@ Yatta-Yam-Yam/
         │   │   ├── favicon.svg
         │   │   └── logo.png
         │   └── js/
+        │       ├── christmas.js              # Christmas visitors: Santa and the reindeer
         │       └── theme.js                  # Light/dark from the OS setting, Christmas look, Symbolics easter egg
         └── templates/                        # Thymeleaf HTML templates
             ├── index.html                    # Name input
@@ -535,7 +536,7 @@ Yatta-Yam-Yam/
             ├── version.html                  # Version info
             └── fragments/
                 ├── open-debt-badge.html      # Red badge with the open amount next to the name
-                └── theme.html                # <head> include: theme.js + christmas.css + symbolics.css
+                └── theme.html                # <head> include: theme.js, christmas.js, christmas.css, symbolics.css
 ```
 
 ---
@@ -560,7 +561,13 @@ From the Monday after Totensonntag up to and including 26 December the app dress
 - **Automatic:** `theme.js` checks the browser's local date on every page load. Totensonntag (the Sunday of the Dead) is the last Sunday before the first Sunday of Advent, so always between 20 and 26 November; the look starts on the Monday after it at 0:00 (2026: 23 November) and is off again from 27 December, 0:00. No server code, no configuration.
 - **Preview via link:** append `?theme=christmas` to any page URL (e.g. `/orders/dashboard?theme=christmas`, or `&theme=christmas`). The parameter survives both login steps and is then removed from the address bar. The preview only applies to this browser tab until it is closed (`sessionStorage`, `yy-theme-preview` = `christmas`), so a forgotten preview does not linger past Christmas. `?theme=default` ends it earlier.
 - **Precedence:** preview in this tab › Symbolics mode switched on › Christmas season › normal look. Anyone using Symbolics keeps it during Advent; switching it off (typing `symbolics` or `?theme=default`) returns to the Christmas look in season. There is no switch to opt out of the Christmas look during the season.
-- With "reduce motion" enabled in the OS (`prefers-reduced-motion`) the snow does not fall and the lights do not twinkle.
+- **Visitors** (`static/js/christmas.js`): every 1–5 minutes (at random) one of five appearances comes along, never the same one twice in a row:
+  - Santa flies through the upper half of the screen in his sleigh with two reindeer, on a gentle wave (from the left or the right, twice as often as the others),
+  - Santa or a reindeer dances along the bottom edge,
+  - Santa or a reindeer peeks in from the left, right or bottom edge and waves.
+
+  The next due time is kept in `sessionStorage` (`yy-xmas-next`), so the rhythm carries on across page loads instead of restarting on every click; if it is already due when a page loads, the visit comes 3 seconds later. If it falls due while the tab is in the background, it comes 3 seconds after the tab is visible again. On the first page of a `?theme=christmas` preview the first visitor appears after 3 seconds. Typing `hohoho` outside a form field calls one at once. The figures are inline SVGs, ignore clicks (`pointer-events: none`) and are removed afterwards; they move with the Web Animations API, arms and legs with CSS (`.yy-xd-*` in `christmas.css`).
+- With "reduce motion" enabled in the OS (`prefers-reduced-motion`) the snow does not fall, the lights do not twinkle and no visitors come.
 - Styles: `static/css/christmas.css`, every rule scoped to `html[data-yy-theme="christmas"]`. Hat, lights and snow are inline SVGs in CSS variables (no extra requests). The snow sits behind every card with `z-index: -1` and does not catch clicks.
 
 ### Easter egg: Symbolics mode

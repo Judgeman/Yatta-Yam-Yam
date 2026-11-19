@@ -2,6 +2,7 @@
  * Christmas look: fir-green menu bar with twinkling fairy lights, red buttons and
  * avatars, Santa hats, falling snow behind the content and a tree next to the app
  * name. Light and dark mode both get their own palette (snowy day / winter night).
+ * Every few minutes Santa or a reindeer drops by (christmas.js, styles at the end).
  *
  * theme.js sets html[data-yy-theme="christmas"] from the Monday after Totensonntag
  * until 26 December, or for a preview via ?theme=christmas. Every rule is scoped to
@@ -189,6 +190,130 @@ html[data-yy-theme="christmas"] ::selection {
     color: #fff;
 }
 
+/* ── Visitors: Santa and the reindeer (built and moved by christmas.js) ── */
+.yy-xmas-stage {
+    display: none;
+}
+
+html[data-yy-theme="christmas"] .yy-xmas-stage {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 1080;                       /* above menu bar and modals, below toasts */
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.yy-xmas-actor {
+    position: absolute;
+    left: 0;
+    top: 0;
+    will-change: transform;
+}
+
+.yy-xmas-actor div,
+.yy-xmas-actor svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+.yy-xmas-actor svg {
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.18));
+}
+
+.yy-xd-flip {
+    transform: scaleX(-1);
+}
+
+/* Reindeer legs: a gallop in the air, a prance on the ground */
+.yy-xd-gallop .yy-xd-leg-front { animation: yy-xd-gallop-front 0.6s ease-in-out infinite; }
+.yy-xd-gallop .yy-xd-leg-back  { animation: yy-xd-gallop-back 0.6s ease-in-out infinite; }
+.yy-xd-prance .yy-xd-leg-front { animation: yy-xd-prance 0.5s ease-in-out infinite alternate; }
+.yy-xd-prance .yy-xd-leg-back  { animation: yy-xd-prance 0.5s ease-in-out infinite alternate-reverse; }
+.yy-xd-deer .yy-xd-far         { animation-delay: -0.15s; }
+
+@keyframes yy-xd-gallop-front {
+    0%, 100% { transform: rotate(-42deg); }
+    50%      { transform: rotate(14deg); }
+}
+
+@keyframes yy-xd-gallop-back {
+    0%, 100% { transform: rotate(38deg); }
+    50%      { transform: rotate(-16deg); }
+}
+
+@keyframes yy-xd-prance {
+    from { transform: rotate(-24deg); }
+    to   { transform: rotate(20deg); }
+}
+
+.yy-xd-bob {
+    animation: yy-xd-bob 0.6s ease-in-out infinite;
+}
+
+@keyframes yy-xd-bob {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-5px); }
+}
+
+.yy-xd-wave {
+    animation: yy-xd-wave 0.42s ease-in-out infinite alternate;
+}
+
+@keyframes yy-xd-wave {
+    from { transform: rotate(-22deg); }
+    to   { transform: rotate(18deg); }
+}
+
+.yy-xd-sparkle {
+    animation: yy-xd-sparkle 0.9s ease-in-out infinite;
+}
+
+@keyframes yy-xd-sparkle {
+    0%, 100% { opacity: 0.2; transform: scale(0.6); }
+    50%      { opacity: 1; transform: scale(1.1); }
+}
+
+/* Dancing: hop and sway, Santa throws his arms up and kicks his legs */
+.yy-xd-dance {
+    transform-origin: 50% 100%;
+    animation: yy-xd-hop 0.9s ease-in-out infinite;
+}
+
+@keyframes yy-xd-hop {
+    0%, 100% { transform: translateY(0) rotate(-7deg); }
+    25%      { transform: translateY(-18%) rotate(0deg); }
+    50%      { transform: translateY(0) rotate(7deg); }
+    75%      { transform: translateY(-18%) rotate(0deg); }
+}
+
+.yy-xd-arm-l { animation: yy-xd-arm-l 0.45s ease-in-out infinite alternate; }
+.yy-xd-arm-r { animation: yy-xd-arm-r 0.45s ease-in-out infinite alternate-reverse; }
+.yy-xd-leg-l { animation: yy-xd-kick-l 0.45s ease-in-out infinite alternate; }
+.yy-xd-leg-r { animation: yy-xd-kick-r 0.45s ease-in-out infinite alternate-reverse; }
+
+@keyframes yy-xd-arm-l {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(135deg); }
+}
+
+@keyframes yy-xd-arm-r {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(-135deg); }
+}
+
+@keyframes yy-xd-kick-l {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(22deg); }
+}
+
+@keyframes yy-xd-kick-r {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(-22deg); }
+}
+
 /* No falling snow or twinkling for people who asked their system for less motion */
 @media (prefers-reduced-motion: reduce) {
     html[data-yy-theme="christmas"] body::before {
@@ -201,5 +326,9 @@ html[data-yy-theme="christmas"] ::selection {
 
     html[data-yy-theme="christmas"] body.page-muted::after {
         background-image: var(--xmas-garland);
+    }
+
+    html[data-yy-theme="christmas"] .yy-xmas-stage {
+        display: none;
     }
 }

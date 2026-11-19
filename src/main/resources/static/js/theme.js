@@ -8,7 +8,8 @@
  * 2. Christmas: a festive look (fir-green menu bar with fairy lights, red buttons,
  *    falling snow, Santa hats on the avatars) that switches itself on from the Monday
  *    after Totensonntag until 26 December and is off again from 27 December, by the
- *    browser's local date. It follows light / dark like the normal look.
+ *    browser's local date. It follows light / dark like the normal look. Every few
+ *    minutes Santa or a reindeer drops by (js/christmas.js).
  *    Preview at any time: append ?theme=christmas to any page URL. The preview lasts
  *    until the browser tab is closed (sessionStorage), ?theme=default ends it.
  *    Styles: css/christmas.css.

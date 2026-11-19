@@ -514,6 +514,7 @@ Yatta-Yam-Yam/
         │   │   ├── favicon.svg
         │   │   └── logo.png
         │   └── js/
+        │       ├── christmas.js              # Weihnachts-Besucher: Weihnachtsmann und Rentiere
         │       └── theme.js                  # Hell/dunkel nach Systemeinstellung, Weihnachts-Look, Symbolics-Easter-Egg
         └── templates/                        # Thymeleaf HTML-Templates
             ├── index.html                    # Namenseingabe
@@ -535,7 +536,7 @@ Yatta-Yam-Yam/
             ├── version.html                  # Versionsinfo
             └── fragments/
                 ├── open-debt-badge.html      # Rotes Badge mit offenem Betrag neben dem Namen
-                └── theme.html                # Einbindung im <head>: theme.js + christmas.css + symbolics.css
+                └── theme.html                # Einbindung im <head>: theme.js, christmas.js, christmas.css, symbolics.css
 ```
 
 ---
@@ -560,7 +561,13 @@ Vom Montag nach Totensonntag bis einschließlich 26. Dezember zeigt sich die App
 - **Automatisch:** `theme.js` prüft beim Laden jeder Seite das lokale Datum des Browsers. Totensonntag ist der letzte Sonntag vor dem 1. Advent, also immer zwischen dem 20. und 26. November; der Look beginnt am Montag danach um 0:00 Uhr (2026: 23. November) und ist ab dem 27. Dezember, 0:00 Uhr, wieder aus. Kein Server-Code, keine Konfiguration.
 - **Vorschau per Link:** `?theme=christmas` an die URL einer beliebigen Seite hängen (z. B. `/orders/dashboard?theme=christmas`, bzw. `&theme=christmas`). Der Parameter übersteht beide Login-Schritte und wird danach aus der Adressleiste entfernt. Die Vorschau gilt nur für diesen Browser-Tab, bis er geschlossen wird (`sessionStorage`, `yy-theme-preview` = `christmas`) – eine vergessene Vorschau bleibt also nicht über Weihnachten hinaus hängen. `?theme=default` beendet sie vorher.
 - **Vorrang:** Vorschau in diesem Tab › eingeschalteter Symbolics-Modus › Weihnachtszeit › normaler Look. Wer Symbolics an hat, behält es also auch im Advent; Ausschalten (`symbolics` tippen oder `?theme=default`) führt in der Saison zum Weihnachts-Look zurück. Einen Schalter, um den Weihnachts-Look in der Saison abzuwählen, gibt es nicht.
-- Bei „Bewegung reduzieren“ im Betriebssystem (`prefers-reduced-motion`) fällt kein Schnee und die Lichterkette funkelt nicht.
+- **Besucher** (`static/js/christmas.js`): Alle 1–5 Minuten (zufällig) kommt einer von fünf Auftritten, nie zweimal derselbe hintereinander:
+  - der Weihnachtsmann fliegt im Schlitten mit zwei Rentieren in Wellen durch die obere Bildschirmhälfte (von links oder rechts, doppelt so häufig wie die anderen),
+  - der Weihnachtsmann oder ein Rentier tanzt am unteren Rand über den Bildschirm,
+  - der Weihnachtsmann oder ein Rentier schaut von links, rechts oder unten herein und winkt.
+
+  Der nächste Termin steht in `sessionStorage` (`yy-xmas-next`), damit der Rhythmus über Seitenwechsel hinweg weiterläuft statt bei jedem Klick neu zu starten; ist er beim Laden einer Seite schon fällig, kommt der Besuch 3 Sekunden später. Fällt er in eine Zeit, in der der Tab im Hintergrund ist, kommt er 3 Sekunden nach der Rückkehr. Beim ersten Aufruf einer `?theme=christmas`-Vorschau erscheint der erste Besucher schon nach 3 Sekunden. `hohoho` außerhalb eines Formularfelds tippen ruft sofort einen. Die Figuren sind Inline-SVGs, fangen keine Klicks ab (`pointer-events: none`) und werden danach wieder entfernt; Bewegung über die Web Animations API, Arme und Beine per CSS (`.yy-xd-*` in `christmas.css`).
+- Bei „Bewegung reduzieren“ im Betriebssystem (`prefers-reduced-motion`) fällt kein Schnee, die Lichterkette funkelt nicht und es kommen keine Besucher.
 - Styles: `static/css/christmas.css`, alle Regeln auf `html[data-yy-theme="christmas"]` beschränkt. Mütze, Lichterkette und Schnee sind Inline-SVGs in CSS-Variablen (keine zusätzlichen Requests). Der Schnee liegt mit `z-index: -1` hinter allen Karten und fängt keine Klicks ab.
 
 ### Easter Egg: Symbolics-Modus

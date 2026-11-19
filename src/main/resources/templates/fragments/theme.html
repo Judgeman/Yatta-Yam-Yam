@@ -6,12 +6,14 @@
      <th:block th:replace="~{fragments/theme :: head}"></th:block>
      theme.js sets data-bs-theme (light/dark from the OS setting) before the first paint.
      christmas.css only applies during the Christmas season or a preview, symbolics.css
-     only while the hidden Symbolics mode is on (see theme.js). -->
+     only while the hidden Symbolics mode is on (see theme.js). christmas.js sends Santa
+     and the reindeer across the screen while the Christmas look is on. -->
 <th:block th:fragment="head">
     <meta name="color-scheme" content="light dark"/>
     <link rel="stylesheet" th:href="@{/css/christmas.css}"/>
     <link rel="stylesheet" th:href="@{/css/symbolics.css}"/>
     <script th:src="@{/js/theme.js}"></script>
+    <script th:src="@{/js/christmas.js}" defer></script>
 </th:block>
 
 </head>
