@@ -1,6 +1,6 @@
 # Yatta-Yam-Yam – Technical Documentation
 
-**Version:** 1.11.0  
+**Version:** 1.12.0  
 **Date:** November 2026
 
 ---
@@ -39,6 +39,7 @@ Yatta-Yam-Yam is an internal web application for collective food ordering. Users
 - User statistics (total spend, open amounts)
 - Red badge with the open amount next to your own name in the navbar
 - Dark mode that follows the operating system setting
+- Christmas look from the Monday after Totensonntag until 26 December
 
 ---
 
@@ -459,7 +460,7 @@ Application available at: `http://localhost:38443`
 
 ```bash
 mvn package
-java -DYATTA_YAM_YAM_PASSWORD=yourPassword -jar target/yatta-yam-yam-1.11.0.jar
+java -DYATTA_YAM_YAM_PASSWORD=yourPassword -jar target/yatta-yam-yam-1.12.0.jar
 ```
 
 ---
@@ -505,6 +506,7 @@ Yatta-Yam-Yam/
         ├── application.properties
         ├── static/
         │   ├── css/
+        │   │   ├── christmas.css             # Christmas look (inert outside the season)
         │   │   ├── dashboard.css
         │   │   ├── style.css                 # Base styles + colour tokens (--yy-*) for light/dark
         │   │   └── symbolics.css             # Easter egg: Symbolics mode (inert unless enabled)
@@ -512,7 +514,7 @@ Yatta-Yam-Yam/
         │   │   ├── favicon.svg
         │   │   └── logo.png
         │   └── js/
-        │       └── theme.js                  # Light/dark from the OS setting, Symbolics easter egg
+        │       └── theme.js                  # Light/dark from the OS setting, Christmas look, Symbolics easter egg
         └── templates/                        # Thymeleaf HTML templates
             ├── index.html                    # Name input
             ├── confirm.html                  # Confirm existing user
@@ -533,7 +535,7 @@ Yatta-Yam-Yam/
             ├── version.html                  # Version info
             └── fragments/
                 ├── open-debt-badge.html      # Red badge with the open amount next to the name
-                └── theme.html                # <head> include: theme.js + symbolics.css
+                └── theme.html                # <head> include: theme.js + christmas.css + symbolics.css
 ```
 
 ---
@@ -551,12 +553,22 @@ The app follows the light/dark setting of the operating system; there is no togg
 - No hard-coded colours: use the `--yy-*` tokens or Bootstrap variables (`--bs-body-bg`, `--bs-border-color`, `--bs-secondary-color`, …).
 - Avoid `bg-light` and `text-bg-light`, which stay light in dark mode; use `bg-body-tertiary` and `text-body-emphasis`. Centred single-card pages use `<body class="page-muted">`.
 
+### Christmas look
+
+From the Monday after Totensonntag up to and including 26 December the app dresses up for Christmas: a fir-green menu bar with twinkling fairy lights (along the top edge on pages without a menu bar), red buttons and avatars, Santa hats on every avatar, gently falling snow behind the content and a 🎄 next to the app name. Light and dark each have their own palette (snowy day / winter night); the look still follows the OS setting.
+
+- **Automatic:** `theme.js` checks the browser's local date on every page load. Totensonntag (the Sunday of the Dead) is the last Sunday before the first Sunday of Advent, so always between 20 and 26 November; the look starts on the Monday after it at 0:00 (2026: 23 November) and is off again from 27 December, 0:00. No server code, no configuration.
+- **Preview via link:** append `?theme=christmas` to any page URL (e.g. `/orders/dashboard?theme=christmas`, or `&theme=christmas`). The parameter survives both login steps and is then removed from the address bar. The preview only applies to this browser tab until it is closed (`sessionStorage`, `yy-theme-preview` = `christmas`), so a forgotten preview does not linger past Christmas. `?theme=default` ends it earlier.
+- **Precedence:** preview in this tab › Symbolics mode switched on › Christmas season › normal look. Anyone using Symbolics keeps it during Advent; switching it off (typing `symbolics` or `?theme=default`) returns to the Christmas look in season. There is no switch to opt out of the Christmas look during the season.
+- With "reduce motion" enabled in the OS (`prefers-reduced-motion`) the snow does not fall and the lights do not twinkle.
+- Styles: `static/css/christmas.css`, every rule scoped to `html[data-yy-theme="christmas"]`. Hat, lights and snow are inline SVGs in CSS variables (no extra requests). The snow sits behind every card with `z-index: -1` and does not catch clicks.
+
 ### Easter egg: Symbolics mode
 
 A hidden third look styled after symbolics.com, the first .com domain ever registered: a neon retro terminal with scanlines on black, glowing cyan headings and frames, green monospace text, magenta and yellow accents, window title bars with three dots, and a command line at the bottom (`C:\YATTA-YAM-YAM\ORDERS\DASHBOARD>`) that shows the command a click on the item under the mouse would run.
 
 - **On/off:** type `symbolics` anywhere outside a form field, or tap the version badge on `/version` 7 times in a row (works on phones, too).
-- **Via link:** append `?theme=symbolics` to any page URL (e.g. `/orders/12?theme=symbolics`, or `&theme=symbolics` if the URL already has parameters); `?theme=default` switches back. The parameter survives both login steps. Once the choice is stored, `theme.js` removes the parameter from the address bar, so reloading or copying the URL does not switch it again.
+- **Via link:** append `?theme=symbolics` to any page URL (e.g. `/orders/12?theme=symbolics`, or `&theme=symbolics` if the URL already has parameters); `?theme=default` switches back (and also ends a Christmas preview). The parameter survives both login steps. Once the choice is stored, `theme.js` removes the parameter from the address bar, so reloading or copying the URL does not switch it again.
 - The choice is stored per browser in `localStorage` (`yy-theme` = `symbolics`); other open tabs follow. If storage is blocked, the mode lasts for the current page only.
 - Styles: `static/css/symbolics.css`. Every rule is scoped to `html[data-yy-theme="symbolics"]`, so the file has no effect otherwise. In this mode `data-bs-theme` is always `dark`, regardless of the OS setting.
 - Deliberately not mentioned in the release notes.

@@ -5,9 +5,11 @@
 <!-- Colour theme for every page; include as the last element in <head>:
      <th:block th:replace="~{fragments/theme :: head}"></th:block>
      theme.js sets data-bs-theme (light/dark from the OS setting) before the first paint.
-     symbolics.css only applies while the hidden Symbolics mode is on (see theme.js). -->
+     christmas.css only applies during the Christmas season or a preview, symbolics.css
+     only while the hidden Symbolics mode is on (see theme.js). -->
 <th:block th:fragment="head">
     <meta name="color-scheme" content="light dark"/>
+    <link rel="stylesheet" th:href="@{/css/christmas.css}"/>
     <link rel="stylesheet" th:href="@{/css/symbolics.css}"/>
     <script th:src="@{/js/theme.js}"></script>
 </th:block>

@@ -5,19 +5,32 @@
  * 1. Light / dark: follows the operating system (prefers-color-scheme) and switches
  *    live when the OS setting changes. Bootstrap 5.3 reads data-bs-theme on <html>.
  *
- * 2. Easter egg "Symbolics": a neon retro-terminal look styled after symbolics.com,
+ * 2. Christmas: a festive look (fir-green menu bar with fairy lights, red buttons,
+ *    falling snow, Santa hats on the avatars) that switches itself on from the Monday
+ *    after Totensonntag until 26 December and is off again from 27 December, by the
+ *    browser's local date. It follows light / dark like the normal look.
+ *    Preview at any time: append ?theme=christmas to any page URL. The preview lasts
+ *    until the browser tab is closed (sessionStorage), ?theme=default ends it.
+ *    Styles: css/christmas.css.
+ *
+ * 3. Easter egg "Symbolics": a neon retro-terminal look styled after symbolics.com,
  *    the first .com domain ever registered. Toggle it by typing "symbolics" anywhere
  *    outside a form field, or by tapping the version badge on the release notes page
  *    7 times. A link can switch it, too: append ?theme=symbolics to any page URL
  *    (?theme=default switches back). The choice is kept per browser in localStorage.
  *    Styles: css/symbolics.css.
+ *
+ * Which look applies: a Christmas preview in this tab, else Symbolics if switched on,
+ * else Christmas during the season, else the normal look.
  */
 (function () {
     'use strict';
 
     var root = document.documentElement;
-    var STORAGE_KEY = 'yy-theme';
+    var STORAGE_KEY = 'yy-theme';           // localStorage: "symbolics" while the easter egg is on
+    var PREVIEW_KEY = 'yy-theme-preview';   // sessionStorage: "christmas" while previewing it in this tab
     var EGG = 'symbolics';
+    var XMAS = 'christmas';
     var URL_PARAM = 'theme';
     var URL_OFF = 'default';
     var TAPS_NEEDED = 7;
@@ -26,10 +39,12 @@
 
     var media = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
     var symbolics = readEgg();
+    var preview = readPreview();
+    var theme = null; // the look shown right now: EGG, XMAS or null
 
-    // A shared link like /orders/12?theme=symbolics switches the mode before the
-    // first paint. Once the choice is stored, the parameter is removed from the
-    // address bar, so reloading or copying the URL does not switch it again.
+    // A shared link like /orders/12?theme=symbolics (or ?theme=christmas) switches the
+    // look before the first paint. Once the choice is stored, the parameter is removed
+    // from the address bar, so reloading or copying the URL does not switch it again.
     (function themeFromUrl() {
         var url;
         try {
@@ -38,11 +53,20 @@
             return;
         }
         var value = (url.searchParams.get(URL_PARAM) || '').toLowerCase();
-        if (value !== EGG && value !== URL_OFF) {
+        if (value !== EGG && value !== XMAS && value !== URL_OFF) {
             return;
         }
-        symbolics = value === EGG;
-        if (writeEgg(symbolics) && window.history.replaceState) {
+        var stored;
+        if (value === XMAS) {
+            preview = true;
+            stored = writePreview(true);
+        } else {
+            symbolics = value === EGG;
+            preview = false;
+            var eggStored = writeEgg(symbolics);
+            stored = writePreview(false) && eggStored;
+        }
+        if (stored && window.history.replaceState) {
             url.searchParams.delete(URL_PARAM);
             window.history.replaceState(window.history.state, '', url.pathname + url.search + url.hash);
         }
@@ -71,12 +95,58 @@
         }
     }
 
-    function applyTheme() {
+    function readPreview() {
+        try {
+            return window.sessionStorage.getItem(PREVIEW_KEY) === XMAS;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    // Returns false if the preview could not be stored
+    function writePreview(on) {
+        try {
+            if (on) {
+                window.sessionStorage.setItem(PREVIEW_KEY, XMAS);
+            } else {
+                window.sessionStorage.removeItem(PREVIEW_KEY);
+            }
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    // Christmas season: from the Monday after Totensonntag (the last Sunday before
+    // Advent, always between 20 and 26 November) up to and including 26 December.
+    function isChristmasSeason(now) {
+        var year = now.getFullYear();
+        var totensonntag = 26 - new Date(year, 10, 26).getDay(); // Sunday on or before 26 Nov
+        var start = new Date(year, 10, totensonntag + 1);
+        var end = new Date(year, 11, 27); // off again from 27 December
+        return now >= start && now < end;
+    }
+
+    function currentTheme() {
+        if (preview) {
+            return XMAS;
+        }
         if (symbolics) {
-            root.setAttribute('data-bs-theme', 'dark');
-            root.setAttribute('data-yy-theme', EGG);
+            return EGG;
+        }
+        return isChristmasSeason(new Date()) ? XMAS : null;
+    }
+
+    function applyTheme() {
+        theme = currentTheme();
+        if (theme === EGG) {
+            root.setAttribute('data-bs-theme', 'dark'); // Symbolics is always dark
         } else {
             root.setAttribute('data-bs-theme', media && media.matches ? 'dark' : 'light');
+        }
+        if (theme) {
+            root.setAttribute('data-yy-theme', theme);
+        } else {
             root.removeAttribute('data-yy-theme');
         }
     }
@@ -178,7 +248,7 @@
     }
 
     function syncChrome() {
-        if (symbolics) {
+        if (theme === EGG) {
             buildChrome();
         } else {
             removeChrome();
@@ -189,6 +259,9 @@
         symbolics = on;
         if (persist) {
             writeEgg(on);
+            // Switching the easter egg by hand ends a Christmas preview, so the change shows
+            preview = false;
+            writePreview(false);
         }
         applyTheme();
         syncChrome();
@@ -212,7 +285,7 @@
         typed = (typed + e.key.toLowerCase()).slice(-EGG.length);
         if (typed === EGG) {
             typed = '';
-            setSymbolics(!symbolics, true);
+            setSymbolics(theme !== EGG, true);
         }
     });
 
@@ -229,7 +302,7 @@
         lastTap = now;
         if (taps >= TAPS_NEEDED) {
             taps = 0;
-            setSymbolics(!symbolics, true);
+            setSymbolics(theme !== EGG, true);
         }
     });
 

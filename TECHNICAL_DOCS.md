@@ -1,6 +1,6 @@
 # Yatta-Yam-Yam – Technische Dokumentation
 
-**Version:** 1.11.0  
+**Version:** 1.12.0  
 **Stand:** November 2026
 
 ---
@@ -39,6 +39,7 @@ Yatta-Yam-Yam ist eine interne Web-App zur kollektiven Essensbestellung. Nutzer 
 - Benutzerstatistiken (Gesamtausgaben, offene Beträge)
 - Rotes Badge mit dem offenen Betrag neben dem eigenen Namen in der Menüleiste
 - Dark Mode, der der Einstellung des Betriebssystems folgt
+- Weihnachts-Look vom Montag nach Totensonntag bis zum 26. Dezember
 
 ---
 
@@ -459,7 +460,7 @@ Anwendung erreichbar unter: `http://localhost:38443`
 
 ```bash
 mvn package
-java -DYATTA_YAM_YAM_PASSWORD=deinPasswort -jar target/yatta-yam-yam-1.11.0.jar
+java -DYATTA_YAM_YAM_PASSWORD=deinPasswort -jar target/yatta-yam-yam-1.12.0.jar
 ```
 
 ---
@@ -505,6 +506,7 @@ Yatta-Yam-Yam/
         ├── application.properties
         ├── static/
         │   ├── css/
+        │   │   ├── christmas.css             # Weihnachts-Look (ohne Wirkung außerhalb der Saison)
         │   │   ├── dashboard.css
         │   │   ├── style.css                 # Basis-Styles + Farb-Tokens (--yy-*) für hell/dunkel
         │   │   └── symbolics.css             # Easter Egg: Symbolics-Modus (ohne Wirkung, solange aus)
@@ -512,7 +514,7 @@ Yatta-Yam-Yam/
         │   │   ├── favicon.svg
         │   │   └── logo.png
         │   └── js/
-        │       └── theme.js                  # Hell/dunkel nach Systemeinstellung, Symbolics-Easter-Egg
+        │       └── theme.js                  # Hell/dunkel nach Systemeinstellung, Weihnachts-Look, Symbolics-Easter-Egg
         └── templates/                        # Thymeleaf HTML-Templates
             ├── index.html                    # Namenseingabe
             ├── confirm.html                  # Bestehenden Nutzer bestätigen
@@ -533,7 +535,7 @@ Yatta-Yam-Yam/
             ├── version.html                  # Versionsinfo
             └── fragments/
                 ├── open-debt-badge.html      # Rotes Badge mit offenem Betrag neben dem Namen
-                └── theme.html                # Einbindung im <head>: theme.js + symbolics.css
+                └── theme.html                # Einbindung im <head>: theme.js + christmas.css + symbolics.css
 ```
 
 ---
@@ -551,12 +553,22 @@ Die App folgt der Hell/Dunkel-Einstellung des Betriebssystems; einen eigenen Ums
 - Keine fest codierten Farben: `--yy-*`-Tokens oder Bootstrap-Variablen (`--bs-body-bg`, `--bs-border-color`, `--bs-secondary-color`, …) verwenden.
 - `bg-light` und `text-bg-light` vermeiden, sie bleiben im Dark Mode hell; stattdessen `bg-body-tertiary` und `text-body-emphasis`. Zentrierte Ein-Karten-Seiten nutzen `<body class="page-muted">`.
 
+### Weihnachts-Look
+
+Vom Montag nach Totensonntag bis einschließlich 26. Dezember zeigt sich die App weihnachtlich: tannengrüne Menüleiste mit funkelnder Lichterkette (auf Seiten ohne Menüleiste am oberen Rand), rote Buttons und Avatare, Nikolausmützen auf allen Avataren, leise fallender Schnee hinter den Inhalten und ein 🎄 neben dem App-Namen. Hell und dunkel haben je eine eigene Palette (verschneiter Tag / Winternacht); der Look folgt weiter der Systemeinstellung.
+
+- **Automatisch:** `theme.js` prüft beim Laden jeder Seite das lokale Datum des Browsers. Totensonntag ist der letzte Sonntag vor dem 1. Advent, also immer zwischen dem 20. und 26. November; der Look beginnt am Montag danach um 0:00 Uhr (2026: 23. November) und ist ab dem 27. Dezember, 0:00 Uhr, wieder aus. Kein Server-Code, keine Konfiguration.
+- **Vorschau per Link:** `?theme=christmas` an die URL einer beliebigen Seite hängen (z. B. `/orders/dashboard?theme=christmas`, bzw. `&theme=christmas`). Der Parameter übersteht beide Login-Schritte und wird danach aus der Adressleiste entfernt. Die Vorschau gilt nur für diesen Browser-Tab, bis er geschlossen wird (`sessionStorage`, `yy-theme-preview` = `christmas`) – eine vergessene Vorschau bleibt also nicht über Weihnachten hinaus hängen. `?theme=default` beendet sie vorher.
+- **Vorrang:** Vorschau in diesem Tab › eingeschalteter Symbolics-Modus › Weihnachtszeit › normaler Look. Wer Symbolics an hat, behält es also auch im Advent; Ausschalten (`symbolics` tippen oder `?theme=default`) führt in der Saison zum Weihnachts-Look zurück. Einen Schalter, um den Weihnachts-Look in der Saison abzuwählen, gibt es nicht.
+- Bei „Bewegung reduzieren“ im Betriebssystem (`prefers-reduced-motion`) fällt kein Schnee und die Lichterkette funkelt nicht.
+- Styles: `static/css/christmas.css`, alle Regeln auf `html[data-yy-theme="christmas"]` beschränkt. Mütze, Lichterkette und Schnee sind Inline-SVGs in CSS-Variablen (keine zusätzlichen Requests). Der Schnee liegt mit `z-index: -1` hinter allen Karten und fängt keine Klicks ab.
+
 ### Easter Egg: Symbolics-Modus
 
 Ein versteckter dritter Look im Stil von symbolics.com, der ersten jemals registrierten .com-Domain: Neon-Retro-Terminal mit Scanlines auf Schwarz, leuchtenden cyanfarbenen Überschriften und Rahmen, grüner Monospace-Schrift, Magenta- und Gelb-Akzenten, Fenstertiteln mit drei Punkten und einer Kommandozeile am unteren Rand (`C:\YATTA-YAM-YAM\ORDERS\DASHBOARD>`), die anzeigt, welchen Befehl ein Klick auf das Element unter dem Mauszeiger ausführen würde.
 
 - **Ein/aus:** irgendwo außerhalb eines Formularfelds `symbolics` tippen oder auf `/version` 7-mal hintereinander auf das Versions-Badge tippen (funktioniert auch auf dem Handy).
-- **Per Link:** `?theme=symbolics` an die URL einer beliebigen Seite hängen (z. B. `/orders/12?theme=symbolics`, bzw. `&theme=symbolics`, wenn die URL schon Parameter hat); `?theme=default` schaltet zurück. Der Parameter übersteht beide Login-Schritte. Sobald die Wahl gespeichert ist, entfernt `theme.js` ihn aus der Adressleiste, damit Neuladen oder Kopieren der URL nicht erneut umschaltet.
+- **Per Link:** `?theme=symbolics` an die URL einer beliebigen Seite hängen (z. B. `/orders/12?theme=symbolics`, bzw. `&theme=symbolics`, wenn die URL schon Parameter hat); `?theme=default` schaltet zurück (und beendet auch eine Weihnachts-Vorschau). Der Parameter übersteht beide Login-Schritte. Sobald die Wahl gespeichert ist, entfernt `theme.js` ihn aus der Adressleiste, damit Neuladen oder Kopieren der URL nicht erneut umschaltet.
 - Die Wahl wird pro Browser in `localStorage` gespeichert (`yy-theme` = `symbolics`); andere offene Tabs ziehen mit. Ist der Speicher blockiert, gilt der Modus nur für die aktuelle Seite.
 - Styles: `static/css/symbolics.css`. Alle Regeln sind auf `html[data-yy-theme="symbolics"]` beschränkt, die Datei wirkt also sonst nicht. In diesem Modus ist `data-bs-theme` unabhängig von der Systemeinstellung immer `dark`.
 - Bewusst nicht in den Release Notes erwähnt.
