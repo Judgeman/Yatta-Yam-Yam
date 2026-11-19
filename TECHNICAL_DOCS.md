@@ -552,6 +552,7 @@ Die App folgt der Hell/Dunkel-Einstellung des Betriebssystems; einen eigenen Ums
 Ein versteckter dritter Look im Stil von symbolics.com, der ersten jemals registrierten .com-Domain: Neon-Retro-Terminal mit Scanlines auf Schwarz, leuchtenden cyanfarbenen Überschriften und Rahmen, grüner Monospace-Schrift, Magenta- und Gelb-Akzenten, Fenstertiteln mit drei Punkten und einer Kommandozeile am unteren Rand (`C:\YATTA-YAM-YAM\ORDERS\DASHBOARD>`), die anzeigt, welchen Befehl ein Klick auf das Element unter dem Mauszeiger ausführen würde.
 
 - **Ein/aus:** irgendwo außerhalb eines Formularfelds `symbolics` tippen oder auf `/version` 7-mal hintereinander auf das Versions-Badge tippen (funktioniert auch auf dem Handy).
+- **Per Link:** `?theme=symbolics` an die URL einer beliebigen Seite hängen (z. B. `/orders/12?theme=symbolics`, bzw. `&theme=symbolics`, wenn die URL schon Parameter hat); `?theme=default` schaltet zurück. Der Parameter übersteht beide Login-Schritte. Sobald die Wahl gespeichert ist, entfernt `theme.js` ihn aus der Adressleiste, damit Neuladen oder Kopieren der URL nicht erneut umschaltet.
 - Die Wahl wird pro Browser in `localStorage` gespeichert (`yy-theme` = `symbolics`); andere offene Tabs ziehen mit. Ist der Speicher blockiert, gilt der Modus nur für die aktuelle Seite.
 - Styles: `static/css/symbolics.css`. Alle Regeln sind auf `html[data-yy-theme="symbolics"]` beschränkt, die Datei wirkt also sonst nicht. In diesem Modus ist `data-bs-theme` unabhängig von der Systemeinstellung immer `dark`.
 - Bewusst nicht in den Release Notes erwähnt.

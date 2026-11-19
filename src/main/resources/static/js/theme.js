@@ -8,7 +8,9 @@
  * 2. Easter egg "Symbolics": a neon retro-terminal look styled after symbolics.com,
  *    the first .com domain ever registered. Toggle it by typing "symbolics" anywhere
  *    outside a form field, or by tapping the version badge on the release notes page
- *    7 times. The choice is kept per browser in localStorage. Styles: css/symbolics.css.
+ *    7 times. A link can switch it, too: append ?theme=symbolics to any page URL
+ *    (?theme=default switches back). The choice is kept per browser in localStorage.
+ *    Styles: css/symbolics.css.
  */
 (function () {
     'use strict';
@@ -16,12 +18,35 @@
     var root = document.documentElement;
     var STORAGE_KEY = 'yy-theme';
     var EGG = 'symbolics';
+    var URL_PARAM = 'theme';
+    var URL_OFF = 'default';
     var TAPS_NEEDED = 7;
     var TAP_WINDOW_MS = 1500;
     var IDLE_TEXT = "READY FOR INPUT... (TYPE 'SYMBOLICS' TO EXIT)";
 
     var media = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
     var symbolics = readEgg();
+
+    // A shared link like /orders/12?theme=symbolics switches the mode before the
+    // first paint. Once the choice is stored, the parameter is removed from the
+    // address bar, so reloading or copying the URL does not switch it again.
+    (function themeFromUrl() {
+        var url;
+        try {
+            url = new URL(window.location.href);
+        } catch (e) {
+            return;
+        }
+        var value = (url.searchParams.get(URL_PARAM) || '').toLowerCase();
+        if (value !== EGG && value !== URL_OFF) {
+            return;
+        }
+        symbolics = value === EGG;
+        if (writeEgg(symbolics) && window.history.replaceState) {
+            url.searchParams.delete(URL_PARAM);
+            window.history.replaceState(window.history.state, '', url.pathname + url.search + url.hash);
+        }
+    })();
 
     function readEgg() {
         try {
@@ -31,6 +56,7 @@
         }
     }
 
+    // Returns false if the choice could not be stored
     function writeEgg(on) {
         try {
             if (on) {
@@ -38,8 +64,10 @@
             } else {
                 window.localStorage.removeItem(STORAGE_KEY);
             }
+            return true;
         } catch (e) {
             // Private mode or blocked storage: the mode then lasts for this page only
+            return false;
         }
     }
 
