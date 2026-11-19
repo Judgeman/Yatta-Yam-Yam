@@ -1,6 +1,6 @@
 # Yatta-Yam-Yam – Technische Dokumentation
 
-**Version:** 1.10.0  
+**Version:** 1.10.1  
 **Stand:** November 2026
 
 ---
@@ -26,7 +26,7 @@
 Yatta-Yam-Yam ist eine interne Web-App zur kollektiven Essensbestellung. Nutzer wählen Speisen aus vordefinierten Menülisten aus, der Ersteller der Bestellung telefoniert die Sammelliste durch und verwaltet anschließend die Zahlungseingänge.
 
 **Kernfunktionen:**
-- Namenbasierter Login ohne Passwort (Cookie-Session)
+- Gemeinsames Zugangspasswort für die App, danach namensbasierte Anmeldung ohne persönliches Passwort (Cookie)
 - Verwaltung von Bestellungen mit Statuslebenszyklus
 - Wiederverwendbare Menülisten mit Sichtbarkeitsschalter (ausgeblendete Listen erscheinen nicht bei neuen Bestellungen)
 - Standortfilter (Kassel / Frankfurt)
@@ -77,12 +77,12 @@ Spring Data JPA Repository
 H2-Datenbank (Datei: ./data/yatta_yam_yam_db)
 ```
 
-**Zwei parallele Authentifizierungspfade:**
+**Zwei Anmeldestufen, nacheinander:**
 
-| Pfad | Mechanismus | Nutzergruppe |
-|------|-------------|--------------|
-| Cookie (`nameapp_user`) | Eigene Implementierung via `LoginController` | Alle App-Nutzer |
-| HTTP-Login (`/login`) | Spring Security Form-Login | Admin-Zugang (z. B. H2-Konsole) |
+| Stufe | Mechanismus | Zweck |
+|-------|-------------|-------|
+| 1. Zugangspasswort (`/login`) | Spring Security Form-Login mit Remember-Me | Schaltet die App frei – ein gemeinsames Konto `yatta` für alle Nutzer |
+| 2. Name (`nameapp_user`) | Eigene Implementierung via `LoginController` | Legt fest, wer man in der App ist (kein persönliches Passwort) |
 
 ---
 
@@ -199,9 +199,29 @@ Eintrag im Kontaktbuch (z. B. Restaurant oder Lieferdienst). Unabhängig von den
 
 ## 5. Authentifizierung & Session
 
-### Cookie-Login (Nutzer)
+Der Zugriff läuft in zwei Stufen: Zuerst schaltet ein gemeinsames Zugangspasswort die App frei (Spring Security), danach gibt sich jeder Nutzer über seinen Namen zu erkennen (eigener Cookie). Das Passwort schützt die App nach außen; der Name legt nur fest, wer man in der App ist, und ist durch kein persönliches Passwort geschützt.
 
-Der primäre Anmeldeweg erfolgt über einen HttpOnly-Cookie `nameapp_user`, der den URL-encodierten Nutzernamen enthält.
+### Stufe 1: Zugangspasswort (Spring Security)
+
+Spring Security schützt alle Routen. Öffentlich zugänglich (ohne Passwort) sind nur:
+- `/css/**`, `/js/**`, `/images/**`, `/uploads/**`
+- `/version`
+
+Jeder andere Aufruf – auch die Namenseingabe auf `/` und die H2-Konsole – leitet nicht angemeldete Besucher auf `/login` um. Dort gibt man das gemeinsame Zugangspasswort ein; der Benutzername `yatta` steckt als verstecktes Feld im Formular. Das Konto wird in `application.properties` konfiguriert:
+```
+spring.security.user.name=yatta
+spring.security.user.password=${YATTA_YAM_YAM_PASSWORD}
+```
+
+Nach erfolgreicher Eingabe leitet Spring Security auf die ursprünglich aufgerufene URL weiter, sonst auf `/`.
+
+Remember-Me ist immer aktiv (verstecktes Feld `remember-me=true`) und hat eine Token-Gültigkeit von einem Jahr. Pro Browser muss das Passwort also nur einmal im Jahr eingegeben werden. Die Oberfläche hat keinen Logout-Button; „Switch Account" löscht nur den Namens-Cookie aus Stufe 2, nicht die Passwort-Anmeldung.
+
+Der CSRF-Schutz ist für `POST /login` abgeschaltet (`csrf.ignoringRequestMatchers("/login")`). Das CSRF-Token liegt in der serverseitigen Session; war diese beim Absenden abgelaufen (Timeout, Neustart, wiederhergestellter Tab), wurde der Login stillschweigend abgelehnt und der Nutzer landete erneut auf `/login`. Da es nur ein gemeinsames Konto gibt, bringt Login-CSRF einem Angreifer nichts. Alle übrigen Formulare bleiben CSRF-geschützt.
+
+### Stufe 2: Namens-Login (Cookie)
+
+Nach dem Passwort identifiziert sich jeder Nutzer über seinen Namen. Die Identität wird in einem HttpOnly-Cookie `nameapp_user` gespeichert, der den URL-encodierten Nutzernamen enthält. Die Controller lesen diesen Cookie selbst; fehlt er oder ist der Name unbekannt, leiten sie auf `/` zur Namenseingabe um.
 
 **Ablauf:**
 1. `GET /` — Existiert ein Cookie mit bekanntem Namen → direkt eingeloggt
@@ -210,23 +230,7 @@ Der primäre Anmeldeweg erfolgt über einen HttpOnly-Cookie `nameapp_user`, der 
 
 Der Cookie hat eine Ablaufzeit von `Integer.MAX_VALUE` Sekunden (~68 Jahre), ist `HttpOnly` und gilt für den Pfad `/`.
 
-**Redirect-Preservation:** Wenn ein nicht eingeloggter Nutzer eine geschützte URL aufruft, wird die URL in der Session unter `redirectAfterLogin` gespeichert und nach dem Login wiederhergestellt.
-
-### Spring Security (Admin)
-
-Spring Security schützt alle Routen. Öffentlich zugänglich (ohne Login) sind:
-- `/css/**`, `/js/**`, `/images/**`, `/uploads/**`
-- `/version`
-
-Für den Cookie-basierten Nutzer-Login ist kein Spring-Security-Login notwendig, da die Routen durch den `LoginController` und die Cookie-Prüfung in den Controllern selbst abgesichert werden.
-
-Der Admin-Zugang (z. B. für die H2-Konsole) läuft über `/login` und wird via `application.properties` konfiguriert:
-```
-spring.security.user.name=yatta
-spring.security.user.password=${YATTA_YAM_YAM_PASSWORD}
-```
-
-Remember-Me ist aktiviert mit einer Token-Gültigkeit von einem Jahr.
+**Redirect-Preservation:** Ruft jemand ohne Namens-Cookie eine Bestell- oder Kontaktseite auf (`/orders/**`, `/contacts/**`), wird die URL in der Session unter `redirectAfterLogin` gespeichert und nach der Namenseingabe wiederhergestellt. Zusammen mit der Weiterleitung aus Stufe 1 landet ein geteilter Link so nach Passwort und Namenseingabe auf der richtigen Seite.
 
 ---
 
@@ -242,7 +246,7 @@ Remember-Me ist aktiviert mit einer Token-Gültigkeit von einem Jahr.
 | POST    | `/not-me`          | Zurück zur Namenseingabe                           |
 | POST    | `/confirm-new-login` | Neuen Nutzer einloggen, Cookie setzen            |
 | POST    | `/switch-account`  | Cookie löschen, zurück zu `/`                     |
-| GET     | `/login`           | Spring Security Login-Seite                        |
+| GET     | `/login`           | Zugangspasswort eingeben (Spring Security)         |
 | POST    | `/rename`          | Nutzernamen ändern, Cookie aktualisieren           |
 | GET     | `/version`         | Versionsseite (öffentlich)                         |
 | GET     | `/users`           | Nutzerstatistiken (nur für eingeloggte Nutzer)     |
@@ -415,7 +419,7 @@ Alle Einstellungen befinden sich in `src/main/resources/application.properties`.
 
 | Variable                   | Pflicht | Beschreibung               |
 |----------------------------|---------|----------------------------|
-| `YATTA_YAM_YAM_PASSWORD`   | Ja      | Admin-Passwort für Spring Security |
+| `YATTA_YAM_YAM_PASSWORD`   | Ja      | Gemeinsames Zugangspasswort für alle Nutzer (Spring Security) |
 
 ### Datei-Uploads
 
@@ -453,7 +457,7 @@ Anwendung erreichbar unter: `http://localhost:38443`
 
 ```bash
 mvn package
-java -DYATTA_YAM_YAM_PASSWORD=deinPasswort -jar target/yatta-yam-yam-1.10.0.jar
+java -DYATTA_YAM_YAM_PASSWORD=deinPasswort -jar target/yatta-yam-yam-1.10.1.jar
 ```
 
 ---
