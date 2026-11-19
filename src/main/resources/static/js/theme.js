@@ -16,8 +16,8 @@
  *      from the Monday two weeks before Easter up to and including Easter Monday.
  *      Visitors: the Easter bunny and a chick (js/easter.js). Styles: css/easter.css.
  *    - Halloween: night-purple menu bar with a string of pumpkin lanterns, orange
- *      buttons, falling autumn leaves, a graveyard along the bottom edge, witch hats on
- *      the avatars; from 18 October up to and including 31 October. Visitors: a witch
+ *      buttons, falling autumn leaves, a graveyard along the bottom edge, skull masks
+ *      on the avatars; from 18 October up to and including 31 October. Visitors: a witch
  *      on her broom, a skeleton, a ghost, a spider and a black cat (js/halloween.js).
  *      Styles: css/halloween.css.
  *    Preview at any time: append ?theme=christmas, ?theme=easter or ?theme=halloween
