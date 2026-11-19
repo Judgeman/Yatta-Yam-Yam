@@ -22,11 +22,21 @@
  *      Styles: css/halloween.css.
  *    - Día de los Muertos: rosa-mexicano menu bar with a string of papel picado,
  *      marigold petals drifting down, an ofrenda with candles and marigolds along the
- *      bottom edge, sugar-skull masks on the avatars; 1 and 2 November. Visitors:
+ *      bottom edge, sugar-skull masks on the avatars; 1 to 7 November. Visitors:
  *      monarch butterflies, a Catrina, a skeleton with a guitar (js/muertos.js).
  *      Styles: css/muertos.css.
- *    Preview at any time: append ?theme=christmas, ?theme=easter, ?theme=halloween or
- *    ?theme=muertos to any page URL.
+ *    - Garlic: only on Garlic Day (19 April) and Garlic Lovers Day (6 October). Olive
+ *      menu bar with a garlic braid, purple buttons, garlic-bulb avatars, falling cloves,
+ *      a garlic patch along the bottom edge. Visitors: a dancing garlic bulb, a bat and
+ *      a vampire who are not amused, a garlic charm on a string (js/garlic.js).
+ *      Styles: css/garlic.css.
+ *    - Pizza: the week around Pizza Day (9 February), 6 to 12 February. Tomato-red menu
+ *      bar with a striped pizzeria awning, basil-green buttons, pizza avatars, falling
+ *      toppings, a checked tablecloth along the bottom edge. Visitors: a flying pizza, a
+ *      pizza slice, a pizzaiolo tossing dough, a slice on a string of cheese
+ *      (js/pizza.js). Styles: css/pizza.css.
+ *    Preview at any time: append ?theme=christmas, ?theme=easter, ?theme=halloween,
+ *    ?theme=muertos, ?theme=garlic or ?theme=pizza to any page URL.
  *    The preview lasts until the browser tab is closed (sessionStorage),
  *    ?theme=default ends it.
  *
@@ -51,7 +61,9 @@
     var EASTER = 'easter';
     var HALLOWEEN = 'halloween';
     var MUERTOS = 'muertos';
-    var SEASONS = [XMAS, EASTER, HALLOWEEN, MUERTOS];
+    var GARLIC = 'garlic';
+    var PIZZA = 'pizza';
+    var SEASONS = [XMAS, EASTER, HALLOWEEN, MUERTOS, GARLIC, PIZZA];
     var URL_PARAM = 'theme';
     var URL_OFF = 'default';
     var TAPS_NEEDED = 7;
@@ -185,13 +197,32 @@
         return now >= new Date(year, 9, 18) && now < new Date(year, 10, 1);
     }
 
-    // Día de los Muertos: 1 and 2 November, right after Halloween
+    // Día de los Muertos: the first week of November (1 to 7), right after Halloween
     function isMuertosSeason(now) {
         var year = now.getFullYear();
-        return now >= new Date(year, 10, 1) && now < new Date(year, 10, 3);
+        return now >= new Date(year, 10, 1) && now < new Date(year, 10, 8);
     }
 
+    // Garlic: Garlic Day (19 April) and Garlic Lovers Day (6 October), these two days only
+    function isGarlicDay(now) {
+        var month = now.getMonth();
+        var day = now.getDate();
+        return (month === 3 && day === 19) || (month === 9 && day === 6);
+    }
+
+    // Pizza: a week around Pizza Day (9 February), from 6 to 12 February
+    function isPizzaWeek(now) {
+        return now.getMonth() === 1 && now.getDate() >= 6 && now.getDate() <= 12;
+    }
+
+    // The single days come first: Garlic Day can fall into the Easter weeks
     function seasonOf(now) {
+        if (isGarlicDay(now)) {
+            return GARLIC;
+        }
+        if (isPizzaWeek(now)) {
+            return PIZZA;
+        }
         if (isChristmasSeason(now)) {
             return XMAS;
         }

@@ -1,7 +1,8 @@
 /*
  * Seasonal visitors (built and moved by visitors.js, drawn by christmas.js,
- * easter.js, halloween.js and muertos.js): the stage, the actors and the animations of their
- * arms, legs, ears and wings. The stage only shows while a seasonal look is on.
+ * easter.js, halloween.js, muertos.js, garlic.js and pizza.js): the stage, the actors
+ * and the animations of their arms, legs, ears and wings. The stage only shows while
+ * a seasonal look is on.
  */
 
 .yy-visitors {
@@ -11,7 +12,9 @@
 html[data-yy-theme="christmas"] .yy-visitors,
 html[data-yy-theme="easter"] .yy-visitors,
 html[data-yy-theme="halloween"] .yy-visitors,
-html[data-yy-theme="muertos"] .yy-visitors {
+html[data-yy-theme="muertos"] .yy-visitors,
+html[data-yy-theme="garlic"] .yy-visitors,
+html[data-yy-theme="pizza"] .yy-visitors {
     display: block;
     position: fixed;
     inset: 0;
@@ -191,15 +194,16 @@ html[data-yy-theme="muertos"] .yy-visitors {
 
 /* ── Halloween ── */
 
-/* The spider's thread, from the top of the screen down to the spider */
+/* The thread from the top of the screen down to a dropping visitor (the spider's silk
+   by default; garlic and pizza set their own colour and width) */
 .yy-visitor-drop::before {
     content: "";
     position: absolute;
     left: 50%;
     bottom: 100%;
-    width: 1.2px;
+    width: var(--yy-thread-width, 1.2px);
     height: 100vh;
-    background: #c9c9d6;
+    background: var(--yy-thread-color, #c9c9d6);
     transform: translateX(-50%);
 }
 
@@ -242,6 +246,28 @@ html[data-yy-theme="muertos"] .yy-visitors {
 @keyframes yy-v-strum {
     from { transform: rotate(-10deg); }
     to   { transform: rotate(12deg); }
+}
+
+/* ── Garlic and pizza ── */
+
+/* The flying pizza spins like a frisbee */
+.yy-v-spin {
+    animation: yy-v-spin 0.9s linear infinite;
+}
+
+@keyframes yy-v-spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+/* The pizzaiolo tosses the dough: up, a turn, down into his hands */
+.yy-v-toss {
+    animation: yy-v-toss 0.9s ease-in-out infinite;
+}
+
+@keyframes yy-v-toss {
+    0%, 100% { transform: translateY(18px) rotate(0deg); }
+    50%      { transform: translateY(-14px) rotate(180deg); }
 }
 
 /* No visitors for people who asked their system for less motion (visitors.js does not

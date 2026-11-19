@@ -5,7 +5,7 @@
 <!-- Colour theme for every page; include as the last element in <head>:
      <th:block th:replace="~{fragments/theme :: head}"></th:block>
      theme.js sets data-bs-theme (light/dark from the OS setting) before the first paint.
-     The seasonal styles (christmas, easter, halloween, muertos) only apply during their
+     The seasonal styles (christmas, easter, halloween, muertos, garlic, pizza) only apply during their
      season or a preview, symbolics.css only while the hidden Symbolics mode is on (see
      theme.js). visitors.js sends the season's visitors across the screen; they are drawn
      in the seasonal scripts (which run after it, in this order) and styled in visitors.css. -->
@@ -15,6 +15,8 @@
     <link rel="stylesheet" th:href="@{/css/easter.css}"/>
     <link rel="stylesheet" th:href="@{/css/halloween.css}"/>
     <link rel="stylesheet" th:href="@{/css/muertos.css}"/>
+    <link rel="stylesheet" th:href="@{/css/garlic.css}"/>
+    <link rel="stylesheet" th:href="@{/css/pizza.css}"/>
     <link rel="stylesheet" th:href="@{/css/visitors.css}"/>
     <link rel="stylesheet" th:href="@{/css/symbolics.css}"/>
     <script th:src="@{/js/theme.js}"></script>
@@ -23,6 +25,8 @@
     <script th:src="@{/js/easter.js}" defer></script>
     <script th:src="@{/js/halloween.js}" defer></script>
     <script th:src="@{/js/muertos.js}" defer></script>
+    <script th:src="@{/js/garlic.js}" defer></script>
+    <script th:src="@{/js/pizza.js}" defer></script>
 </th:block>
 
 </head>
