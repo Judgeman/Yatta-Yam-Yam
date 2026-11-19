@@ -1,13 +1,13 @@
 /*
  * Seasonal visitors: while a seasonal look is on (see theme.js), a visitor crosses the
  * screen every 1 to 5 minutes, picked at random from that season's cast, never the
- * same one twice in a row. The casts are registered by christmas.js, easter.js and
- * halloween.js:
+ * same one twice in a row. The casts are registered by christmas.js, easter.js,
+ * halloween.js and muertos.js:
  *
  *   yyVisitors.add('easter', { call: 'hoppel', visitors: [ ... ] });
  *
  * Each visitor has a name, a weight (how often it is picked) and a motion:
- *   fly   across the upper half on a gentle wave (Santa's sleigh, the egg balloon),
+ *   fly   across the upper half on a gentle wave (Santa's sleigh, the egg balloon, ...),
  *   walk  along the bottom edge (dancing, hopping),
  *   peek  in from the left, right or bottom edge, wave and leave again,
  *   drop  down from the top on a thread and climb back up (the spider).
@@ -17,7 +17,8 @@
  * across page loads instead of starting over on every click. When it falls due while
  * the tab is in the background, it shows a moment after the tab is visible again.
  * Opening a ?theme=... preview shows the first visitor after a few seconds. Typing the
- * season's call word ("hohoho", "hoppel", "spuk") outside a form field calls one at once.
+ * season's call word ("hohoho", "hoppel", "spuk", "calavera") outside a form field calls
+ * one at once.
  *
  * Nothing appears with "reduce motion" switched on in the OS. The figures are inline
  * SVG, ignore the mouse (pointer-events: none) and are removed when they are done.

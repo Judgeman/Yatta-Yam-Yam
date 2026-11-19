@@ -20,8 +20,13 @@
  *      on the avatars; from 18 October up to and including 31 October. Visitors: a witch
  *      on her broom, a skeleton, a ghost, a spider and a black cat (js/halloween.js).
  *      Styles: css/halloween.css.
- *    Preview at any time: append ?theme=christmas, ?theme=easter or ?theme=halloween
- *    to any page URL.
+ *    - Día de los Muertos: rosa-mexicano menu bar with a string of papel picado,
+ *      marigold petals drifting down, an ofrenda with candles and marigolds along the
+ *      bottom edge, sugar-skull masks on the avatars; 1 and 2 November. Visitors:
+ *      monarch butterflies, a Catrina, a skeleton with a guitar (js/muertos.js).
+ *      Styles: css/muertos.css.
+ *    Preview at any time: append ?theme=christmas, ?theme=easter, ?theme=halloween or
+ *    ?theme=muertos to any page URL.
  *    The preview lasts until the browser tab is closed (sessionStorage),
  *    ?theme=default ends it.
  *
@@ -45,7 +50,8 @@
     var XMAS = 'christmas';
     var EASTER = 'easter';
     var HALLOWEEN = 'halloween';
-    var SEASONS = [XMAS, EASTER, HALLOWEEN];
+    var MUERTOS = 'muertos';
+    var SEASONS = [XMAS, EASTER, HALLOWEEN, MUERTOS];
     var URL_PARAM = 'theme';
     var URL_OFF = 'default';
     var TAPS_NEEDED = 7;
@@ -179,6 +185,12 @@
         return now >= new Date(year, 9, 18) && now < new Date(year, 10, 1);
     }
 
+    // Día de los Muertos: 1 and 2 November, right after Halloween
+    function isMuertosSeason(now) {
+        var year = now.getFullYear();
+        return now >= new Date(year, 10, 1) && now < new Date(year, 10, 3);
+    }
+
     function seasonOf(now) {
         if (isChristmasSeason(now)) {
             return XMAS;
@@ -186,7 +198,10 @@
         if (isEasterSeason(now)) {
             return EASTER;
         }
-        return isHalloweenSeason(now) ? HALLOWEEN : null;
+        if (isHalloweenSeason(now)) {
+            return HALLOWEEN;
+        }
+        return isMuertosSeason(now) ? MUERTOS : null;
     }
 
     function currentTheme() {

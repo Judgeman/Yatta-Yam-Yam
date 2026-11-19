@@ -39,7 +39,7 @@ Yatta-Yam-Yam is an internal web application for collective food ordering. Users
 - User statistics (total spend, open amounts)
 - Red badge with the open amount next to your own name in the navbar
 - Dark mode that follows the operating system setting
-- Seasonal looks with occasional visitors: Halloween (18–31 October), Christmas (Monday after Totensonntag until 26 December), Easter (two weeks before Easter until Easter Monday)
+- Seasonal looks with occasional visitors: Halloween (18–31 October), Día de los Muertos (1–2 November), Christmas (Monday after Totensonntag until 26 December), Easter (two weeks before Easter until Easter Monday)
 
 ---
 
@@ -510,6 +510,7 @@ Yatta-Yam-Yam/
         │   │   ├── dashboard.css
         │   │   ├── easter.css                # Easter look (inert outside the season)
         │   │   ├── halloween.css             # Halloween look (inert outside the season)
+        │   │   ├── muertos.css               # Día de los Muertos look (inert outside the season)
         │   │   ├── style.css                 # Base styles + colour tokens (--yy-*) for light/dark
         │   │   ├── symbolics.css             # Easter egg: Symbolics mode (inert unless enabled)
         │   │   └── visitors.css              # Visitors: stage and animations
@@ -520,6 +521,7 @@ Yatta-Yam-Yam/
         │       ├── christmas.js              # Christmas visitors: Santa and the reindeer
         │       ├── easter.js                 # Easter visitors: the Easter bunny and a chick
         │       ├── halloween.js              # Halloween visitors: witch, skeleton, ghost, spider, cat
+        │       ├── muertos.js                # Día de los Muertos visitors: monarchs, Catrina, guitar skeleton
         │       ├── theme.js                  # Light/dark from the OS setting, seasonal looks, Symbolics easter egg
         │       └── visitors.js               # Visitors: schedule, motions, call words
         └── templates/                        # Thymeleaf HTML templates
@@ -560,34 +562,36 @@ The app follows the light/dark setting of the operating system; there is no togg
 - No hard-coded colours: use the `--yy-*` tokens or Bootstrap variables (`--bs-body-bg`, `--bs-border-color`, `--bs-secondary-color`, …).
 - Avoid `bg-light` and `text-bg-light`, which stay light in dark mode; use `bg-body-tertiary` and `text-body-emphasis`. Centred single-card pages use `<body class="page-muted">`.
 
-### Seasonal looks: Halloween, Christmas and Easter
+### Seasonal looks: Halloween, Día de los Muertos, Christmas and Easter
 
-At three times of the year the app dresses up by itself. `theme.js` checks the browser's local date on every page load and sets `data-yy-theme="halloween"`, `"christmas"` or `"easter"` on `<html>`; no server code, no configuration. Both looks still follow the OS light/dark setting and have their own light and dark palette.
+At four times of the year the app dresses up by itself. `theme.js` checks the browser's local date on every page load and sets `data-yy-theme="halloween"`, `"muertos"`, `"christmas"` or `"easter"` on `<html>`; no server code, no configuration. Both looks still follow the OS light/dark setting and have their own light and dark palette.
 
 **Halloween** – from 18 October, 0:00, up to and including 31 October (off again from 1 November, 0:00). Night-purple menu bar with a string of flickering pumpkin lanterns, orange buttons, every avatar turned into a skull (eye sockets above the initial, teeth below it – the initial stays readable), autumn leaves drifting down behind the content, a graveyard with tombstones, a fence and pumpkins along the bottom edge (every page gets 44 px of room at the bottom for it), a 🎃 next to the app name; palettes "misty dusk" / "haunted night". Styles: `static/css/halloween.css`.
+
+**Día de los Muertos** (the Mexican Day of the Dead) – on 1 and 2 November, right after Halloween (off again from 3 November, 0:00). Rosa-mexicano-to-purple menu bar with a fluttering string of papel picado (cut-paper flags with flowers, diamonds and skulls), pink buttons, every avatar turned into a sugar skull (calavera: flower-ringed eyes, a marigold on the forehead, a stitched smile – the initial stays readable in the middle), cempasúchil (marigold) petals drifting down behind the content, an ofrenda with flickering candles, marigolds and little sugar skulls along the bottom edge (every page gets 50 px of room at the bottom for it), a 🌼 next to the app name; palettes "warm day" / "candle night". Styles: `static/css/muertos.css`.
 
 **Christmas** – from the Monday after Totensonntag, 0:00, up to and including 26 December (off again from 27 December, 0:00). Totensonntag (the Sunday of the Dead) is the last Sunday before the first Sunday of Advent, so always between 20 and 26 November (2026: starts on 23 November). Fir-green menu bar with twinkling fairy lights (along the top edge on pages without a menu bar), red buttons and avatars, Santa hats on every avatar, gently falling snow behind the content, a 🎄 next to the app name; palettes "snowy day" / "winter night". Styles: `static/css/christmas.css`.
 
 **Easter** – from the Monday two weeks before Easter Sunday (the Monday before Palm Sunday), 0:00, up to and including Easter Monday (off again from the Tuesday after, 0:00). Easter Sunday is computed with the Gregorian computus (anonymous Gregorian algorithm); in 2027 the look runs from 15 to 29 March. Sky-blue menu bar with a string of painted Easter eggs that swing gently, pink buttons and avatars, bunny ears on every avatar, blossom petals drifting down behind the content, a meadow with hidden eggs and flowers along the bottom edge (every page gets 40 px of room at the bottom for it), a 🐣 next to the app name; palettes "spring morning" / "spring night". Styles: `static/css/easter.css`.
 
-- **Preview via link:** append `?theme=halloween`, `?theme=christmas` or `?theme=easter` to any page URL (e.g. `/orders/dashboard?theme=easter`, or `&theme=easter`). The parameter survives both login steps and is then removed from the address bar. The preview only applies to this browser tab until it is closed (`sessionStorage`, `yy-theme-preview` = `halloween`/`christmas`/`easter`), so a forgotten preview does not linger past the holiday. `?theme=default` ends it earlier.
+- **Preview via link:** append `?theme=halloween`, `?theme=muertos`, `?theme=christmas` or `?theme=easter` to any page URL (e.g. `/orders/dashboard?theme=easter`, or `&theme=easter`). The parameter survives both login steps and is then removed from the address bar. The preview only applies to this browser tab until it is closed (`sessionStorage`, `yy-theme-preview` = the look's name), so a forgotten preview does not linger past the holiday. `?theme=default` ends it earlier.
 - **Precedence:** preview in this tab › Symbolics mode switched on › seasonal look › normal look. Anyone using Symbolics keeps it during the season; switching it off (typing `symbolics` or `?theme=default`) returns to the seasonal look in season. There is no switch to opt out of a seasonal look.
-- With "reduce motion" enabled in the OS (`prefers-reduced-motion`) no leaves or snow fall and no petals drift, lanterns, lights and eggs stay still and no visitors come.
-- Every rule is scoped to the season's `html[data-yy-theme="…"]`, so the files have no effect otherwise. Hat, ears, skull, lights, lanterns, eggs, leaves, snow, petals, meadow and graveyard are inline SVGs in CSS variables (no extra requests). Leaves, snow and petals sit behind every card with `z-index: -1`; none of it catches clicks.
+- With "reduce motion" enabled in the OS (`prefers-reduced-motion`) no leaves or snow fall and no petals drift, lanterns, candles, flags, lights and eggs stay still and no visitors come.
+- Every rule is scoped to the season's `html[data-yy-theme="…"]`, so the files have no effect otherwise. Hat, ears, skulls, lights, lanterns, flags, eggs, leaves, snow, petals, meadow, graveyard and ofrenda are inline SVGs in CSS variables (no extra requests). Leaves, snow and petals sit behind every card with `z-index: -1`; none of it catches clicks.
 
 ### Visitors
 
 During a seasonal look a visitor crosses the screen every 1–5 minutes (at random), never the same one twice in a row:
 
-| | Halloween (`static/js/halloween.js`) | Christmas (`static/js/christmas.js`) | Easter (`static/js/easter.js`) |
-|---|---|---|---|
-| Flying through the upper half (twice as often) | a witch on her broomstick, a black cat riding at the back | Santa in his sleigh with two reindeer | the Easter bunny in the basket of an egg-shaped hot-air balloon |
-| Along the bottom edge | a skeleton with a bow tie dances; a ghost floats | Santa or a reindeer dances | the Easter bunny hops with a basket of eggs; a chick with an eggshell cap dances |
-| Letting itself down from the top on a thread, waving, climbing back | a spider | – | – |
-| Peeking in from the left, right or bottom edge and waving | a black cat or a ghost ("Boo!") | Santa or a reindeer | the Easter bunny or a chick in its egg |
-| Call one at once: type outside a form field | `spuk` | `hohoho` | `hoppel` |
+| | Halloween (`halloween.js`) | Día de los Muertos (`muertos.js`) | Christmas (`christmas.js`) | Easter (`easter.js`) |
+|---|---|---|---|---|
+| Flying through the upper half (twice as often) | a witch on her broomstick, a black cat riding at the back | a small swarm of monarch butterflies | Santa in his sleigh with two reindeer | the Easter bunny in the basket of an egg-shaped hot-air balloon |
+| Along the bottom edge | a skeleton with a bow tie dances; a ghost floats | a Catrina in her flower hat dances; a skeleton with a marigold crown plays the guitar | Santa or a reindeer dances | the Easter bunny hops with a basket of eggs; a chick with an eggshell cap dances |
+| Letting itself down from the top on a thread, waving, climbing back | a spider | – | – | – |
+| Peeking in from the left, right or bottom edge and waving | a black cat or a ghost ("Boo!") | a skeleton in an embroidered shirt, or the Catrina | Santa or a reindeer | the Easter bunny or a chick in its egg |
+| Call one at once: type outside a form field | `spuk` | `calavera` | `hohoho` | `hoppel` |
 
-- Schedule, motions and call words are handled by `static/js/visitors.js`; `halloween.js`, `christmas.js` and `easter.js` only draw the figures and register them with `yyVisitors.add(...)` (the scripts load with `defer` in this order).
+- Schedule, motions and call words are handled by `static/js/visitors.js`; the seasonal scripts (`static/js/halloween.js`, `muertos.js`, `christmas.js`, `easter.js`) only draw the figures and register them with `yyVisitors.add(...)` (the scripts load with `defer` in this order).
 - The next due time is kept in `sessionStorage` (`yy-visitor-next`), so the rhythm carries on across page loads instead of restarting on every click; if it is already due when a page loads, the visit comes 3 seconds later. If it falls due while the tab is in the background, it comes 3 seconds after the tab is visible again. On the first page of a preview (`?theme=…`) the first visitor appears after 3 seconds.
 - The figures are inline SVGs, ignore clicks (`pointer-events: none`) and are removed afterwards. They move with the Web Animations API; arms, legs, ears and wings with CSS (`.yy-v-*` in `static/css/visitors.css`); the spider's thread is `.yy-visitor-drop::before`.
 

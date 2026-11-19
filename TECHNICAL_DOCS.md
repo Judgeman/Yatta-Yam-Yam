@@ -39,7 +39,7 @@ Yatta-Yam-Yam ist eine interne Web-App zur kollektiven Essensbestellung. Nutzer 
 - Benutzerstatistiken (Gesamtausgaben, offene Beträge)
 - Rotes Badge mit dem offenen Betrag neben dem eigenen Namen in der Menüleiste
 - Dark Mode, der der Einstellung des Betriebssystems folgt
-- Saisonale Looks mit gelegentlichen Besuchern: Halloween (18.–31. Oktober), Weihnachten (Montag nach Totensonntag bis 26. Dezember), Ostern (zwei Wochen vor Ostern bis Ostermontag)
+- Saisonale Looks mit gelegentlichen Besuchern: Halloween (18.–31. Oktober), Día de los Muertos (1.–2. November), Weihnachten (Montag nach Totensonntag bis 26. Dezember), Ostern (zwei Wochen vor Ostern bis Ostermontag)
 
 ---
 
@@ -510,6 +510,7 @@ Yatta-Yam-Yam/
         │   │   ├── dashboard.css
         │   │   ├── easter.css                # Oster-Look (ohne Wirkung außerhalb der Saison)
         │   │   ├── halloween.css             # Halloween-Look (ohne Wirkung außerhalb der Saison)
+        │   │   ├── muertos.css               # Día-de-los-Muertos-Look (ohne Wirkung außerhalb der Saison)
         │   │   ├── style.css                 # Basis-Styles + Farb-Tokens (--yy-*) für hell/dunkel
         │   │   ├── symbolics.css             # Easter Egg: Symbolics-Modus (ohne Wirkung, solange aus)
         │   │   └── visitors.css              # Besucher: Bühne und Animationen
@@ -520,6 +521,7 @@ Yatta-Yam-Yam/
         │       ├── christmas.js              # Weihnachts-Besucher: Weihnachtsmann und Rentiere
         │       ├── easter.js                 # Oster-Besucher: Osterhase und Küken
         │       ├── halloween.js              # Halloween-Besucher: Hexe, Skelett, Gespenst, Spinne, Katze
+        │       ├── muertos.js                # Día-de-los-Muertos-Besucher: Monarchfalter, Catrina, Skelett mit Gitarre
         │       ├── theme.js                  # Hell/dunkel nach Systemeinstellung, Saison-Looks, Symbolics-Easter-Egg
         │       └── visitors.js               # Besucher: Zeitplan, Bewegungen, Rufwort
         └── templates/                        # Thymeleaf HTML-Templates
@@ -560,34 +562,36 @@ Die App folgt der Hell/Dunkel-Einstellung des Betriebssystems; einen eigenen Ums
 - Keine fest codierten Farben: `--yy-*`-Tokens oder Bootstrap-Variablen (`--bs-body-bg`, `--bs-border-color`, `--bs-secondary-color`, …) verwenden.
 - `bg-light` und `text-bg-light` vermeiden, sie bleiben im Dark Mode hell; stattdessen `bg-body-tertiary` und `text-body-emphasis`. Zentrierte Ein-Karten-Seiten nutzen `<body class="page-muted">`.
 
-### Saisonale Looks: Halloween, Weihnachten und Ostern
+### Saisonale Looks: Halloween, Día de los Muertos, Weihnachten und Ostern
 
-Zu drei Zeiten im Jahr zieht sich die App von selbst um. `theme.js` prüft dafür beim Laden jeder Seite das lokale Datum des Browsers und setzt `data-yy-theme="halloween"`, `"christmas"` bzw. `"easter"` auf `<html>`; kein Server-Code, keine Konfiguration. Beide Looks folgen weiter der Hell/Dunkel-Einstellung des Systems und haben je eine eigene helle und dunkle Palette.
+Zu vier Zeiten im Jahr zieht sich die App von selbst um. `theme.js` prüft dafür beim Laden jeder Seite das lokale Datum des Browsers und setzt `data-yy-theme="halloween"`, `"muertos"`, `"christmas"` bzw. `"easter"` auf `<html>`; kein Server-Code, keine Konfiguration. Beide Looks folgen weiter der Hell/Dunkel-Einstellung des Systems und haben je eine eigene helle und dunkle Palette.
 
 **Halloween** – vom 18. Oktober, 0:00 Uhr, bis einschließlich 31. Oktober (ab dem 1. November, 0:00 Uhr, wieder aus). Nachtviolette Menüleiste mit einer Kette flackernder Kürbislaternen, orange Buttons, jeder Avatar wird zum Totenkopf (Augenhöhlen über der Initiale, Zahnreihe darunter – die Initiale bleibt lesbar), langsam herabfallendes Herbstlaub hinter den Inhalten, ein Friedhof mit Grabsteinen, Zaun und Kürbissen am unteren Rand (jede Seite bekommt dafür 44 px Abstand unten), ein 🎃 neben dem App-Namen; Paletten „neblige Dämmerung“ / „Geisternacht“. Styles: `static/css/halloween.css`.
+
+**Día de los Muertos** (mexikanisches Totenfest) – am 1. und 2. November, direkt nach Halloween (ab dem 3. November, 0:00 Uhr, wieder aus). Menüleiste in Rosa mexicano bis Violett mit einer flatternden Girlande aus Papel picado (Scherenschnitt-Fähnchen mit Blüten, Rauten und Schädeln), pinke Buttons, jeder Avatar wird zum Zuckerschädel (Calavera: Augen mit Blütenkränzen, Ringelblume auf der Stirn, genähtes Lächeln – die Initiale bleibt in der Mitte lesbar), herabschwebende Cempasúchil-Blüten (Studentenblumen) hinter den Inhalten, eine Ofrenda mit flackernden Kerzen, Blüten und kleinen Zuckerschädeln am unteren Rand (jede Seite bekommt dafür 50 px Abstand unten), ein 🌼 neben dem App-Namen; Paletten „warmer Tag“ / „Kerzennacht“. Styles: `static/css/muertos.css`.
 
 **Weihnachten** – vom Montag nach Totensonntag, 0:00 Uhr, bis einschließlich 26. Dezember (ab dem 27. Dezember, 0:00 Uhr, wieder aus). Totensonntag ist der letzte Sonntag vor dem 1. Advent, also immer zwischen dem 20. und 26. November (2026: Start am 23. November). Tannengrüne Menüleiste mit funkelnder Lichterkette (auf Seiten ohne Menüleiste am oberen Rand), rote Buttons und Avatare, Nikolausmützen auf allen Avataren, leise fallender Schnee hinter den Inhalten, ein 🎄 neben dem App-Namen; Paletten „verschneiter Tag“ / „Winternacht“. Styles: `static/css/christmas.css`.
 
 **Ostern** – vom Montag zwei Wochen vor Ostersonntag (dem Montag vor Palmsonntag), 0:00 Uhr, bis einschließlich Ostermontag (ab dem Dienstag danach, 0:00 Uhr, wieder aus). Der Ostersonntag wird mit der Gaußschen Osterformel (gregorianisch) berechnet; 2027 läuft der Look also vom 15. bis 29. März. Himmelblaue Menüleiste mit einer Schnur bemalter Ostereier, die leicht schaukeln, rosa Buttons und Avatare, Hasenohren auf allen Avataren, langsam herabschwebende Blütenblätter hinter den Inhalten, eine Wiese mit versteckten Eiern und Blumen am unteren Rand (jede Seite bekommt dafür 40 px Abstand unten), ein 🐣 neben dem App-Namen; Paletten „Frühlingsmorgen“ / „Frühlingsnacht“. Styles: `static/css/easter.css`.
 
-- **Vorschau per Link:** `?theme=halloween`, `?theme=christmas` bzw. `?theme=easter` an die URL einer beliebigen Seite hängen (z. B. `/orders/dashboard?theme=easter`, bzw. `&theme=easter`). Der Parameter übersteht beide Login-Schritte und wird danach aus der Adressleiste entfernt. Die Vorschau gilt nur für diesen Browser-Tab, bis er geschlossen wird (`sessionStorage`, `yy-theme-preview` = `halloween`/`christmas`/`easter`) – eine vergessene Vorschau bleibt also nicht über das Fest hinaus hängen. `?theme=default` beendet sie vorher.
+- **Vorschau per Link:** `?theme=halloween`, `?theme=muertos`, `?theme=christmas` bzw. `?theme=easter` an die URL einer beliebigen Seite hängen (z. B. `/orders/dashboard?theme=easter`, bzw. `&theme=easter`). Der Parameter übersteht beide Login-Schritte und wird danach aus der Adressleiste entfernt. Die Vorschau gilt nur für diesen Browser-Tab, bis er geschlossen wird (`sessionStorage`, `yy-theme-preview` = Name des Looks) – eine vergessene Vorschau bleibt also nicht über das Fest hinaus hängen. `?theme=default` beendet sie vorher.
 - **Vorrang:** Vorschau in diesem Tab › eingeschalteter Symbolics-Modus › Saison-Look › normaler Look. Wer Symbolics an hat, behält es also auch in der Saison; Ausschalten (`symbolics` tippen oder `?theme=default`) führt in der Saison zum Saison-Look zurück. Einen Schalter, um den Saison-Look abzuwählen, gibt es nicht.
-- Bei „Bewegung reduzieren“ im Betriebssystem (`prefers-reduced-motion`) fallen kein Laub und kein Schnee und schweben keine Blüten, Laternen, Lichter und Eier bewegen sich nicht und es kommen keine Besucher.
-- Alle Regeln sind auf `html[data-yy-theme="…"]` der jeweiligen Saison beschränkt, die Dateien wirken also sonst nicht. Mütze, Ohren, Totenkopf, Lichter, Laternen, Eier, Laub, Schnee, Blüten, Wiese und Friedhof sind Inline-SVGs in CSS-Variablen (keine zusätzlichen Requests). Laub, Schnee und Blüten liegen mit `z-index: -1` hinter allen Karten; nichts davon fängt Klicks ab.
+- Bei „Bewegung reduzieren“ im Betriebssystem (`prefers-reduced-motion`) fallen kein Laub und kein Schnee und schweben keine Blüten, Laternen, Kerzen, Fähnchen, Lichter und Eier bewegen sich nicht und es kommen keine Besucher.
+- Alle Regeln sind auf `html[data-yy-theme="…"]` der jeweiligen Saison beschränkt, die Dateien wirken also sonst nicht. Mütze, Ohren, Schädel, Lichter, Laternen, Fähnchen, Eier, Laub, Schnee, Blüten, Wiese, Friedhof und Ofrenda sind Inline-SVGs in CSS-Variablen (keine zusätzlichen Requests). Laub, Schnee und Blüten liegen mit `z-index: -1` hinter allen Karten; nichts davon fängt Klicks ab.
 
 ### Besucher
 
 Während eines Saison-Looks kommt alle 1–5 Minuten (zufällig) ein Besucher über den Bildschirm, nie zweimal derselbe hintereinander:
 
-| | Halloween (`static/js/halloween.js`) | Weihnachten (`static/js/christmas.js`) | Ostern (`static/js/easter.js`) |
-|---|---|---|---|
-| Fliegen, obere Bildschirmhälfte (doppelt so häufig) | Hexe auf dem Besen, hinten sitzt eine schwarze Katze | Weihnachtsmann im Schlitten mit zwei Rentieren | Osterhase im Korb eines Ei-Heißluftballons |
-| Am unteren Rand entlang | Skelett mit Fliege tanzt; Gespenst schwebt | Weihnachtsmann oder Rentier tanzt | Osterhase hoppelt mit Eierkörbchen; Küken mit Eierschalen-Mütze tanzt |
-| Von oben am Faden herablassen, winken, wieder hochklettern | Spinne | – | – |
-| Von links, rechts oder unten hereinschauen und winken | schwarze Katze oder Gespenst („Boo!“) | Weihnachtsmann oder Rentier | Osterhase oder Küken im Ei |
-| Sofort rufen: außerhalb eines Formularfelds tippen | `spuk` | `hohoho` | `hoppel` |
+| | Halloween (`halloween.js`) | Día de los Muertos (`muertos.js`) | Weihnachten (`christmas.js`) | Ostern (`easter.js`) |
+|---|---|---|---|---|
+| Fliegen, obere Bildschirmhälfte (doppelt so häufig) | Hexe auf dem Besen, hinten sitzt eine schwarze Katze | ein kleiner Schwarm Monarchfalter | Weihnachtsmann im Schlitten mit zwei Rentieren | Osterhase im Korb eines Ei-Heißluftballons |
+| Am unteren Rand entlang | Skelett mit Fliege tanzt; Gespenst schwebt | Catrina mit Blumenhut tanzt; Skelett mit Blumenkranz spielt Gitarre | Weihnachtsmann oder Rentier tanzt | Osterhase hoppelt mit Eierkörbchen; Küken mit Eierschalen-Mütze tanzt |
+| Von oben am Faden herablassen, winken, wieder hochklettern | Spinne | – | – | – |
+| Von links, rechts oder unten hereinschauen und winken | schwarze Katze oder Gespenst („Boo!“) | Skelett im bestickten Hemd oder die Catrina | Weihnachtsmann oder Rentier | Osterhase oder Küken im Ei |
+| Sofort rufen: außerhalb eines Formularfelds tippen | `spuk` | `calavera` | `hohoho` | `hoppel` |
 
-- Zeitplan, Bewegungen und Rufwort steuert `static/js/visitors.js`; `halloween.js`, `christmas.js` und `easter.js` zeichnen nur die Figuren und melden sie mit `yyVisitors.add(...)` an (die Skripte laden mit `defer` in dieser Reihenfolge).
+- Zeitplan, Bewegungen und Rufwort steuert `static/js/visitors.js`; die Saison-Skripte (`static/js/halloween.js`, `muertos.js`, `christmas.js`, `easter.js`) zeichnen nur die Figuren und melden sie mit `yyVisitors.add(...)` an (die Skripte laden mit `defer` in dieser Reihenfolge).
 - Der nächste Termin steht in `sessionStorage` (`yy-visitor-next`), damit der Rhythmus über Seitenwechsel hinweg weiterläuft statt bei jedem Klick neu zu starten; ist er beim Laden einer Seite schon fällig, kommt der Besuch 3 Sekunden später. Fällt er in eine Zeit, in der der Tab im Hintergrund ist, kommt er 3 Sekunden nach der Rückkehr. Beim ersten Aufruf einer Vorschau (`?theme=…`) erscheint der erste Besucher schon nach 3 Sekunden.
 - Die Figuren sind Inline-SVGs, fangen keine Klicks ab (`pointer-events: none`) und werden danach wieder entfernt. Bewegung über die Web Animations API, Arme, Beine, Ohren und Flügel per CSS; der Faden der Spinne ist `.yy-visitor-drop::before` (`.yy-v-*` in `static/css/visitors.css`).
 

@@ -1,6 +1,6 @@
 /*
  * Seasonal visitors (built and moved by visitors.js, drawn by christmas.js,
- * easter.js and halloween.js): the stage, the actors and the animations of their
+ * easter.js, halloween.js and muertos.js): the stage, the actors and the animations of their
  * arms, legs, ears and wings. The stage only shows while a seasonal look is on.
  */
 
@@ -10,7 +10,8 @@
 
 html[data-yy-theme="christmas"] .yy-visitors,
 html[data-yy-theme="easter"] .yy-visitors,
-html[data-yy-theme="halloween"] .yy-visitors {
+html[data-yy-theme="halloween"] .yy-visitors,
+html[data-yy-theme="muertos"] .yy-visitors {
     display: block;
     position: fixed;
     inset: 0;
@@ -219,6 +220,28 @@ html[data-yy-theme="halloween"] .yy-visitors {
 @keyframes yy-v-float {
     0%, 100% { transform: translateY(0) rotate(-5deg); }
     50%      { transform: translateY(-22%) rotate(5deg); }
+}
+
+/* ── Día de los Muertos ── */
+
+/* Monarch wings fold towards the body and open again */
+.yy-v-flutter {
+    animation: yy-v-flutter 0.18s ease-in-out infinite alternate;
+}
+
+@keyframes yy-v-flutter {
+    from { transform: scaleX(1); }
+    to   { transform: scaleX(0.25); }
+}
+
+/* The guitar player strums */
+.yy-v-strum {
+    animation: yy-v-strum 0.22s ease-in-out infinite alternate;
+}
+
+@keyframes yy-v-strum {
+    from { transform: rotate(-10deg); }
+    to   { transform: rotate(12deg); }
 }
 
 /* No visitors for people who asked their system for less motion (visitors.js does not
