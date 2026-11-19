@@ -1,7 +1,7 @@
 /*
- * Seasonal visitors (built and moved by visitors.js, drawn by christmas.js and
- * easter.js): the stage, the actors and the animations of their arms, legs, ears
- * and wings. The stage only shows while a seasonal look is on.
+ * Seasonal visitors (built and moved by visitors.js, drawn by christmas.js,
+ * easter.js and halloween.js): the stage, the actors and the animations of their
+ * arms, legs, ears and wings. The stage only shows while a seasonal look is on.
  */
 
 .yy-visitors {
@@ -9,7 +9,8 @@
 }
 
 html[data-yy-theme="christmas"] .yy-visitors,
-html[data-yy-theme="easter"] .yy-visitors {
+html[data-yy-theme="easter"] .yy-visitors,
+html[data-yy-theme="halloween"] .yy-visitors {
     display: block;
     position: fixed;
     inset: 0;
@@ -185,6 +186,39 @@ html[data-yy-theme="easter"] .yy-visitors {
 @keyframes yy-v-sway {
     from { transform: rotate(-4deg); }
     to   { transform: rotate(4deg); }
+}
+
+/* ── Halloween ── */
+
+/* The spider's thread, from the top of the screen down to the spider */
+.yy-visitor-drop::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 100%;
+    width: 1.2px;
+    height: 100vh;
+    background: #c9c9d6;
+    transform: translateX(-50%);
+}
+
+.yy-v-legs-l { animation: yy-v-legs 0.3s ease-in-out infinite alternate; }
+.yy-v-legs-r { animation: yy-v-legs 0.3s ease-in-out infinite alternate-reverse; }
+
+@keyframes yy-v-legs {
+    from { transform: rotate(-6deg); }
+    to   { transform: rotate(6deg); }
+}
+
+/* The ghost floats up and down and sways */
+.yy-v-float {
+    transform-origin: 50% 50%;
+    animation: yy-v-float 1.6s ease-in-out infinite;
+}
+
+@keyframes yy-v-float {
+    0%, 100% { transform: translateY(0) rotate(-5deg); }
+    50%      { transform: translateY(-22%) rotate(5deg); }
 }
 
 /* No visitors for people who asked their system for less motion (visitors.js does not

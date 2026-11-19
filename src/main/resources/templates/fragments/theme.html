@@ -5,20 +5,22 @@
 <!-- Colour theme for every page; include as the last element in <head>:
      <th:block th:replace="~{fragments/theme :: head}"></th:block>
      theme.js sets data-bs-theme (light/dark from the OS setting) before the first paint.
-     christmas.css and easter.css only apply during their season or a preview,
+     christmas.css, easter.css and halloween.css only apply during their season or a preview,
      symbolics.css only while the hidden Symbolics mode is on (see theme.js).
-     visitors.js sends the season's visitors (drawn in christmas.js and easter.js,
+     visitors.js sends the season's visitors (drawn in christmas.js, easter.js and halloween.js,
      styled in visitors.css) across the screen; the scripts run in this order. -->
 <th:block th:fragment="head">
     <meta name="color-scheme" content="light dark"/>
     <link rel="stylesheet" th:href="@{/css/christmas.css}"/>
     <link rel="stylesheet" th:href="@{/css/easter.css}"/>
+    <link rel="stylesheet" th:href="@{/css/halloween.css}"/>
     <link rel="stylesheet" th:href="@{/css/visitors.css}"/>
     <link rel="stylesheet" th:href="@{/css/symbolics.css}"/>
     <script th:src="@{/js/theme.js}"></script>
     <script th:src="@{/js/visitors.js}" defer></script>
     <script th:src="@{/js/christmas.js}" defer></script>
     <script th:src="@{/js/easter.js}" defer></script>
+    <script th:src="@{/js/halloween.js}" defer></script>
 </th:block>
 
 </head>

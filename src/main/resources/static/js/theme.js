@@ -15,7 +15,13 @@
  *      blossom petals, a meadow along the bottom edge, bunny ears on the avatars;
  *      from the Monday two weeks before Easter up to and including Easter Monday.
  *      Visitors: the Easter bunny and a chick (js/easter.js). Styles: css/easter.css.
- *    Preview at any time: append ?theme=christmas or ?theme=easter to any page URL.
+ *    - Halloween: night-purple menu bar with a string of pumpkin lanterns, orange
+ *      buttons, falling autumn leaves, a graveyard along the bottom edge, witch hats on
+ *      the avatars; from 18 October up to and including 31 October. Visitors: a witch
+ *      on her broom, a skeleton, a ghost, a spider and a black cat (js/halloween.js).
+ *      Styles: css/halloween.css.
+ *    Preview at any time: append ?theme=christmas, ?theme=easter or ?theme=halloween
+ *    to any page URL.
  *    The preview lasts until the browser tab is closed (sessionStorage),
  *    ?theme=default ends it.
  *
@@ -38,7 +44,8 @@
     var SYMBOLICS = 'symbolics';
     var XMAS = 'christmas';
     var EASTER = 'easter';
-    var SEASONS = [XMAS, EASTER];
+    var HALLOWEEN = 'halloween';
+    var SEASONS = [XMAS, EASTER, HALLOWEEN];
     var URL_PARAM = 'theme';
     var URL_OFF = 'default';
     var TAPS_NEEDED = 7;
@@ -48,7 +55,7 @@
     var media = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
     var symbolics = readSymbolics();
     var preview = readPreview();
-    var theme = null; // the look shown right now: SYMBOLICS, XMAS, EASTER or null
+    var theme = null; // the look shown right now: SYMBOLICS, one of SEASONS, or null
 
     // A shared link like /orders/12?theme=symbolics (or ?theme=easter) switches the
     // look before the first paint. Once the choice is stored, the parameter is removed
@@ -166,11 +173,20 @@
         return now >= start && now < end;
     }
 
+    // Halloween season: the last two weeks of October, 18 to 31 October
+    function isHalloweenSeason(now) {
+        var year = now.getFullYear();
+        return now >= new Date(year, 9, 18) && now < new Date(year, 10, 1);
+    }
+
     function seasonOf(now) {
         if (isChristmasSeason(now)) {
             return XMAS;
         }
-        return isEasterSeason(now) ? EASTER : null;
+        if (isEasterSeason(now)) {
+            return EASTER;
+        }
+        return isHalloweenSeason(now) ? HALLOWEEN : null;
     }
 
     function currentTheme() {
