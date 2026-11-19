@@ -8,7 +8,8 @@
      The seasonal styles (christmas, easter, halloween, muertos, garlic, pizza) only apply during their
      season or a preview, symbolics.css only while the hidden Symbolics mode is on (see
      theme.js). visitors.js sends the season's visitors across the screen; they are drawn
-     in the seasonal scripts (which run after it, in this order) and styled in visitors.css. -->
+     in the seasonal scripts (which run after it, in this order) and styled in visitors.css.
+     theme-info.js adds the (i) button about the current look to the menu bar. -->
 <th:block th:fragment="head">
     <meta name="color-scheme" content="light dark"/>
     <link rel="stylesheet" th:href="@{/css/christmas.css}"/>
@@ -27,6 +28,7 @@
     <script th:src="@{/js/muertos.js}" defer></script>
     <script th:src="@{/js/garlic.js}" defer></script>
     <script th:src="@{/js/pizza.js}" defer></script>
+    <script th:src="@{/js/theme-info.js}" defer></script>
 </th:block>
 
 </head>
