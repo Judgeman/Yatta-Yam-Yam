@@ -1,6 +1,6 @@
 # Yatta-Yam-Yam – Technische Dokumentation
 
-**Version:** 1.10.0  
+**Version:** 1.10.1  
 **Stand:** November 2026
 
 ---
@@ -228,6 +228,8 @@ spring.security.user.password=${YATTA_YAM_YAM_PASSWORD}
 
 Remember-Me ist aktiviert mit einer Token-Gültigkeit von einem Jahr.
 
+Der CSRF-Schutz ist für `POST /login` abgeschaltet (`csrf.ignoringRequestMatchers("/login")`). Das CSRF-Token liegt in der serverseitigen Session; war diese beim Absenden abgelaufen (Timeout, Neustart, wiederhergestellter Tab), wurde der Login stillschweigend abgelehnt und der Nutzer landete erneut auf `/login`. Da es nur ein gemeinsames Konto gibt, bringt Login-CSRF einem Angreifer nichts. Alle übrigen Formulare bleiben CSRF-geschützt.
+
 ---
 
 ## 6. Routen-Referenz
@@ -453,7 +455,7 @@ Anwendung erreichbar unter: `http://localhost:38443`
 
 ```bash
 mvn package
-java -DYATTA_YAM_YAM_PASSWORD=deinPasswort -jar target/yatta-yam-yam-1.10.0.jar
+java -DYATTA_YAM_YAM_PASSWORD=deinPasswort -jar target/yatta-yam-yam-1.10.1.jar
 ```
 
 ---
