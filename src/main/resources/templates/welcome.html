@@ -17,31 +17,32 @@
             margin-top: 24px;
         }
         .stat-card {
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
+            background: var(--yy-surface-muted);
+            border: 1px solid var(--yy-border-soft);
             border-radius: 12px;
             padding: 12px 8px;
         }
         .stat-card-warning {
-            background: #fff8e1;
-            border-color: #ffe082;
+            background: var(--yy-warn-bg);
+            border-color: var(--yy-warn-border);
         }
         .stat-value {
             font-weight: 700;
             font-size: 16px;
-            color: #667eea;
+            color: var(--yy-accent-text);
         }
         .stat-label {
             font-size: 11px;
-            color: #adb5bd;
+            color: var(--yy-faint-text);
             margin-top: 2px;
         }
         .open-debt-list .list-group-item {
-            border-color: #ffe082;
+            border-color: var(--yy-warn-border);
         }
     </style>
+    <th:block th:replace="~{fragments/theme :: head}"></th:block>
 </head>
-<body class="bg-light d-flex align-items-center justify-content-center min-vh-100 py-4">
+<body class="page-muted d-flex align-items-center justify-content-center min-vh-100 py-4">
 
 <div class="card shadow-lg p-5 text-center" style="width: 100%; max-width: 480px;">
 
@@ -55,7 +56,7 @@
     </h1>
     <p class="text-muted mb-4">You're logged in. Great to have you here.</p>
 
-    <div class="card bg-light border-0 p-3 mb-4">
+    <div class="card bg-body-tertiary border-0 p-3 mb-4">
         <small class="text-muted">Signed in as</small>
         <div class="fw-semibold fs-5" th:text="${user.name}">Name</div>
         <small class="text-muted">Remembered on this browser</small>

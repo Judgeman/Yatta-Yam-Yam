@@ -1,0 +1,599 @@
+/*
+ * Easter egg: "Symbolics" mode, styled after symbolics.com (the first .com domain
+ * ever registered): a neon retro terminal with scanlines on black, cyan frames and
+ * glowing headings, green monospace text, magenta and yellow accents, window title
+ * bars with three dots, and a command line at the bottom of the screen.
+ *
+ * Every rule is scoped to html[data-yy-theme="symbolics"], which theme.js sets only
+ * while the mode is on (together with data-bs-theme="dark"), so this file does
+ * nothing otherwise.
+ */
+
+html[data-yy-theme="symbolics"] {
+    --neo-bg: #000;
+    --neo-panel: #010707;
+    --neo-cyan: #00e5ff;
+    --neo-cyan-rgb: 0, 229, 255;
+    --neo-green: #33ff66;
+    --neo-green-rgb: 51, 255, 102;
+    --neo-dim: #6fcf8f;
+    --neo-magenta: #ff2bd6;
+    --neo-magenta-rgb: 255, 43, 214;
+    --neo-yellow: #ffd60a;
+    --neo-yellow-rgb: 255, 214, 10;
+    --neo-red: #ff4040;
+    --neo-red-rgb: 255, 64, 64;
+    --neo-mono: "Share Tech Mono", "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, "Liberation Mono", "Courier New", monospace;
+    --neo-display: "Arial Black", "Helvetica Neue", Arial, system-ui, sans-serif;
+    --neo-glow: 0 0 4px rgba(var(--neo-cyan-rgb), 0.9), 0 0 14px rgba(var(--neo-cyan-rgb), 0.55);
+    --neo-box-glow: 0 0 10px rgba(var(--neo-cyan-rgb), 0.35), inset 0 0 0 1px rgba(var(--neo-cyan-rgb), 0.15);
+    --neo-scanlines: repeating-linear-gradient(to bottom, #062022 0 2px, #000 2px 4px);
+    /* three window dots: red, yellow, green */
+    --neo-dots: radial-gradient(circle at 6px 50%, #ff4545 5px, transparent 5.5px),
+                radial-gradient(circle at 23px 50%, #ffc400 5px, transparent 5.5px),
+                radial-gradient(circle at 40px 50%, #22dd55 5px, transparent 5.5px);
+
+    color-scheme: dark;
+    scrollbar-color: var(--neo-cyan) #000;
+
+    --bs-body-font-family: var(--neo-mono);
+    --bs-font-sans-serif: var(--neo-mono);
+    --bs-body-color: var(--neo-green);       --bs-body-color-rgb: var(--neo-green-rgb);
+    --bs-body-bg: var(--neo-panel);          --bs-body-bg-rgb: 1, 7, 7;
+    --bs-emphasis-color: #b9ffcf;            --bs-emphasis-color-rgb: 185, 255, 207;
+    --bs-secondary-color: var(--neo-dim);    --bs-secondary-color-rgb: 111, 207, 143;
+    --bs-secondary-bg: #031414;              --bs-secondary-bg-rgb: 3, 20, 20;
+    --bs-tertiary-color: var(--neo-dim);     --bs-tertiary-color-rgb: 111, 207, 143;
+    --bs-tertiary-bg: #021010;               --bs-tertiary-bg-rgb: 2, 16, 16;
+    --bs-heading-color: var(--neo-cyan);
+    --bs-link-color: var(--neo-cyan);        --bs-link-color-rgb: var(--neo-cyan-rgb);
+    --bs-link-hover-color: var(--neo-magenta); --bs-link-hover-color-rgb: var(--neo-magenta-rgb);
+    --bs-border-color: rgba(var(--neo-cyan-rgb), 0.55);
+    --bs-border-color-translucent: rgba(var(--neo-cyan-rgb), 0.3);
+    --bs-border-radius: 6px;
+    --bs-border-radius-sm: 4px;
+    --bs-border-radius-lg: 8px;
+    --bs-border-radius-xl: 8px;
+    --bs-border-radius-xxl: 8px;
+    --bs-box-shadow: none;
+    --bs-box-shadow-sm: none;
+    --bs-box-shadow-lg: none;
+    --bs-focus-ring-color: rgba(var(--neo-cyan-rgb), 0.5);
+
+    --bs-primary: var(--neo-cyan);       --bs-primary-rgb: var(--neo-cyan-rgb);
+    --bs-secondary: var(--neo-dim);      --bs-secondary-rgb: 111, 207, 143;
+    --bs-success: var(--neo-green);      --bs-success-rgb: var(--neo-green-rgb);
+    --bs-info: var(--neo-cyan);          --bs-info-rgb: var(--neo-cyan-rgb);
+    --bs-warning: var(--neo-yellow);     --bs-warning-rgb: var(--neo-yellow-rgb);
+    --bs-danger: var(--neo-red);         --bs-danger-rgb: var(--neo-red-rgb);
+    --bs-primary-text-emphasis: var(--neo-cyan);    --bs-primary-bg-subtle: #000;    --bs-primary-border-subtle: var(--neo-cyan);
+    --bs-secondary-text-emphasis: var(--neo-dim);   --bs-secondary-bg-subtle: #000;  --bs-secondary-border-subtle: var(--neo-dim);
+    --bs-success-text-emphasis: var(--neo-green);   --bs-success-bg-subtle: #000;    --bs-success-border-subtle: var(--neo-green);
+    --bs-info-text-emphasis: var(--neo-cyan);       --bs-info-bg-subtle: #000;       --bs-info-border-subtle: var(--neo-cyan);
+    --bs-warning-text-emphasis: var(--neo-yellow);  --bs-warning-bg-subtle: #000;    --bs-warning-border-subtle: var(--neo-yellow);
+    --bs-danger-text-emphasis: var(--neo-red);      --bs-danger-bg-subtle: #000;     --bs-danger-border-subtle: var(--neo-red);
+
+    /* The app's own tokens (style.css) */
+    --yy-accent: var(--neo-cyan);
+    --yy-accent-2: var(--neo-cyan);
+    --yy-accent-text: var(--neo-magenta);
+    --yy-accent-hover: var(--neo-cyan);
+    --yy-accent-2-hover: var(--neo-cyan);
+    --yy-page-bg: #000;
+    --yy-page-muted-bg: #000;
+    --yy-surface: var(--neo-panel);
+    --yy-surface-muted: #000;
+    --yy-border-soft: rgba(var(--neo-cyan-rgb), 0.55);
+    --yy-divider: rgba(var(--neo-cyan-rgb), 0.3);
+    --yy-faint-text: var(--neo-dim);
+    --yy-muted-box-bg: #000;
+    --yy-muted-box-border: rgba(var(--neo-cyan-rgb), 0.55);
+    --yy-warn-bg: #000;
+    --yy-warn-border: var(--neo-yellow);
+    --yy-badge-open-bg: transparent;      --yy-badge-open-fg: var(--neo-green);
+    --yy-badge-ordered-bg: transparent;   --yy-badge-ordered-fg: var(--neo-cyan);
+    --yy-badge-closed-bg: transparent;    --yy-badge-closed-fg: var(--neo-yellow);
+    --yy-badge-archived-bg: transparent;  --yy-badge-archived-fg: var(--neo-dim);
+}
+
+html[data-yy-theme="symbolics"] body {
+    background: var(--neo-scanlines);
+    background-attachment: fixed;
+    font-family: var(--neo-mono);
+    letter-spacing: 0.02em;
+    padding-bottom: 2.75rem; /* room for the command line */
+    caret-color: var(--neo-green);
+}
+
+html[data-yy-theme="symbolics"] ::selection {
+    background: var(--neo-magenta);
+    color: #000;
+}
+
+/* ── Type: glowing cyan display headings, uppercase labels ── */
+html[data-yy-theme="symbolics"] h1,
+html[data-yy-theme="symbolics"] h2,
+html[data-yy-theme="symbolics"] h3,
+html[data-yy-theme="symbolics"] .h4,
+html[data-yy-theme="symbolics"] .navbar-brand {
+    font-family: var(--neo-display);
+    font-weight: 900;
+    color: var(--neo-cyan);
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+    text-shadow: var(--neo-glow);
+}
+
+html[data-yy-theme="symbolics"] h4,
+html[data-yy-theme="symbolics"] h5,
+html[data-yy-theme="symbolics"] h6,
+html[data-yy-theme="symbolics"] .h5,
+html[data-yy-theme="symbolics"] .form-label,
+html[data-yy-theme="symbolics"] .card-header,
+html[data-yy-theme="symbolics"] th {
+    font-family: var(--neo-mono);
+    color: var(--neo-cyan);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+html[data-yy-theme="symbolics"] .text-muted,
+html[data-yy-theme="symbolics"] .text-secondary,
+html[data-yy-theme="symbolics"] .text-body-secondary {
+    color: var(--neo-dim) !important;
+}
+
+html[data-yy-theme="symbolics"] .text-primary {
+    color: var(--neo-magenta) !important;
+    text-shadow: 0 0 6px rgba(var(--neo-magenta-rgb), 0.6);
+}
+
+html[data-yy-theme="symbolics"] .text-success { color: var(--neo-green) !important; }
+html[data-yy-theme="symbolics"] .text-danger  { color: var(--neo-red) !important; }
+html[data-yy-theme="symbolics"] .text-warning { color: var(--neo-yellow) !important; }
+
+html[data-yy-theme="symbolics"] hr {
+    border-top: 1px solid var(--neo-cyan);
+    opacity: 0.5;
+}
+
+html[data-yy-theme="symbolics"] a:not(.btn) {
+    color: var(--neo-cyan);
+}
+
+html[data-yy-theme="symbolics"] a:not(.btn):hover {
+    color: var(--neo-magenta);
+}
+
+html[data-yy-theme="symbolics"] :focus-visible {
+    outline: 2px solid var(--neo-cyan) !important;
+    outline-offset: 2px;
+    box-shadow: var(--neo-glow) !important;
+}
+
+html[data-yy-theme="symbolics"] .shadow,
+html[data-yy-theme="symbolics"] .shadow-sm,
+html[data-yy-theme="symbolics"] .shadow-lg {
+    box-shadow: var(--neo-box-glow) !important;
+}
+
+/* ── Navbar ── */
+html[data-yy-theme="symbolics"] .navbar {
+    background: var(--neo-scanlines) !important;
+    border-bottom: 1px solid var(--neo-cyan);
+    box-shadow: 0 0 12px rgba(var(--neo-cyan-rgb), 0.35);
+}
+
+html[data-yy-theme="symbolics"] .navbar .text-white {
+    color: var(--neo-cyan) !important;
+    text-transform: uppercase;
+}
+
+html[data-yy-theme="symbolics"] .user-badge {
+    border-radius: 6px;
+    background: #2bff2b;
+    color: #000;
+    box-shadow: 0 0 8px rgba(var(--neo-green-rgb), 0.6);
+}
+
+html[data-yy-theme="symbolics"] .navbar .open-debt-badge {
+    background: transparent !important;
+    color: var(--neo-magenta);
+    border: 1px solid var(--neo-magenta);
+    border-radius: 999px;
+    box-shadow: 0 0 8px rgba(var(--neo-magenta-rgb), 0.6);
+    text-shadow: 0 0 6px rgba(var(--neo-magenta-rgb), 0.8);
+}
+
+/* ── Buttons: neon outlines, gradient for the main action ── */
+html[data-yy-theme="symbolics"] .btn {
+    --bs-btn-color: var(--neo-cyan);
+    --bs-btn-bg: transparent;
+    --bs-btn-border-color: var(--neo-cyan);
+    --bs-btn-hover-color: #000;
+    --bs-btn-hover-bg: var(--neo-cyan);
+    --bs-btn-hover-border-color: var(--neo-cyan);
+    --bs-btn-active-color: #000;
+    --bs-btn-active-bg: var(--neo-cyan);
+    --bs-btn-active-border-color: var(--neo-cyan);
+    --bs-btn-disabled-color: var(--neo-cyan);
+    --bs-btn-disabled-bg: transparent;
+    --bs-btn-disabled-border-color: var(--neo-cyan);
+    --bs-btn-focus-box-shadow: var(--neo-glow);
+    background: var(--bs-btn-bg);
+    border: 1px solid var(--bs-btn-border-color);
+    border-radius: 6px;
+    font-family: var(--neo-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+html[data-yy-theme="symbolics"] .btn-success,
+html[data-yy-theme="symbolics"] .btn-outline-success {
+    --bs-btn-color: var(--neo-green);
+    --bs-btn-border-color: var(--neo-green);
+    --bs-btn-hover-bg: var(--neo-green);
+    --bs-btn-hover-border-color: var(--neo-green);
+    --bs-btn-active-bg: var(--neo-green);
+}
+
+html[data-yy-theme="symbolics"] .btn-warning,
+html[data-yy-theme="symbolics"] .btn-outline-warning {
+    --bs-btn-color: var(--neo-yellow);
+    --bs-btn-border-color: var(--neo-yellow);
+    --bs-btn-hover-bg: var(--neo-yellow);
+    --bs-btn-hover-border-color: var(--neo-yellow);
+    --bs-btn-active-bg: var(--neo-yellow);
+}
+
+html[data-yy-theme="symbolics"] .btn-danger,
+html[data-yy-theme="symbolics"] .btn-outline-danger {
+    --bs-btn-color: var(--neo-red);
+    --bs-btn-border-color: var(--neo-red);
+    --bs-btn-hover-bg: var(--neo-red);
+    --bs-btn-hover-border-color: var(--neo-red);
+    --bs-btn-active-bg: var(--neo-red);
+}
+
+html[data-yy-theme="symbolics"] .btn-secondary,
+html[data-yy-theme="symbolics"] .btn-outline-secondary {
+    --bs-btn-color: var(--neo-dim);
+    --bs-btn-border-color: rgba(var(--neo-cyan-rgb), 0.45);
+}
+
+html[data-yy-theme="symbolics"] .btn-primary {
+    --bs-btn-color: #050816;
+    --bs-btn-border-color: transparent;
+    --bs-btn-hover-color: #050816;
+    --bs-btn-hover-border-color: transparent;
+    --bs-btn-active-color: #050816;
+    --bs-btn-disabled-color: #050816;
+    background: linear-gradient(90deg, #8b7bff, #4fb6ff);
+    font-weight: 600;
+}
+
+html[data-yy-theme="symbolics"] .btn:hover,
+html[data-yy-theme="symbolics"] .btn:focus-visible {
+    background: var(--bs-btn-hover-bg);
+    color: var(--bs-btn-hover-color);
+    border-color: var(--bs-btn-hover-border-color);
+    box-shadow: 0 0 12px rgba(var(--neo-cyan-rgb), 0.55);
+}
+
+html[data-yy-theme="symbolics"] .btn-primary:hover,
+html[data-yy-theme="symbolics"] .btn-primary:focus-visible {
+    background: linear-gradient(90deg, #a397ff, #74c6ff);
+    box-shadow: 0 0 14px rgba(124, 140, 255, 0.7);
+}
+
+html[data-yy-theme="symbolics"] .btn:active,
+html[data-yy-theme="symbolics"] .btn.active {
+    background: var(--bs-btn-active-bg);
+    color: var(--bs-btn-active-color);
+}
+
+/* ── Cards are terminal windows: cyan frame, glow, title bar with three dots ── */
+html[data-yy-theme="symbolics"] .card,
+html[data-yy-theme="symbolics"] .order-card,
+html[data-yy-theme="symbolics"] .summary-card,
+html[data-yy-theme="symbolics"] .modal-content {
+    --bs-card-bg: var(--neo-panel);
+    --bs-card-cap-bg: transparent;
+    --bs-card-border-color: var(--neo-cyan);
+    --bs-card-color: var(--neo-green);
+    background: var(--neo-panel);
+    border: 2px solid var(--neo-cyan);
+    border-radius: 8px;
+    box-shadow: var(--neo-box-glow);
+}
+
+html[data-yy-theme="symbolics"] .card-header {
+    border-bottom: 1px solid rgba(var(--neo-cyan-rgb), 0.55);
+    font-weight: 700;
+}
+
+html[data-yy-theme="symbolics"] .card-header::before,
+html[data-yy-theme="symbolics"] .modal-title::before {
+    content: "";
+    display: inline-block;
+    width: 52px;
+    height: 12px;
+    vertical-align: -1px;
+    background: var(--neo-dots);
+}
+
+html[data-yy-theme="symbolics"] .order-card {
+    transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+html[data-yy-theme="symbolics"] .order-card:hover {
+    transform: none;
+    border-color: var(--neo-magenta);
+    box-shadow: 0 0 16px rgba(var(--neo-magenta-rgb), 0.45);
+}
+
+html[data-yy-theme="symbolics"] .order-card.archived {
+    opacity: 0.7;
+    border-style: dashed;
+}
+
+html[data-yy-theme="symbolics"] .item-card,
+html[data-yy-theme="symbolics"] .split-stat,
+html[data-yy-theme="symbolics"] .stat-card,
+html[data-yy-theme="symbolics"] .split-calculator,
+html[data-yy-theme="symbolics"] .item-list-option,
+html[data-yy-theme="symbolics"] .muted-box {
+    background: #000;
+    border: 1px solid rgba(var(--neo-cyan-rgb), 0.6) !important;
+    border-radius: 6px;
+}
+
+html[data-yy-theme="symbolics"] .item-card:hover,
+html[data-yy-theme="symbolics"] .item-list-option:hover {
+    border-color: var(--neo-cyan) !important;
+    box-shadow: 0 0 10px rgba(var(--neo-cyan-rgb), 0.4);
+}
+
+html[data-yy-theme="symbolics"] .stat-card-warning {
+    border-color: var(--neo-yellow) !important;
+    box-shadow: 0 0 10px rgba(var(--neo-yellow-rgb), 0.35);
+}
+
+html[data-yy-theme="symbolics"] .split-stat-value,
+html[data-yy-theme="symbolics"] .stat-value {
+    color: var(--neo-magenta);
+    text-shadow: 0 0 8px rgba(var(--neo-magenta-rgb), 0.7);
+}
+
+html[data-yy-theme="symbolics"] .split-stat-label,
+html[data-yy-theme="symbolics"] .stat-label {
+    color: var(--neo-yellow);
+    text-transform: uppercase;
+}
+
+/* ── Avatars: bright green tiles like the site's logo ── */
+html[data-yy-theme="symbolics"] .avatar-circle,
+html[data-yy-theme="symbolics"] .mini-avatar,
+html[data-yy-theme="symbolics"] .contact-avatar-initial {
+    background: #2bff2b;
+    color: #000;
+    border-radius: 6px;
+    box-shadow: 0 0 10px rgba(var(--neo-green-rgb), 0.55);
+}
+
+html[data-yy-theme="symbolics"] .contact-avatar,
+html[data-yy-theme="symbolics"] .item-image,
+html[data-yy-theme="symbolics"] .item-image-placeholder {
+    border-radius: 6px;
+    border: 1px solid rgba(var(--neo-cyan-rgb), 0.6);
+    background: #000;
+}
+
+/* ── Badges: outlined pills ── */
+html[data-yy-theme="symbolics"] .badge,
+html[data-yy-theme="symbolics"] .order-status-badge {
+    background: transparent !important;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    font-family: var(--neo-mono);
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+html[data-yy-theme="symbolics"] .badge                { color: var(--neo-cyan) !important; }
+html[data-yy-theme="symbolics"] .badge.bg-success     { color: var(--neo-green) !important; }
+html[data-yy-theme="symbolics"] .badge.bg-warning     { color: var(--neo-yellow) !important; }
+html[data-yy-theme="symbolics"] .badge.bg-danger      { color: var(--neo-magenta) !important; }
+html[data-yy-theme="symbolics"] .badge.bg-secondary   { color: var(--neo-dim) !important; }
+
+/* ── Alerts: black panels with a coloured frame ── */
+html[data-yy-theme="symbolics"] .alert {
+    --bs-alert-bg: #000;
+    border-radius: 6px;
+    border-width: 1px;
+}
+
+html[data-yy-theme="symbolics"] .alert-danger {
+    --bs-alert-color: var(--neo-magenta);
+    --bs-alert-border-color: var(--neo-magenta);
+    box-shadow: 0 0 10px rgba(var(--neo-magenta-rgb), 0.35);
+}
+
+html[data-yy-theme="symbolics"] .alert-warning {
+    box-shadow: 0 0 10px rgba(var(--neo-yellow-rgb), 0.3);
+}
+
+/* ── Forms: the C:\> prompt input ── */
+html[data-yy-theme="symbolics"] .form-control,
+html[data-yy-theme="symbolics"] .form-select,
+html[data-yy-theme="symbolics"] .input-group-text,
+html[data-yy-theme="symbolics"] .qty-input,
+html[data-yy-theme="symbolics"] .qty-btn {
+    background-color: #000;
+    color: var(--neo-green);
+    border: 1px solid var(--neo-cyan);
+    border-radius: 6px;
+    font-family: var(--neo-mono);
+}
+
+html[data-yy-theme="symbolics"] .input-group-text {
+    color: var(--neo-cyan);
+}
+
+html[data-yy-theme="symbolics"] .form-control:focus,
+html[data-yy-theme="symbolics"] .form-select:focus {
+    border-color: var(--neo-cyan);
+    box-shadow: 0 0 0 1px var(--neo-cyan), 0 0 12px rgba(var(--neo-cyan-rgb), 0.55);
+}
+
+html[data-yy-theme="symbolics"] .form-control::placeholder {
+    color: rgba(var(--neo-green-rgb), 0.45);
+}
+
+html[data-yy-theme="symbolics"] .qty-btn:hover {
+    background: var(--neo-cyan);
+    color: #000;
+    border-color: var(--neo-cyan);
+}
+
+html[data-yy-theme="symbolics"] .form-check-input {
+    background-color: #000;
+    border: 1px solid var(--neo-cyan);
+}
+
+html[data-yy-theme="symbolics"] .form-check-input:checked {
+    background-color: var(--neo-cyan);
+    border-color: var(--neo-cyan);
+    box-shadow: 0 0 8px rgba(var(--neo-cyan-rgb), 0.6);
+}
+
+/* ── Tables and lists ── */
+html[data-yy-theme="symbolics"] .table {
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--neo-green);
+    --bs-table-border-color: rgba(var(--neo-cyan-rgb), 0.3);
+    --bs-table-hover-bg: rgba(var(--neo-cyan-rgb), 0.08);
+    --bs-table-hover-color: var(--neo-green);
+}
+
+html[data-yy-theme="symbolics"] .table > thead > tr > *,
+html[data-yy-theme="symbolics"] .table-light > * {
+    --bs-table-bg: #000;
+    --bs-table-color: var(--neo-cyan);
+    border-bottom-color: var(--neo-cyan);
+}
+
+html[data-yy-theme="symbolics"] .list-group {
+    --bs-list-group-bg: transparent;
+    --bs-list-group-color: var(--neo-green);
+    --bs-list-group-border-color: rgba(var(--neo-cyan-rgb), 0.3);
+    --bs-list-group-action-hover-bg: rgba(var(--neo-cyan-rgb), 0.1);
+    --bs-list-group-action-hover-color: var(--neo-green);
+}
+
+html[data-yy-theme="symbolics"] .participant-row {
+    border-bottom: 1px dashed rgba(var(--neo-cyan-rgb), 0.3);
+}
+
+/* ── Modals ── */
+html[data-yy-theme="symbolics"] .modal-backdrop {
+    --bs-backdrop-bg: #000;
+    --bs-backdrop-opacity: 0.75;
+}
+
+html[data-yy-theme="symbolics"] .modal-header {
+    border-bottom: 1px solid rgba(var(--neo-cyan-rgb), 0.55);
+}
+
+html[data-yy-theme="symbolics"] .modal-title {
+    color: var(--neo-cyan);
+    font-family: var(--neo-mono);
+    text-transform: uppercase;
+}
+
+html[data-yy-theme="symbolics"] .modal-footer {
+    border-top: 1px solid rgba(var(--neo-cyan-rgb), 0.55);
+}
+
+html[data-yy-theme="symbolics"] .version-footer,
+html[data-yy-theme="symbolics"] .version-footer a {
+    color: var(--neo-dim);
+}
+
+/* ── Command line at the bottom (built by theme.js) ── */
+.yy-terminal {
+    display: none;
+}
+
+html[data-yy-theme="symbolics"] .yy-terminal {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1090; /* above modals and toasts */
+    padding: 6px 16px;
+    font-family: var(--neo-mono);
+    font-size: 13px;
+    color: var(--neo-green);
+    background: #000;
+    border-top: 1px solid var(--neo-cyan);
+    box-shadow: 0 0 12px rgba(var(--neo-cyan-rgb), 0.35);
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+html[data-yy-theme="symbolics"] .yy-terminal-line {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+html[data-yy-theme="symbolics"] .yy-terminal-cmd {
+    color: var(--neo-yellow);
+}
+
+html[data-yy-theme="symbolics"] .yy-terminal-cursor {
+    display: inline-block;
+    width: 0.6em;
+    height: 1.1em;
+    margin-left: 2px;
+    vertical-align: -0.2em;
+    background: var(--neo-green);
+    animation: yy-blink 1s steps(1) infinite;
+}
+
+html[data-yy-theme="symbolics"] .yy-terminal-status {
+    color: var(--neo-cyan);
+    text-transform: uppercase;
+}
+
+html[data-yy-theme="symbolics"] .yy-terminal-status::after {
+    content: "";
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    margin-left: 8px;
+    border-radius: 50%;
+    background: #22dd55;
+    box-shadow: 0 0 6px #22dd55;
+}
+
+@keyframes yy-blink {
+    50% { opacity: 0; }
+}
+
+@media (max-width: 576px) {
+    html[data-yy-theme="symbolics"] .yy-terminal-status {
+        display: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html[data-yy-theme="symbolics"] .yy-terminal-cursor {
+        animation: none;
+    }
+}

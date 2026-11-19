@@ -25,8 +25,9 @@
             text-decoration: underline;
         }
     </style>
+    <th:block th:replace="~{fragments/theme :: head}"></th:block>
 </head>
-<body class="bg-light">
+<body class="page-muted">
 
 <div class="container py-5" style="max-width: 680px;">
     <div class="mb-4">
@@ -37,10 +38,10 @@
 
     <div class="card shadow-sm p-4">
         <div class="d-flex align-items-center gap-3 mb-4">
-            <img src="/images/logo.png" alt="Yatta-Yam-Yam" style="height:48px;"/>
+            <img src="/images/logo.png" alt="Yatta-Yam-Yam" class="app-logo" style="height:48px;"/>
             <div>
                 <h1 class="h4 fw-bold mb-0">Release Notes</h1>
-                <span class="badge bg-primary fs-6 mt-1"
+                <span id="release-version" class="badge bg-primary fs-6 mt-1 user-select-none"
                       th:text="'v' + ${@environment.getProperty('spring.application.version')}">v?</span>
             </div>
         </div>
@@ -51,6 +52,13 @@
         </h2>
 
         <ul class="list-group list-group-flush mb-3">
+            <li class="list-group-item d-flex gap-2 align-items-start px-0">
+                <i class="bi bi-moon-stars text-primary mt-1"></i>
+                <div>
+                    <strong>Dark mode</strong><br/>
+                    <span class="text-muted small">Yatta-Yam-Yam now follows the light or dark setting of your device. If your system switches to dark mode — manually or automatically in the evening — every page switches along with it, even while it's open.</span>
+                </div>
+            </li>
             <li class="list-group-item d-flex gap-2 align-items-start px-0">
                 <i class="bi bi-wrench-adjustable text-primary mt-1"></i>
                 <div>

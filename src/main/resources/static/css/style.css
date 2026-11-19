@@ -1,7 +1,75 @@
+/* ── Colour tokens ──
+   theme.js sets data-bs-theme="light" or "dark" on <html> from the OS setting.
+   Bootstrap 5.3 switches its own components with that attribute; everything the
+   app paints itself uses the --yy-* tokens below. */
+:root,
+[data-bs-theme="light"] {
+    --yy-accent: #667eea;
+    --yy-accent-2: #764ba2;
+    --yy-accent-text: #667eea;          /* accent used as text colour */
+    --yy-accent-hover: #5a6fd6;
+    --yy-accent-2-hover: #6a3f96;
+    --yy-tint-1: #667eea22;             /* page background gradient */
+    --yy-tint-2: #764ba222;
+    --yy-page-bg: #fff;
+    --yy-page-muted-bg: #f8f9fa;        /* centred single-card pages */
+    --yy-surface: #fff;                 /* cards and tiles */
+    --yy-surface-muted: #f8f9fa;        /* stat tiles, calculators, placeholders */
+    --yy-border-soft: #e9ecef;
+    --yy-divider: #f1f3f5;
+    --yy-faint-text: #adb5bd;
+    --yy-muted-box-bg: #f2f2f2;
+    --yy-muted-box-border: #e0e0e0;
+    --yy-warn-bg: #fff8e1;
+    --yy-warn-border: #ffe082;
+    --yy-badge-open-bg: #d1fae5;      --yy-badge-open-fg: #065f46;
+    --yy-badge-ordered-bg: #e0f2fe;   --yy-badge-ordered-fg: #0369a1;
+    --yy-badge-closed-bg: #fef3c7;    --yy-badge-closed-fg: #92400e;
+    --yy-badge-archived-bg: #f1f5f9;  --yy-badge-archived-fg: #475569;
+}
+
+[data-bs-theme="dark"] {
+    --yy-accent-text: #8c9bf2;
+    --yy-tint-1: #667eea1f;
+    --yy-tint-2: #764ba22e;
+    --yy-page-bg: #15171b;
+    --yy-page-muted-bg: #15171b;
+    --yy-surface: var(--bs-body-bg);
+    --yy-surface-muted: var(--bs-tertiary-bg);
+    --yy-border-soft: #343a40;
+    --yy-divider: #2b3035;
+    --yy-faint-text: #7c858d;
+    --yy-muted-box-bg: var(--bs-tertiary-bg);
+    --yy-muted-box-border: var(--bs-border-color);
+    --yy-warn-bg: rgba(255, 193, 7, 0.1);
+    --yy-warn-border: rgba(255, 193, 7, 0.4);
+    --yy-badge-open-bg: rgba(16, 185, 129, 0.18);     --yy-badge-open-fg: #6ee7b7;
+    --yy-badge-ordered-bg: rgba(14, 165, 233, 0.18);  --yy-badge-ordered-fg: #7dd3fc;
+    --yy-badge-closed-bg: rgba(245, 158, 11, 0.18);   --yy-badge-closed-fg: #fcd34d;
+    --yy-badge-archived-bg: rgba(148, 163, 184, 0.16); --yy-badge-archived-fg: #cbd5e1;
+}
+
+/* Table header rows use .table-light, which Bootstrap keeps light in dark mode */
+[data-bs-theme="dark"] .table-light {
+    --bs-table-color: var(--bs-body-color);
+    --bs-table-bg: var(--bs-tertiary-bg);
+    --bs-table-border-color: var(--bs-border-color);
+    --bs-table-striped-bg: var(--bs-tertiary-bg);
+    --bs-table-striped-color: var(--bs-body-color);
+    --bs-table-active-bg: var(--bs-secondary-bg);
+    --bs-table-active-color: var(--bs-body-color);
+    --bs-table-hover-bg: var(--bs-secondary-bg);
+    --bs-table-hover-color: var(--bs-body-color);
+}
+
 body {
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    background: linear-gradient(135deg, #667eea22 0%, #764ba222 100%);
+    background: linear-gradient(135deg, var(--yy-tint-1) 0%, var(--yy-tint-2) 100%) var(--yy-page-bg);
     min-height: 100vh;
+}
+
+body.page-muted {
+    background-color: var(--yy-page-muted-bg);
 }
 
 .card {
@@ -18,7 +86,7 @@ body {
     width: 80px;
     height: 80px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, var(--yy-accent), var(--yy-accent-2));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -30,13 +98,13 @@ body {
 
 /* Button polish */
 .btn-primary {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, var(--yy-accent), var(--yy-accent-2));
     border: none;
     border-radius: 0.75rem;
 }
 
 .btn-primary:hover {
-    background: linear-gradient(135deg, #5a6fd6, #6a3f96);
+    background: linear-gradient(135deg, var(--yy-accent-hover), var(--yy-accent-2-hover));
     border: none;
 }
 
@@ -46,12 +114,12 @@ body {
 
 .btn-outline-primary {
     border-radius: 0.75rem;
-    border-color: #667eea;
-    color: #667eea;
+    border-color: var(--yy-accent-text);
+    color: var(--yy-accent-text);
 }
 
 .btn-outline-primary:hover {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, var(--yy-accent), var(--yy-accent-2));
     border-color: transparent;
 }
 
@@ -64,19 +132,32 @@ body {
 }
 
 .form-control:focus {
-    border-color: #667eea;
+    border-color: var(--yy-accent);
     box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
 }
 
 .text-primary {
-    color: #667eea !important;
+    color: var(--yy-accent-text) !important;
 }
 
 .version-footer a {
-    color: #adb5bd;
+    color: var(--yy-faint-text);
     text-decoration: none;
 }
 
 .version-footer a:hover {
     text-decoration: underline;
+}
+
+/* Small grey info box (e.g. "2 unpaid · €12.00 open" for non-owners) */
+.muted-box {
+    background-color: var(--yy-muted-box-bg);
+    border: 1px solid var(--yy-muted-box-border);
+}
+
+/* The logo is black line art on an opaque white background: in dark mode it is
+   inverted and screened onto the card, so only the (now light) lines remain */
+[data-bs-theme="dark"] .app-logo {
+    filter: invert(1) brightness(0.88);
+    mix-blend-mode: screen;
 }

@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
     <link rel="stylesheet" th:href="@{/css/style.css}"/>
     <link rel="stylesheet" th:href="@{/css/dashboard.css}"/>
+    <th:block th:replace="~{fragments/theme :: head}"></th:block>
 </head>
 <body>
 
@@ -80,7 +81,7 @@
                 <div class="flex-grow-1" style="min-width:0;">
                     <div class="d-flex align-items-center gap-2 flex-wrap">
                         <h5 class="fw-bold mb-0" th:text="${contact.name}">Name</h5>
-                        <span class="badge text-bg-light border">
+                        <span class="badge bg-body-tertiary text-body-emphasis border">
                             <i class="bi bi-geo-alt"></i>
                             <span th:text="${#strings.capitalize(#strings.toLowerCase(contact.location.name()))}">Location</span>
                         </span>
