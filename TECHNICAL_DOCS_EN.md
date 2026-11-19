@@ -1,6 +1,6 @@
 # Yatta-Yam-Yam – Technical Documentation
 
-**Version:** 1.10.0  
+**Version:** 1.11.0  
 **Date:** November 2026
 
 ---
@@ -18,6 +18,7 @@
 9. [Configuration](#9-configuration)
 10. [Local Setup](#10-local-setup)
 11. [Project Structure](#11-project-structure)
+12. [Colour Scheme (Dark Mode)](#12-colour-scheme-dark-mode)
 
 ---
 
@@ -37,6 +38,7 @@ Yatta-Yam-Yam is an internal web application for collective food ordering. Users
 - Contact book (name, location, address, phone numbers, image) with a quick lookup in the phone-order dialog
 - User statistics (total spend, open amounts)
 - Red badge with the open amount next to your own name in the navbar
+- Dark mode that follows the operating system setting
 
 ---
 
@@ -453,7 +455,7 @@ Application available at: `http://localhost:38443`
 
 ```bash
 mvn package
-java -DYATTA_YAM_YAM_PASSWORD=yourPassword -jar target/yatta-yam-yam-1.10.0.jar
+java -DYATTA_YAM_YAM_PASSWORD=yourPassword -jar target/yatta-yam-yam-1.11.0.jar
 ```
 
 ---
@@ -500,10 +502,13 @@ Yatta-Yam-Yam/
         ├── static/
         │   ├── css/
         │   │   ├── dashboard.css
-        │   │   └── style.css
-        │   └── images/
-        │       ├── favicon.svg
-        │       └── logo.png
+        │   │   ├── style.css                 # Base styles + colour tokens (--yy-*) for light/dark
+        │   │   └── symbolics.css             # Easter egg: Symbolics mode (inert unless enabled)
+        │   ├── images/
+        │   │   ├── favicon.svg
+        │   │   └── logo.png
+        │   └── js/
+        │       └── theme.js                  # Light/dark from the OS setting, Symbolics easter egg
         └── templates/                        # Thymeleaf HTML templates
             ├── index.html                    # Name input
             ├── confirm.html                  # Confirm existing user
@@ -523,5 +528,30 @@ Yatta-Yam-Yam/
             ├── users.html                    # User statistics
             ├── version.html                  # Version info
             └── fragments/
-                └── open-debt-badge.html      # Red badge with the open amount next to the name
+                ├── open-debt-badge.html      # Red badge with the open amount next to the name
+                └── theme.html                # <head> include: theme.js + symbolics.css
 ```
+
+---
+
+## 12. Colour Scheme (Dark Mode)
+
+The app follows the light/dark setting of the operating system; there is no toggle of its own.
+
+- `static/js/theme.js` is loaded in the `<head>` of every page through the fragment `fragments/theme.html`. Before the first paint it sets `data-bs-theme="light"` or `"dark"` on `<html>` from `prefers-color-scheme`, and it updates the attribute live when the OS setting changes (e.g. automatic dark mode in the evening).
+- Bootstrap 5.3 switches its own components with this attribute. Everything the app paints itself (`style.css`, `dashboard.css`, the inline styles of `welcome.html`) uses the `--yy-*` CSS variables defined at the top of `style.css`, with one set of values for light and one for dark.
+- The logo (`logo.png`, black line art on an opaque white background) carries the class `app-logo` and is inverted in dark mode.
+
+**Rules for new pages and styles:**
+- Include `<th:block th:replace="~{fragments/theme :: head}"></th:block>` as the last element of `<head>`.
+- No hard-coded colours: use the `--yy-*` tokens or Bootstrap variables (`--bs-body-bg`, `--bs-border-color`, `--bs-secondary-color`, …).
+- Avoid `bg-light` and `text-bg-light`, which stay light in dark mode; use `bg-body-tertiary` and `text-body-emphasis`. Centred single-card pages use `<body class="page-muted">`.
+
+### Easter egg: Symbolics mode
+
+A hidden third look styled after symbolics.com, the first .com domain ever registered: a neon retro terminal with scanlines on black, glowing cyan headings and frames, green monospace text, magenta and yellow accents, window title bars with three dots, and a command line at the bottom (`C:\YATTA-YAM-YAM\ORDERS\DASHBOARD>`) that shows the command a click on the item under the mouse would run.
+
+- **On/off:** type `symbolics` anywhere outside a form field, or tap the version badge on `/version` 7 times in a row (works on phones, too).
+- The choice is stored per browser in `localStorage` (`yy-theme` = `symbolics`); other open tabs follow. If storage is blocked, the mode lasts for the current page only.
+- Styles: `static/css/symbolics.css`. Every rule is scoped to `html[data-yy-theme="symbolics"]`, so the file has no effect otherwise. In this mode `data-bs-theme` is always `dark`, regardless of the OS setting.
+- Deliberately not mentioned in the release notes.
