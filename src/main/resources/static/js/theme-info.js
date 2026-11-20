@@ -124,6 +124,20 @@
                 + 'whoever places their order first gets to name the rival.',
             tip: 'Wild lunch monsters jump out of the tall grass now and then. Type \u201Cpokemon\u201D to call one.'
         },
+        mario: {
+            emoji: '\uD83D\uDD79\uFE0F',
+            title: 'Lunch World 1-1',
+            when: null,                 // link-only, like Triple-T: no dates, no preview note
+            previewNote: false,
+            text: 'Some of us learned to jump before we learned to read. A grey box under the TV, a cartridge that '
+                + 'only worked after you blew into it, and World 1-1 of Super Mario Bros., which we could play with '
+                + 'our eyes closed: run right, jump on everything, bump every brick, grab every coin. We rescued a '
+                + 'princess more times than we can count and never once got lunch for it. Today it\u2019s the other '
+                + 'way round \u2013 so press Start, collect your coins and place your order. Thank you, hungry hero! '
+                + 'But your lunch is in another castle\u2026 no, wait, it\u2019s right here.',
+            tip: 'Our pixel chef, a grumpy broccoli and a bird with a slice of pizza drop by now and then. '
+                + 'Type \u201Cmario\u201D to call them.'
+        },
         symbolics: {
             emoji: '🖥️',
             title: 'Symbolics mode',

@@ -58,6 +58,11 @@
  *      games. Handheld-screen greens, cartridges on a link cable, tall grass along the
  *      bottom edge. Visitors: made-up pixel lunch monsters (js/pokemon.js).
  *      Styles: css/pokemon.css.
+ *    - Super Mario homage (?theme=mario, "Lunch World 1-1"): a nod to the 8-bit
+ *      jump-and-run days as our own pixel art, nothing from the games. Brick-wall menu
+ *      bar with spinning coins, coin avatars, ground blocks along the bottom edge (blue
+ *      underground bricks in dark mode). Visitors: a jumping pixel chef, a grumpy
+ *      broccoli, a bird with a slice of pizza (js/mario.js). Styles: css/mario.css.
  *    The hidden page /themes lists every look with a preview link.
  *    The preview lasts until the browser tab is closed (sessionStorage),
  *    ?theme=default ends it.
@@ -90,8 +95,9 @@
     var PASTA = 'pasta';
     var GTA = 'gta';
     var POKEMON = 'pokemon';
+    var MARIO = 'mario';
     var SEASONS = [XMAS, EASTER, HALLOWEEN, MUERTOS, GARLIC, PIZZA];
-    var LINK_ONLY = [PELMENI, PASTA, GTA, POKEMON]; // no season: only ever shown as a preview
+    var LINK_ONLY = [PELMENI, PASTA, GTA, POKEMON, MARIO]; // no season: only ever shown as a preview
     var PREVIEWABLE = SEASONS.concat(LINK_ONLY);
     var URL_PARAM = 'theme';
     var URL_OFF = 'default';
