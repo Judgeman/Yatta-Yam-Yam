@@ -7,6 +7,8 @@
  *   - a donut with sprinkles flaps across the upper half on little wings,
  *   - a wild BURGLIN walks along the bottom edge, its textbox above it,
  *   - a taco dances along the bottom edge,
+ *   - a wild GRILLHÄHNCHEN (a roast chicken, like the one in the app's logo) hops along
+ *     the bottom edge, steaming, its textbox above it,
  *   - a rice ball peeks in from an edge and waves,
  *   - a cartridge (red, blue or yellow) comes down on a link cable.
  * Typing "pokemon" outside a form field calls one at once.
@@ -45,6 +47,14 @@
                     return [h * 16 / 13, h];
                 },
                 speed: 0.15, minMs: 6000, maxMs: 11000
+            },
+            {
+                name: 'roast-chicken', weight: 1, motion: 'walk', facesRight: true, svg: roastChickenSvg,
+                size: function (vw, vh) {
+                    var h = clamp(vh * 0.2, 110, 160);
+                    return [h * 66 / 50, h];
+                },
+                speed: 0.15, minMs: 6000, maxMs: 12000
             },
             { name: 'peek-onigiri', weight: 1, motion: 'peek', svg: onigiriPeekSvg },
             {
@@ -177,6 +187,44 @@
             + '<g class="yy-v-leg-l" style="transform-origin:6px 9px">' + pix(['0', '0', '00'], GB, 1, 5, 9) + '</g>'
             + '<g class="yy-v-leg-r" style="transform-origin:10px 9px">' + pix(['0', '0', '00'], GB, 1, 10, 9) + '</g>'
             + pix(TACO, GB, 1, 0, 0));
+    }
+
+    var CHICKEN = [
+        '..........................',
+        '................0.0...0.0.',
+        '...............03030.03030',
+        '...............03330.03330',
+        '................030...030.',
+        '...............030...030..',
+        '..............030...030...',
+        '.......00000002220.02220..',
+        '....0002222222222002220...',
+        '...02333222222222222220...',
+        '..02332222222222222220....',
+        '.0222222202222022222220...',
+        '022222222222222222222220..',
+        '.0222122122002221222220...',
+        '..02222222221222222220....',
+        '...022222212221222220.....',
+        '....0002222222222000......'
+    ];
+
+    // A roast chicken in golden brown, as a Super Game Boy would have coloured it:
+    // the crust, the meat of the drumsticks, the bones
+    var ROAST = { '0': '#3a1f0f', '1': '#8a4a1e', '2': '#c9802f', '3': '#f6e3b4' };
+
+    // A wild GRILLHÄHNCHEN: a roast chicken with both drumsticks up, hopping along and
+    // steaming, its textbox above it; 66 x 50
+    function roastChickenSvg() {
+        function puff(x, y, delay) {
+            return '<g class="yy-v-sparkle" style="transform-origin:' + (x + 2) + 'px ' + (y + 2) + 'px;animation-delay:' + delay + 's">'
+                + pix(['.00.', '0330', '0330', '.00.'], { '0': '#a8a8b8', '3': '#fbfbff' }, 1, x, y) + '</g>';
+        }
+        return svg('0 0 66 50', ''
+            + textbox(1, 0, 64, 14, ['A wild GRILLH\u00C4HNCHEN', 'appeared!'])
+            + '<path d="M31 14 L33 17 L35 14" fill="#f8f8f0" stroke="#081820" stroke-width=".8"/>'
+            + puff(4, 30, 0) + puff(1, 22, -0.3) + puff(8, 18, -0.6)
+            + '<g class="yy-v-bunny-hop">' + pix(CHICKEN, ROAST, 2, 12, 16) + '</g>');
     }
 
     var ONIGIRI = [

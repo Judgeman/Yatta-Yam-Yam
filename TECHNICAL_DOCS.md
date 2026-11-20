@@ -533,7 +533,7 @@ Yatta-Yam-Yam/
         │       ├── muertos.js                # Día-de-los-Muertos-Besucher: Monarchfalter, Catrina, Skelett mit Gitarre
         │       ├── pasta.js                  # Pasta-Besucher: Farfalle, Fleischbällchen, Nudel-Parade
         │       ├── pelmeni.js                # Pelmeni-Besucher: Löffel-Surfer, Teigtaschen-Parade, Gabel
-        │       ├── pokemon.js                # Pokémon-Besucher: erfundene Pixel-Essensmonster, Spielmodul
+        │       ├── pokemon.js                # Pokémon-Besucher: erfundene Pixel-Essensmonster, Grillhähnchen, Spielmodul
         │       ├── pizza.js                  # Pizza-Besucher: fliegende Pizza, Pizzastück, Pizzabäcker
         │       ├── theme-info.js             # (i)-Knopf in der Menüleiste mit Infos zum aktiven Look
         │       ├── theme.js                  # Hell/dunkel nach Systemeinstellung, Saison-Looks, Symbolics-Easter-Egg
@@ -626,7 +626,7 @@ Während eines Looks kommt alle 1–5 Minuten (zufällig) ein Besucher über den
 | Weihnachten (`christmas.js`) | Weihnachtsmann im Schlitten mit zwei Rentieren | Weihnachtsmann oder Rentier tanzt | – | Weihnachtsmann oder Rentier | `hohoho` |
 | Pelmeni, nur per Link (`pelmeni.js`) | Pelmen surft auf einem Holzlöffel | Parade aus Gyoza, Ravioli und Pelmen; Pelmen mit Dillfrisur tanzt | Gabel mit aufgespießtem Pelmen | Pelmen mit Smetana-Häubchen | `pelmeni` |
 | GTA-VI-Hommage, nur per Link (`gta.js`) | Hubschrauber mit Suchscheinwerfer | Verfolgungsjagd Sportwagen und Polizeiauto (doppelt so häufig); Speedboot | Geldsack am Seil | Flamingo mit Sonnenbrille | `vicecity` |
-| Pokémon-Hommage, nur per Link (`pokemon.js`) | Donut mit Flügeln | wilder BURGLIN mit Textbox „A wild BURGLIN appeared!“; tanzender Taco | Spielmodul (rot, blau oder gelb) am Link-Kabel | Reisbällchen | `pokemon` |
+| Pokémon-Hommage, nur per Link (`pokemon.js`) | Donut mit Flügeln | wilder BURGLIN mit Textbox „A wild BURGLIN appeared!“; tanzender Taco; hüpfendes, dampfendes Grillhähnchen („A wild GRILLHÄHNCHEN appeared!“, goldbraun wie mit dem Super Game Boy eingefärbt) | Spielmodul (rot, blau oder gelb) am Link-Kabel | Reisbällchen | `pokemon` |
 | Pasta, nur per Link (`pasta.js`) | Schwarm Farfalle | Fleischbällchen mit Spaghetti-Haaren tanzt; Parade aus Penne, Fusilli und Muschelnudel | Fleischbällchen an einem Spaghetti | Fleischbällchen | `pasta` |
 
 - Zeitplan, Bewegungen und Rufwort steuert `static/js/visitors.js`; die Skripte der Looks (`static/js/*.js` aus der Tabelle) zeichnen nur die Figuren und melden sie mit `yyVisitors.add(...)` an (alle laden mit `defer`, `visitors.js` zuerst).
