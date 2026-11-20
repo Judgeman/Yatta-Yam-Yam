@@ -1,6 +1,6 @@
 /*
  * Seasonal visitors (built and moved by visitors.js, drawn by christmas.js,
- * easter.js, halloween.js, muertos.js, garlic.js, pizza.js, pelmeni.js and pasta.js): the stage, the actors
+ * easter.js, halloween.js, muertos.js, garlic.js, pizza.js, pelmeni.js, pasta.js and gta.js): the stage, the actors
  * and the animations of their arms, legs, ears and wings. The stage only shows while
  * a seasonal look is on.
  */
@@ -16,7 +16,8 @@ html[data-yy-theme="muertos"] .yy-visitors,
 html[data-yy-theme="garlic"] .yy-visitors,
 html[data-yy-theme="pizza"] .yy-visitors,
 html[data-yy-theme="pelmeni"] .yy-visitors,
-html[data-yy-theme="pasta"] .yy-visitors {
+html[data-yy-theme="pasta"] .yy-visitors,
+html[data-yy-theme="gta"] .yy-visitors {
     display: block;
     position: fixed;
     inset: 0;
@@ -270,6 +271,22 @@ html[data-yy-theme="pasta"] .yy-visitors {
 @keyframes yy-v-toss {
     0%, 100% { transform: translateY(18px) rotate(0deg); }
     50%      { transform: translateY(-14px) rotate(180deg); }
+}
+
+/* ── GTA VI homage ── */
+
+/* The police car's light bar flashes red and blue in turn */
+.yy-v-siren {
+    animation: yy-v-siren 0.5s steps(1) infinite;
+}
+
+.yy-v-siren-alt {
+    animation-delay: -0.25s;
+}
+
+@keyframes yy-v-siren {
+    0%  { opacity: 1; }
+    50% { opacity: 0.15; }
 }
 
 /* No visitors for people who asked their system for less motion (visitors.js does not

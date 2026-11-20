@@ -511,6 +511,7 @@ Yatta-Yam-Yam/
         │   │   ├── dashboard.css
         │   │   ├── easter.css                # Oster-Look (ohne Wirkung außerhalb der Saison)
         │   │   ├── garlic.css                # Knoblauch-Look (ohne Wirkung außerhalb der zwei Tage)
+        │   │   ├── gta.css                   # GTA-VI-Hommage (nur per Link, ohne Saison)
         │   │   ├── halloween.css             # Halloween-Look (ohne Wirkung außerhalb der Saison)
         │   │   ├── muertos.css               # Día-de-los-Muertos-Look (ohne Wirkung außerhalb der Saison)
         │   │   ├── pasta.css                 # Pasta-Look (nur per Link, ohne Saison)
@@ -526,6 +527,7 @@ Yatta-Yam-Yam/
         │       ├── christmas.js              # Weihnachts-Besucher: Weihnachtsmann und Rentiere
         │       ├── easter.js                 # Oster-Besucher: Osterhase und Küken
         │       ├── garlic.js                 # Knoblauch-Besucher: Knolle, Fledermaus, Vampir
+        │       ├── gta.js                    # GTA-Besucher: Verfolgungsjagd, Hubschrauber, Speedboot, Flamingo, Geldsack
         │       ├── halloween.js              # Halloween-Besucher: Hexe, Skelett, Gespenst, Spinne, Katze
         │       ├── muertos.js                # Día-de-los-Muertos-Besucher: Monarchfalter, Catrina, Skelett mit Gitarre
         │       ├── pasta.js                  # Pasta-Besucher: Farfalle, Fleischbällchen, Nudel-Parade
@@ -595,9 +597,11 @@ Zu sechs Zeiten im Jahr zieht sich die App von selbst um. `theme.js` prüft daf�
 
 **Pasta** („Pasta Day“, `?theme=pasta`): Menüleiste in Amalfi-Petrol mit Tagliatelle, die an einer Holzstange trocknen, tomatenrote Buttons, jeder Avatar wird zum Teller Spaghetti (die Initiale liegt auf einer Burrata), herabfallende Farfalle, Penne, Fusilli, Muschelnudeln, Basilikum und Parmesan, eine blau-weiß gestreifte Tischdecke mit Spaghettitopf, Sieb, einem Glas Penne, Parmesan und einem Teller am unteren Rand (46 px Abstand unten), ein 🍝 neben dem App-Namen; Paletten „Zitronenküche“ / „Trattoria-Nacht“. Styles: `static/css/pasta.css`.
 
+**GTA-VI-Hommage** („Food Order in Vice City“, `?theme=gta`): eigene Zeichnungen im Miami-Neon-Stil, keine Inhalte aus dem Spiel (keine Logos, Figuren, Schriften oder Grafiken von Rockstar). Menüleiste von Nachtviolett zu Neonpink mit flackernden Neonröhren an der Unterkante, pinke Buttons, jeder Avatar wird zur gestreiften Synthwave-Sonne (die Initiale darauf), herabfallende Dollarscheine und Palmwedel, eine Ocean-Drive-Skyline mit Art-déco-Hotels, Palmen und Meer am unteren Rand (52 px Abstand unten, nachts mit Neonrand), ein 🌴 neben dem App-Namen; Paletten „Sonnenuntergang“ / „Neonnacht“. Das (i)-Fenster enthält eine Hommage aus Sicht eines Fans, der seit GTA V (2013) gewartet hat. Styles: `static/css/gta.css`.
+
 **Übersicht `/themes`:** Eine versteckte Seite (nirgends verlinkt, nur nach Login) listet alle Looks als Karten: Saison-Looks in der Reihenfolge, in der sie als Nächstes kommen, mit Regel, aktuellem bzw. nächstem Zeitraum (aus `theme.js` berechnet), Zahl der Besucher und Rufwort; danach die Link-Looks, Symbolics und der Standard-Look. Jede Karte hat einen Knopf, der das Dashboard mit `?theme=…` in einem neuen Tab öffnet, und den Link zum Kopieren. Die Karten entstehen im Browser aus `window.yyTheme` (`theme.js`), `window.yyThemeInfo` (`theme-info.js`) und `yyVisitors.castOf()` (`visitors.js`) – ein neuer Look erscheint dort also von selbst.
 
-- **Vorschau per Link:** `?theme=pizza`, `?theme=easter`, `?theme=garlic`, `?theme=halloween`, `?theme=muertos` bzw. `?theme=christmas` (und die Link-Looks `?theme=pelmeni`, `?theme=pasta`) an die URL einer beliebigen Seite hängen (z. B. `/orders/dashboard?theme=pizza`, bzw. `&theme=pizza`). Der Parameter übersteht beide Login-Schritte und wird danach aus der Adressleiste entfernt. Die Vorschau gilt nur für diesen Browser-Tab, bis er geschlossen wird (`sessionStorage`, `yy-theme-preview` = Name des Looks) – eine vergessene Vorschau bleibt also nicht über den Anlass hinaus hängen. `?theme=default` beendet sie vorher.
+- **Vorschau per Link:** `?theme=pizza`, `?theme=easter`, `?theme=garlic`, `?theme=halloween`, `?theme=muertos` bzw. `?theme=christmas` (und die Link-Looks `?theme=pelmeni`, `?theme=pasta`, `?theme=gta`) an die URL einer beliebigen Seite hängen (z. B. `/orders/dashboard?theme=pizza`, bzw. `&theme=pizza`). Der Parameter übersteht beide Login-Schritte und wird danach aus der Adressleiste entfernt. Die Vorschau gilt nur für diesen Browser-Tab, bis er geschlossen wird (`sessionStorage`, `yy-theme-preview` = Name des Looks) – eine vergessene Vorschau bleibt also nicht über den Anlass hinaus hängen. `?theme=default` beendet sie vorher.
 - **Info-Knopf:** Solange ein besonderer Look aktiv ist (auch der Symbolics-Modus), steht in der Menüleiste ganz vorne in der rechten Gruppe ein (i)-Knopf. Er öffnet ein Bootstrap-Modal mit dem Anlass in ein paar Sätzen, dem Zeitraum, einem Hinweis auf die Besucher samt Rufwort und – bei einer Vorschau – dem Hinweis, wie sie endet. `static/js/theme-info.js` setzt den Knopf per Skript in jede Seite mit Menüleiste (Formularseiten, deren Leiste nur den App-Namen zeigt, bekommen rechts eine eigene Gruppe) und blendet ihn ein, aus oder um, sobald sich `data-yy-theme` ändert. Die Texte stehen in `INFO` in derselben Datei; Seiten ohne Menüleiste (Login, Namenseingabe, Startseite, Release Notes) haben keinen Knopf.
 - **Hinweis im Symbolics-Modus:** Symbolics verdeckt die Saison-Looks. Damit auch diese Nutzer sie mitbekommen, erscheint auf jeder Seite unten rechts (über der Kommandozeile) ein Fenster „Incoming message“, solange Symbolics an ist und das Datum einen Saison-Look vorsieht – mit dem Anlass und dem Knopf „Switch to the standard look“. Der schaltet Symbolics an Ort und Stelle ab (ohne Neuladen, Eingaben bleiben erhalten; ohne JavaScript führt der Link auf `?theme=default`), danach ist der Saison-Look zu sehen; `symbolics` tippen bringt den Modus zurück. „Not now“ (×) blendet den Hinweis für den Rest dieses Anlasses aus (`localStorage`, `yy-season-hint-dismissed` = z. B. `christmas:2026`, bei Knoblauch mit Monat, weil er zweimal im Jahr kommt); beim nächsten Anlass erscheint er wieder. Derselbe Weg zurück steht im (i)-Fenster des Symbolics-Modus. Umgesetzt in `theme-info.js` (über `window.yyTheme` aus `theme.js`), Styles in `symbolics.css`.
 - **Vorrang:** Vorschau in diesem Tab › eingeschalteter Symbolics-Modus › Look des Tages (einzelne Aktionstage vor mehrwöchigen Festen) › normaler Look. Wer Symbolics an hat, behält es also auch in der Saison; Ausschalten (`symbolics` tippen oder `?theme=default`) führt zum Look des Tages zurück. Einen Schalter, um einen Look abzuwählen, gibt es nicht.
@@ -606,7 +610,7 @@ Zu sechs Zeiten im Jahr zieht sich die App von selbst um. `theme.js` prüft daf�
 
 ### Besucher
 
-Während eines Looks kommt alle 1–5 Minuten (zufällig) ein Besucher über den Bildschirm, nie zweimal derselbe hintereinander. Der Auftritt in der Spalte „Fliegt“ kommt doppelt so häufig wie die anderen (bei Knoblauch der tanzende Knoblauch).
+Während eines Looks kommt alle 1–5 Minuten (zufällig) ein Besucher über den Bildschirm, nie zweimal derselbe hintereinander. Der Auftritt in der Spalte „Fliegt“ kommt doppelt so häufig wie die anderen (bei Knoblauch der tanzende Knoblauch, bei GTA die Verfolgungsjagd).
 
 | Look (Skript) | Fliegt durch die obere Hälfte | Am unteren Rand entlang | Lässt sich von oben herab | Schaut vom Rand herein und winkt | Rufwort |
 |---|---|---|---|---|---|
@@ -617,6 +621,7 @@ Während eines Looks kommt alle 1–5 Minuten (zufällig) ein Besucher über den
 | Día de los Muertos (`muertos.js`) | Schwarm Monarchfalter | Catrina tanzt; Skelett mit Blumenkranz spielt Gitarre | – | Skelett im bestickten Hemd oder die Catrina | `calavera` |
 | Weihnachten (`christmas.js`) | Weihnachtsmann im Schlitten mit zwei Rentieren | Weihnachtsmann oder Rentier tanzt | – | Weihnachtsmann oder Rentier | `hohoho` |
 | Pelmeni, nur per Link (`pelmeni.js`) | Pelmen surft auf einem Holzlöffel | Parade aus Gyoza, Ravioli und Pelmen; Pelmen mit Dillfrisur tanzt | Gabel mit aufgespießtem Pelmen | Pelmen mit Smetana-Häubchen | `pelmeni` |
+| GTA-VI-Hommage, nur per Link (`gta.js`) | Hubschrauber mit Suchscheinwerfer | Verfolgungsjagd Sportwagen und Polizeiauto (doppelt so häufig); Speedboot | Geldsack am Seil | Flamingo mit Sonnenbrille | `vicecity` |
 | Pasta, nur per Link (`pasta.js`) | Schwarm Farfalle | Fleischbällchen mit Spaghetti-Haaren tanzt; Parade aus Penne, Fusilli und Muschelnudel | Fleischbällchen an einem Spaghetti | Fleischbällchen | `pasta` |
 
 - Zeitplan, Bewegungen und Rufwort steuert `static/js/visitors.js`; die Skripte der Looks (`static/js/*.js` aus der Tabelle) zeichnen nur die Figuren und melden sie mit `yyVisitors.add(...)` an (alle laden mit `defer`, `visitors.js` zuerst).

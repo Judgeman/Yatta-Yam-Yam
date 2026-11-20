@@ -6,7 +6,7 @@
      <th:block th:replace="~{fragments/theme :: head}"></th:block>
      theme.js sets data-bs-theme (light/dark from the OS setting) before the first paint.
      The seasonal styles (christmas, easter, halloween, muertos, garlic, pizza) only apply during their
-     season or a preview, the link-only pelmeni.css and pasta.css only in their ?theme=... preview, symbolics.css only while the hidden Symbolics mode is on (see
+     season or a preview, the link-only pelmeni.css, pasta.css and gta.css only in their ?theme=... preview, symbolics.css only while the hidden Symbolics mode is on (see
      theme.js). visitors.js sends the season's visitors across the screen; they are drawn
      in the seasonal scripts (which run after it, in this order) and styled in visitors.css.
      theme-info.js adds the (i) button about the current look to the menu bar. -->
@@ -20,6 +20,7 @@
     <link rel="stylesheet" th:href="@{/css/pizza.css}"/>
     <link rel="stylesheet" th:href="@{/css/pelmeni.css}"/>
     <link rel="stylesheet" th:href="@{/css/pasta.css}"/>
+    <link rel="stylesheet" th:href="@{/css/gta.css}"/>
     <link rel="stylesheet" th:href="@{/css/visitors.css}"/>
     <link rel="stylesheet" th:href="@{/css/symbolics.css}"/>
     <script th:src="@{/js/theme.js}"></script>
@@ -32,6 +33,7 @@
     <script th:src="@{/js/pizza.js}" defer></script>
     <script th:src="@{/js/pelmeni.js}" defer></script>
     <script th:src="@{/js/pasta.js}" defer></script>
+    <script th:src="@{/js/gta.js}" defer></script>
     <script th:src="@{/js/theme-info.js}" defer></script>
 </th:block>
 

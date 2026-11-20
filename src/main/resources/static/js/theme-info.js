@@ -98,6 +98,20 @@
             text: 'Today is Pasta Day \u2013 get ready to be surprised!',
             tip: 'Pasta in all shapes drops by now and then. Type \u201Cpasta\u201D to call it.'
         },
+        gta: {
+            emoji: '\uD83C\uDF34',
+            title: 'Food Order in Vice City',
+            when: null,                 // link-only, like Triple-T: no dates, no preview note
+            previewNote: false,
+            text: 'Thirteen years. Since GTA V came out in 2013 we rewatched every trailer, zoomed into every '
+                + 'screenshot and promised each other: next year, for sure. A whole generation of lunch orders came '
+                + 'and went while we waited. Now the neon is back on, the palms are swaying and the sunset is '
+                + 'everything we dreamed of. So tonight we cruise down the boulevard, roll the windows down and order '
+                + 'like we own the city \u2013 just settle up on time, or that red badge next to your name turns into a '
+                + 'wanted star.',
+            tip: 'A car chase, a helicopter and a flamingo in shades drop by now and then. Type \u201Cvicecity\u201D '
+                + 'to call them.'
+        },
         symbolics: {
             emoji: '🖥️',
             title: 'Symbolics mode',

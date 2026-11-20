@@ -48,6 +48,11 @@
  *      tomato buttons, plate-of-spaghetti avatars, falling pasta shapes, a striped
  *      tablecloth along the bottom edge. Visitors: farfalle, a meatball, a pasta parade
  *      (js/pasta.js). Styles: css/pasta.css.
+ *    - GTA VI homage (?theme=gta, "Food Order in Vice City"): our own Miami-at-sunset
+ *      artwork, no game assets. Night-purple-to-pink menu bar with neon tubes, synthwave
+ *      sun avatars, falling dollar bills, an ocean drive skyline along the bottom edge.
+ *      Visitors: a car chase, a helicopter, a speedboat, a flamingo in shades, a bag of
+ *      cash (js/gta.js). Styles: css/gta.css.
  *    The hidden page /themes lists every look with a preview link.
  *    The preview lasts until the browser tab is closed (sessionStorage),
  *    ?theme=default ends it.
@@ -78,8 +83,9 @@
     var PIZZA = 'pizza';
     var PELMENI = 'pelmeni';
     var PASTA = 'pasta';
+    var GTA = 'gta';
     var SEASONS = [XMAS, EASTER, HALLOWEEN, MUERTOS, GARLIC, PIZZA];
-    var LINK_ONLY = [PELMENI, PASTA];             // no season: only ever shown as a preview
+    var LINK_ONLY = [PELMENI, PASTA, GTA];        // no season: only ever shown as a preview
     var PREVIEWABLE = SEASONS.concat(LINK_ONLY);
     var URL_PARAM = 'theme';
     var URL_OFF = 'default';
