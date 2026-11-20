@@ -168,7 +168,8 @@ public class LoginController {
     @GetMapping("/users")
     public String userList(HttpServletRequest request, Model model) {
         String savedName = getCookieValue(request);
-        if (savedName == null || userService.findByName(savedName).isEmpty())
+        Optional<AppUser> user = savedName != null ? userService.findByName(savedName) : Optional.empty();
+        if (user.isEmpty())
             return "redirect:/";
 
         List<Map<String, Object>> userStats = userService.getAllUserStats();
@@ -181,6 +182,8 @@ public class LoginController {
                 .map(s -> (java.math.BigDecimal) s.get("openAmount"))
                 .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
 
+        // The logged-in user (e.g. for the Wrapped hint in January)
+        model.addAttribute("user", user.get());
         model.addAttribute("userStats", userStats);
         model.addAttribute("totalSpentAll", totalSpentAll);
         model.addAttribute("openAmountAll", openAmountAll);

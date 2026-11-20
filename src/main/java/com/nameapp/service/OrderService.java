@@ -404,7 +404,7 @@ public class OrderService {
     }
 
     /** Who gets the money: the person who advanced it, or the creator if nobody is set. */
-    private static String getPayee(FoodOrder order) {
+    public static String getPayee(FoodOrder order) {
         String paidBy = order.getPaidByName();
         return paidBy != null && !paidBy.isBlank() ? paidBy.trim() : order.getCreator().getName();
     }

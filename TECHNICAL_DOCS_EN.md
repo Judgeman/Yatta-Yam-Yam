@@ -41,6 +41,7 @@ Yatta-Yam-Yam is an internal web application for collective food ordering. Users
 - Red badge with the open amount next to your own name in the navbar
 - Dark mode that follows the operating system setting
 - Seasonal looks with occasional visitors: Pizza (6–12 February), Easter (two weeks before Easter until Easter Monday), Garlic (19 April and 6 October), Halloween (18–31 October), Día de los Muertos (1–7 November), Christmas (Monday after Totensonntag until 26 December)
+- Year-end review "Wrapped" with statistics per location and per person (`/wrapped`)
 
 ---
 
@@ -234,7 +235,7 @@ After the password, each user identifies themselves by name. The identity is sto
 
 The cookie has an expiry of `Integer.MAX_VALUE` seconds (~68 years), is `HttpOnly`, and applies to path `/`.
 
-**Redirect preservation:** When someone without a name cookie opens an order or contact page (`/orders/**`, `/contacts/**`), the URL is stored in the session under `redirectAfterLogin` and restored after name entry. Together with the redirect from step 1, a shared link ends up on the right page after the password and name entry.
+**Redirect preservation:** When someone without a name cookie opens an order or contact page (`/orders/**`, `/contacts/**`) or the year-end review (`/wrapped`), the URL is stored in the session under `redirectAfterLogin` and restored after name entry. Together with the redirect from step 1, a shared link ends up on the right page after the password and name entry.
 
 ---
 
@@ -255,6 +256,13 @@ The cookie has an expiry of `Integer.MAX_VALUE` seconds (~68 years), is `HttpOnl
 | GET    | `/version`           | Version page (public)                               |
 | GET    | `/users`             | User statistics (logged-in users only)              |
 | GET    | `/themes`            | All looks with preview links (hidden page, not linked anywhere; logged-in users only) |
+
+### Year-end review (`WrappedController`)
+
+| Method | Path                 | Description                                         |
+|--------|----------------------|-----------------------------------------------------|
+| GET    | `/wrapped`           | Overview of all past years with orders              |
+| GET    | `/wrapped?year=2025` | That year's "Wrapped" story                         |
 
 ### Orders (`OrderController`, prefix `/orders`)
 
@@ -404,6 +412,56 @@ The overview (`/`, `AppUserService.getStatsForUser`) and the `/users` page (`get
 - **Total spent** (`/users` only): sum of the paid participations, each own items + `getPerPersonCharge` (tip share or cost share)
 - **Open payments / Amount due:** from `getOpenDebts`, so the same figures as the badge in the navbar
 
+### Year-end review "Wrapped"
+
+A year-end review in story format (like Spotify Wrapped): slides to tap through with one year's figures, first for everyone and per location, then for the logged-in user. Only completed years are offered: Wrapped 2026 is available from 1 January 2027 on (`WrappedService.isAvailable`).
+
+- `GET /wrapped` (`wrapped-years.html`) lists all past years with orders as cards, newest first, each with orders, paid in total, most popular dish and the user's own orders and spending (`WrappedService.getYearSummaries`). A click plays that year's story. While there is no completed year with orders yet, one card announces the running year for 1 January. The × leads to the dashboard.
+- `GET /wrapped?year=2025` (`wrapped.html`) plays that year's story. The running, a future, an invalid or a missing year leads back to the overview. The × and the last slide ("All years") lead to the overview as well.
+
+**What counts** (`WrappedService`): orders dated in the chosen year with status CLOSED or ARCHIVED (their amounts are final) and at least one participant according to `OrderService.isParticipant`. Open and ordered orders only count once they are closed; orders without a location only count on the "together" slide.
+
+**Per location (Kassel, Frankfurt) and overall:**
+
+| Figure | Calculation |
+|--------|-------------|
+| Orders | number of counted orders |
+| Dishes | sum of all item quantities (cost splits have no items) |
+| Paid in total | item sum + tip of item orders, plus `splitTotal` of cost splits |
+| Tip in total | sum of `tipAmount` of item orders |
+| Ø tip per order | tip in total ÷ number of item orders (including those without a tip), plus its share of the item value in percent |
+| People | number of distinct participants |
+| Most popular dishes | top 3 by quantity. Items with the same name (ignoring case) are added up across menu lists; shown with the restaurant the dish came from most often |
+| Favourite place, busiest weekday | by number of orders (`placeName` or `orderDate`) |
+| Biggest feast | the order with the most participants |
+
+If at least two locations have orders, one slide compares them directly (orders, dishes, paid in total, Ø tip, people); the highest value gets a crown.
+
+**Personal** (logged-in user):
+
+| Figure | Calculation |
+|--------|-------------|
+| Spent | per participation own items + `getPerPersonCharge` (tip share or cost share), paid or not |
+| Orders, Ø per order, dishes, cost splits | from the user's own participations |
+| Top dishes | top 3 by quantity, grouped as above |
+| First / last order | date and restaurant |
+| Favourite day, hungriest month, favourite place | by number of own orders |
+| Biggest order | the user's highest amount on one order |
+| Tip share | sum of the user's tip shares |
+| Organised | counted orders the user created |
+| Advanced the money | counted orders the user is the payee of (`paidByName`, else the creator – as for open payments), with the total amount |
+| Ranking | place by number of orders among everyone who ordered that year (same number = same place); only shown in the top three or the top half |
+
+On a tie, the entry that came up first in the year wins. The location where the user ordered most often comes first. Anyone who took part in no order that year gets a short note instead of the personal slides.
+
+**Hint in January:** Throughout January, every page with a logged-in user (the overview `/` and all subpages, but not `/wrapped` itself and not the public `/version`) shows a small hint "🎁 Your 2026 Wrapped" at the bottom right, linking straight to the past year's story (`/wrapped?year=2026`). For this, `WrappedHintAdvice` (`@ControllerAdvice`) adds `wrappedYear` (the past year) to every model if that year has orders; outside January or without orders it is `null`. The fragment `fragments/theme.html` then renders the hint as a `<template>` in `<head>`, and `static/js/wrapped-hint.js` places it in `<body>`. The × shrinks it to the gift icon; the browser remembers that per year in `localStorage` (`yy-wrapped-hint-min`). Outside January, `/wrapped` stays reachable but is not linked anywhere.
+
+**Preview for testing:** `/wrapped?preview=on` makes the Wrapped rules act, for the user's own browser session, as if it were already 1 January of next year (`WrappedPreview`). The running year then shows up in the overview and as a story (with the orders so far, marked "Preview · orders so far"), and the January hint appears on every page. The overview shows a preview notice with "End preview" (`/wrapped?preview=off`); otherwise the preview ends with the session. Other users are not affected. The parameter survives the name entry.
+
+**Release notes:** There the feature is deliberately only mentioned as "A secret statistics feature", without details.
+
+**Rendering:** `wrapped.html` renders each slide as a `<section class="wr-slide">`. `static/js/wrapped.js` turns them into a story: tapping on the right, arrow right, space or swiping left moves on; the left third, arrow left or swiping right goes back. Bars at the top show the progress, the slide number is kept in the URL hash (reloading stays on the slide), and big numbers count up when they appear (not with `prefers-reduced-motion`). Without JavaScript the slides are shown one below the other. Styles: `static/css/wrapped.css`.
+
 ---
 
 ## 9. Configuration
@@ -479,11 +537,14 @@ Yatta-Yam-Yam/
     │   │   ├── DatabaseMigration.java        # Database migration logic
     │   │   ├── OpenDebtInterceptor.java      # The user's open amounts for the navbar badge
     │   │   ├── SecurityConfig.java           # Spring Security configuration
-    │   │   └── WebConfig.java                # Web configuration (e.g. static resources)
+    │   │   ├── WebConfig.java                # Web configuration (e.g. static resources)
+    │   │   ├── WrappedHintAdvice.java        # wrappedYear in January for the Wrapped hint
+    │   │   └── WrappedPreview.java           # Wrapped preview for testing (?preview=on, per session)
     │   ├── controller/
     │   │   ├── ContactController.java        # Contact book: list, create, edit, delete
     │   │   ├── LoginController.java          # Cookie login, user flow, /users, /version
-    │   │   └── OrderController.java          # Orders, selections, payments, item management
+    │   │   ├── OrderController.java          # Orders, selections, payments, item management
+    │   │   └── WrappedController.java        # Year-end review /wrapped
     │   ├── model/
     │   │   ├── AppUser.java                  # User entity
     │   │   ├── Contact.java                  # Contact (name, location, address, phone numbers, image)
@@ -503,7 +564,8 @@ Yatta-Yam-Yam/
     │   └── service/
     │       ├── AppUserService.java           # Create/rename users, statistics
     │       ├── ContactService.java           # Save contacts (incl. image upload), delete
-    │       └── OrderService.java             # Order logic, cost calculation, payments
+    │       ├── OrderService.java             # Order logic, cost calculation, payments
+    │       └── WrappedService.java           # Figures for the year-end review
     └── resources/
         ├── application.properties
         ├── static/
@@ -522,7 +584,8 @@ Yatta-Yam-Yam/
         │   │   ├── pizza.css                 # Pizza look (inert outside Pizza week)
         │   │   ├── style.css                 # Base styles + colour tokens (--yy-*) for light/dark
         │   │   ├── symbolics.css             # Easter egg: Symbolics mode (inert unless enabled)
-        │   │   └── visitors.css              # Visitors: stage and animations
+        │   │   ├── visitors.css              # Visitors: stage and animations
+        │   │   └── wrapped.css               # Slides of the year-end review
         │   ├── images/
         │   │   ├── favicon.svg
         │   │   └── logo.png
@@ -540,7 +603,9 @@ Yatta-Yam-Yam/
         │       ├── pizza.js                  # Pizza visitors: flying pizza, pizza slice, pizzaiolo
         │       ├── theme-info.js             # (i) button in the menu bar with notes on the current look
         │       ├── theme.js                  # Light/dark from the OS setting, seasonal looks, Symbolics easter egg
-        │       └── visitors.js               # Visitors: schedule, motions, call words
+        │       ├── visitors.js               # Visitors: schedule, motions, call words
+        │       ├── wrapped-hint.js           # January: hint for the year-end review at the bottom right
+        │       └── wrapped.js                # Story navigation of the year-end review
         └── templates/                        # Thymeleaf HTML templates
             ├── index.html                    # Name input
             ├── confirm.html                  # Confirm existing user
@@ -560,9 +625,11 @@ Yatta-Yam-Yam/
             ├── themes.html                   # Hidden page: all looks with preview links
             ├── users.html                    # User statistics
             ├── version.html                  # Version info
+            ├── wrapped.html                  # Year-end review "Wrapped" (story slides of one year)
+            ├── wrapped-years.html            # Wrapped: overview of all past years
             └── fragments/
                 ├── open-debt-badge.html      # Red badge with the open amount next to the name
-                └── theme.html                # <head> include: theme scripts and styles
+                └── theme.html                # <head> include: theme scripts and styles, in January the Wrapped hint
 ```
 
 ---
@@ -579,6 +646,7 @@ The app follows the light/dark setting of the operating system; there is no togg
 - Include `<th:block th:replace="~{fragments/theme :: head}"></th:block>` as the last element of `<head>`.
 - No hard-coded colours: use the `--yy-*` tokens or Bootstrap variables (`--bs-body-bg`, `--bs-border-color`, `--bs-secondary-color`, …).
 - Avoid `bg-light` and `text-bg-light`, which stay light in dark mode; use `bg-body-tertiary` and `text-body-emphasis`. Centred single-card pages use `<body class="page-muted">`.
+- Exception: the slides of `/wrapped` (`wrapped.css`, variables `--wr-*`) deliberately keep their own vivid colours in light and dark mode (white text on a saturated gradient); only the page around them follows the theme.
 
 ### Seasonal looks: holidays and food days
 

@@ -41,6 +41,7 @@ Yatta-Yam-Yam ist eine interne Web-App zur kollektiven Essensbestellung. Nutzer 
 - Rotes Badge mit dem offenen Betrag neben dem eigenen Namen in der Menüleiste
 - Dark Mode, der der Einstellung des Betriebssystems folgt
 - Saisonale Looks mit gelegentlichen Besuchern: Pizza (6.–12. Februar), Ostern (zwei Wochen vor Ostern bis Ostermontag), Knoblauch (19. April und 6. Oktober), Halloween (18.–31. Oktober), Día de los Muertos (1.–7. November), Weihnachten (Montag nach Totensonntag bis 26. Dezember)
+- Jahresrückblick „Wrapped“ mit Statistik pro Standort und pro Person (`/wrapped`)
 
 ---
 
@@ -234,7 +235,7 @@ Nach dem Passwort identifiziert sich jeder Nutzer über seinen Namen. Die Identi
 
 Der Cookie hat eine Ablaufzeit von `Integer.MAX_VALUE` Sekunden (~68 Jahre), ist `HttpOnly` und gilt für den Pfad `/`.
 
-**Redirect-Preservation:** Ruft jemand ohne Namens-Cookie eine Bestell- oder Kontaktseite auf (`/orders/**`, `/contacts/**`), wird die URL in der Session unter `redirectAfterLogin` gespeichert und nach der Namenseingabe wiederhergestellt. Zusammen mit der Weiterleitung aus Stufe 1 landet ein geteilter Link so nach Passwort und Namenseingabe auf der richtigen Seite.
+**Redirect-Preservation:** Ruft jemand ohne Namens-Cookie eine Bestell- oder Kontaktseite auf (`/orders/**`, `/contacts/**`) oder den Jahresrückblick (`/wrapped`), wird die URL in der Session unter `redirectAfterLogin` gespeichert und nach der Namenseingabe wiederhergestellt. Zusammen mit der Weiterleitung aus Stufe 1 landet ein geteilter Link so nach Passwort und Namenseingabe auf der richtigen Seite.
 
 ---
 
@@ -255,6 +256,13 @@ Der Cookie hat eine Ablaufzeit von `Integer.MAX_VALUE` Sekunden (~68 Jahre), ist
 | GET     | `/version`         | Versionsseite (öffentlich)                         |
 | GET     | `/users`           | Nutzerstatistiken (nur für eingeloggte Nutzer)     |
 | GET     | `/themes`          | Alle Looks mit Vorschau-Links (versteckte Seite, nirgends verlinkt; nur für eingeloggte Nutzer) |
+
+### Jahresrückblick (`WrappedController`)
+
+| Methode | Pfad               | Beschreibung                                      |
+|---------|--------------------|---------------------------------------------------|
+| GET     | `/wrapped`         | Übersicht aller vergangenen Jahre mit Bestellungen |
+| GET     | `/wrapped?year=2025` | Story „Wrapped“ dieses Jahres                    |
 
 ### Bestellungen (`OrderController`, Präfix `/orders`)
 
@@ -404,6 +412,56 @@ Die Übersicht (`/`, `AppUserService.getStatsForUser`) und die Seite `/users` (`
 - **Total spent** (nur `/users`): Summe der bezahlten Teilnahmen, je eigene Artikel + `getPerPersonCharge` (Trinkgeldanteil bzw. Kostenanteil)
 - **Open payments / Amount due:** aus `getOpenDebts`, also dieselben Werte wie das Badge in der Menüleiste
 
+### Jahresrückblick „Wrapped“
+
+Ein Jahresrückblick im Story-Format (wie Spotify Wrapped): Folien zum Durchtippen mit den Zahlen eines Jahres, erst für alle und pro Standort, dann für den angemeldeten Nutzer. Angeboten werden nur abgeschlossene Jahre: Wrapped 2026 gibt es ab dem 01.01.2027 (`WrappedService.isAvailable`).
+
+- `GET /wrapped` (`wrapped-years.html`) listet alle vergangenen Jahre mit Bestellungen als Karten, neuestes zuerst, je mit Bestellungen, insgesamt gezahlt, beliebtestem Gericht und den eigenen Bestellungen und Ausgaben (`WrappedService.getYearSummaries`). Ein Klick startet die Story des Jahres. Gibt es noch kein abgeschlossenes Jahr mit Bestellungen, kündigt eine Karte das laufende Jahr für den 1. Januar an. Das × führt zum Dashboard.
+- `GET /wrapped?year=2025` (`wrapped.html`) spielt die Story dieses Jahres. Das laufende, ein zukünftiges, ein ungültiges oder kein Jahr führt zurück zur Übersicht. Das × und die letzte Folie („All years“) führen ebenfalls zur Übersicht.
+
+**Was zählt** (`WrappedService`): Bestellungen mit Datum im gewählten Jahr im Status CLOSED oder ARCHIVED (die Beträge stehen fest) und mit mindestens einem Teilnehmer nach `OrderService.isParticipant`. Offene und bestellte Bestellungen zählen erst nach dem Schließen; Bestellungen ohne Standort zählen nur in der Gesamtfolie.
+
+**Pro Standort (Kassel, Frankfurt) und gesamt:**
+
+| Kennzahl | Berechnung |
+|----------|------------|
+| Bestellungen | Anzahl der gezählten Bestellungen |
+| Gerichte | Summe aller Artikelmengen (Cost splits haben keine Artikel) |
+| Insgesamt gezahlt | Artikelsumme + Trinkgeld der Artikelbestellungen, plus `splitTotal` der Cost splits |
+| Trinkgeld gesamt | Summe `tipAmount` der Artikelbestellungen |
+| Ø Trinkgeld pro Bestellung | Trinkgeld gesamt ÷ Anzahl Artikelbestellungen (auch die ohne Trinkgeld), dazu der Anteil am Artikelwert in Prozent |
+| Personen | Anzahl verschiedener Teilnehmer |
+| Beliebteste Gerichte | Top 3 nach Menge. Artikel mit gleichem Namen (ohne Beachtung der Groß-/Kleinschreibung) werden über Menülisten hinweg zusammengezählt; dazu das Restaurant, aus dem das Gericht am häufigsten kam |
+| Lieblingsrestaurant, stärkster Wochentag | nach Anzahl Bestellungen (`placeName` bzw. `orderDate`) |
+| Größte Runde | Bestellung mit den meisten Teilnehmern |
+
+Haben mindestens zwei Standorte Bestellungen, vergleicht eine Folie sie direkt (Bestellungen, Gerichte, insgesamt gezahlt, Ø Trinkgeld, Personen); der höchste Wert bekommt eine Krone.
+
+**Persönlich** (angemeldeter Nutzer):
+
+| Kennzahl | Berechnung |
+|----------|------------|
+| Ausgegeben | je Teilnahme eigene Artikel + `getPerPersonCharge` (Trinkgeld- bzw. Kostenanteil), bezahlt oder nicht |
+| Bestellungen, Ø pro Bestellung, Gerichte, Cost splits | aus den eigenen Teilnahmen |
+| Top-Gerichte | Top 3 nach Menge, zusammengefasst wie oben |
+| Erste / letzte Bestellung | Datum und Restaurant |
+| Lieblingstag, hungrigster Monat, Lieblingsrestaurant | nach Anzahl eigener Bestellungen |
+| Größte Bestellung | höchster eigener Betrag einer Bestellung |
+| Trinkgeldanteil | Summe der eigenen Trinkgeldanteile |
+| Organisiert | gezählte Bestellungen, die der Nutzer angelegt hat |
+| Geld ausgelegt | gezählte Bestellungen, deren Empfänger der Nutzer ist (`paidByName`, sonst der Ersteller – wie bei den offenen Beträgen), mit Gesamtbetrag |
+| Platzierung | Platz nach Anzahl Bestellungen unter allen, die im Jahr bestellt haben (gleiche Anzahl = gleicher Platz); nur angezeigt für die Top 3 oder die obere Hälfte |
+
+Bei Gleichstand gewinnt der Eintrag, der im Jahr zuerst vorkam. Der Standort, an dem der Nutzer am häufigsten bestellt hat, kommt zuerst. Wer im Jahr an keiner Bestellung teilgenommen hat, sieht statt der persönlichen Folien eine Hinweisfolie.
+
+**Hinweis im Januar:** Den ganzen Januar über zeigt jede Seite mit angemeldetem Nutzer (Übersicht `/` und alle Unterseiten, nicht `/wrapped` selbst und nicht die öffentliche `/version`) unten rechts einen kleinen Hinweis „🎁 Your 2026 Wrapped“ mit Link direkt auf die Story des Vorjahres (`/wrapped?year=2026`). Dafür legt `WrappedHintAdvice` (`@ControllerAdvice`) `wrappedYear` (das Vorjahr) in jedes Model, sofern dieses Jahr Bestellungen hat; außerhalb des Januars oder ohne Bestellungen ist es `null`. Das Fragment `fragments/theme.html` rendert den Hinweis dann als `<template>` im `<head>`, `static/js/wrapped-hint.js` setzt ihn in den `<body>`. Das × verkleinert ihn auf das Geschenk-Symbol; das merkt sich der Browser pro Jahr in `localStorage` (`yy-wrapped-hint-min`). Außerhalb des Januars ist `/wrapped` weiter erreichbar, wird aber nirgends verlinkt.
+
+**Vorschau zum Testen:** `/wrapped?preview=on` lässt die Wrapped-Regeln für die eigene Browser-Sitzung so tun, als wäre schon der 1. Januar des nächsten Jahres (`WrappedPreview`). Das laufende Jahr erscheint dann in der Übersicht und als Story (mit den Bestellungen bis heute, gekennzeichnet mit „Preview · orders so far“), und der Januar-Hinweis erscheint auf allen Seiten. Die Übersicht zeigt einen Vorschau-Hinweis mit „End preview“ (`/wrapped?preview=off`); sonst endet die Vorschau mit der Sitzung. Andere Nutzer sind nicht betroffen. Der Parameter übersteht die Namenseingabe.
+
+**Release Notes:** Dort ist das Feature bewusst nur als „A secret statistics feature“ ohne Details erwähnt.
+
+**Darstellung:** `wrapped.html` rendert jede Folie als `<section class="wr-slide">`. `static/js/wrapped.js` macht daraus eine Story: rechts tippen, Pfeil rechts, Leertaste oder nach links wischen geht weiter; das linke Drittel, Pfeil links oder nach rechts wischen geht zurück. Oben zeigen Balken den Fortschritt, die Foliennummer steht im URL-Hash (Neuladen bleibt auf der Folie), große Zahlen zählen beim Erscheinen hoch (nicht bei `prefers-reduced-motion`). Ohne JavaScript stehen die Folien untereinander. Styles: `static/css/wrapped.css`.
+
 ---
 
 ## 9. Konfiguration
@@ -479,11 +537,14 @@ Yatta-Yam-Yam/
     │   │   ├── DatabaseMigration.java        # Datenbankmigrationslogik
     │   │   ├── OpenDebtInterceptor.java      # Offene Beträge des Nutzers für das Badge in der Menüleiste
     │   │   ├── SecurityConfig.java           # Spring Security Konfiguration
-    │   │   └── WebConfig.java                # Web-Konfiguration (z. B. statische Ressourcen)
+    │   │   ├── WebConfig.java                # Web-Konfiguration (z. B. statische Ressourcen)
+    │   │   ├── WrappedHintAdvice.java        # wrappedYear im Januar für den Wrapped-Hinweis
+    │   │   └── WrappedPreview.java           # Wrapped-Vorschau zum Testen (?preview=on, pro Sitzung)
     │   ├── controller/
     │   │   ├── ContactController.java        # Kontaktbuch: Liste, Anlegen, Bearbeiten, Löschen
     │   │   ├── LoginController.java          # Cookie-Login, Nutzer-Flow, /users, /version
-    │   │   └── OrderController.java          # Bestellungen, Auswahl, Zahlungen, Artikelverwaltung
+    │   │   ├── OrderController.java          # Bestellungen, Auswahl, Zahlungen, Artikelverwaltung
+    │   │   └── WrappedController.java        # Jahresrückblick /wrapped
     │   ├── model/
     │   │   ├── AppUser.java                  # Nutzer-Entität
     │   │   ├── Contact.java                  # Kontakt (Name, Standort, Adresse, Telefonnummern, Bild)
@@ -503,7 +564,8 @@ Yatta-Yam-Yam/
     │   └── service/
     │       ├── AppUserService.java           # Nutzer anlegen, umbenennen, Statistiken
     │       ├── ContactService.java           # Kontakte speichern (inkl. Bild-Upload), löschen
-    │       └── OrderService.java             # Bestelllogik, Kostenberechnung, Zahlungen
+    │       ├── OrderService.java             # Bestelllogik, Kostenberechnung, Zahlungen
+    │       └── WrappedService.java           # Zahlen für den Jahresrückblick
     └── resources/
         ├── application.properties
         ├── static/
@@ -522,7 +584,8 @@ Yatta-Yam-Yam/
         │   │   ├── pizza.css                 # Pizza-Look (ohne Wirkung außerhalb der Pizza-Woche)
         │   │   ├── style.css                 # Basis-Styles + Farb-Tokens (--yy-*) für hell/dunkel
         │   │   ├── symbolics.css             # Easter Egg: Symbolics-Modus (ohne Wirkung, solange aus)
-        │   │   └── visitors.css              # Besucher: Bühne und Animationen
+        │   │   ├── visitors.css              # Besucher: Bühne und Animationen
+        │   │   └── wrapped.css               # Folien des Jahresrückblicks
         │   ├── images/
         │   │   ├── favicon.svg
         │   │   └── logo.png
@@ -540,7 +603,9 @@ Yatta-Yam-Yam/
         │       ├── pizza.js                  # Pizza-Besucher: fliegende Pizza, Pizzastück, Pizzabäcker
         │       ├── theme-info.js             # (i)-Knopf in der Menüleiste mit Infos zum aktiven Look
         │       ├── theme.js                  # Hell/dunkel nach Systemeinstellung, Saison-Looks, Symbolics-Easter-Egg
-        │       └── visitors.js               # Besucher: Zeitplan, Bewegungen, Rufwort
+        │       ├── visitors.js               # Besucher: Zeitplan, Bewegungen, Rufwort
+        │       ├── wrapped-hint.js           # Januar: Hinweis auf den Jahresrückblick unten rechts
+        │       └── wrapped.js                # Story-Navigation des Jahresrückblicks
         └── templates/                        # Thymeleaf HTML-Templates
             ├── index.html                    # Namenseingabe
             ├── confirm.html                  # Bestehenden Nutzer bestätigen
@@ -560,9 +625,11 @@ Yatta-Yam-Yam/
             ├── themes.html                   # Versteckte Seite: alle Looks mit Vorschau-Links
             ├── users.html                    # Nutzerstatistiken
             ├── version.html                  # Versionsinfo
+            ├── wrapped.html                  # Jahresrückblick „Wrapped“ (Story-Folien eines Jahres)
+            ├── wrapped-years.html            # Wrapped: Übersicht aller vergangenen Jahre
             └── fragments/
                 ├── open-debt-badge.html      # Rotes Badge mit offenem Betrag neben dem Namen
-                └── theme.html                # Einbindung im <head>: Theme-Skripte und -Styles
+                └── theme.html                # Einbindung im <head>: Theme-Skripte und -Styles, im Januar der Wrapped-Hinweis
 ```
 
 ---
@@ -579,6 +646,7 @@ Die App folgt der Hell/Dunkel-Einstellung des Betriebssystems; einen eigenen Ums
 - `<th:block th:replace="~{fragments/theme :: head}"></th:block>` als letztes Element im `<head>` einbinden.
 - Keine fest codierten Farben: `--yy-*`-Tokens oder Bootstrap-Variablen (`--bs-body-bg`, `--bs-border-color`, `--bs-secondary-color`, …) verwenden.
 - `bg-light` und `text-bg-light` vermeiden, sie bleiben im Dark Mode hell; stattdessen `bg-body-tertiary` und `text-body-emphasis`. Zentrierte Ein-Karten-Seiten nutzen `<body class="page-muted">`.
+- Ausnahme: Die Folien von `/wrapped` (`wrapped.css`, Variablen `--wr-*`) behalten in hell und dunkel bewusst ihre eigenen kräftigen Farben (weiße Schrift auf gesättigtem Verlauf); nur die Seite drumherum folgt dem Theme.
 
 ### Saisonale Looks: Feste und Aktionstage
 
