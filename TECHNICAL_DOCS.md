@@ -30,6 +30,7 @@ Yatta-Yam-Yam ist eine interne Web-App zur kollektiven Essensbestellung. Nutzer 
 - Gemeinsames Zugangspasswort für die App, danach namensbasierte Anmeldung ohne persönliches Passwort (Cookie)
 - Verwaltung von Bestellungen mit Statuslebenszyklus
 - Wiederverwendbare Menülisten mit Sichtbarkeitsschalter (ausgeblendete Listen erscheinen nicht bei neuen Bestellungen)
+- Artikelbilder in der Bestellung per Klick groß ansehen (Modal mit Name und Preis, Blättern per Pfeil, Pfeiltaste oder Wischen)
 - Standortfilter (Kassel / Frankfurt)
 - Trinkgeldverteilung pro Kopf
 - Bestellart „Cost split": eine Person kauft alles ein, der Gesamtbetrag wird gleichmäßig auf alle Angemeldeten verteilt

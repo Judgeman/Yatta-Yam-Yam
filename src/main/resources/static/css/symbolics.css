@@ -389,6 +389,36 @@ html[data-yy-theme="symbolics"] .item-image-placeholder {
     background: #000;
 }
 
+html[data-yy-theme="symbolics"] .item-image-btn,
+html[data-yy-theme="symbolics"] .item-image-zoom {
+    border-radius: 6px;
+}
+
+html[data-yy-theme="symbolics"] .item-image-btn:focus-visible {
+    outline-color: var(--neo-cyan);
+}
+
+html[data-yy-theme="symbolics"] .item-image-preview {
+    background: #000;
+}
+
+html[data-yy-theme="symbolics"] .item-image-zoom,
+html[data-yy-theme="symbolics"] .item-image-nav {
+    background: #000;
+    color: var(--neo-cyan);
+    border: 1px solid var(--neo-cyan);
+}
+
+html[data-yy-theme="symbolics"] .item-image-nav {
+    border-radius: 6px;
+}
+
+html[data-yy-theme="symbolics"] .item-image-nav:hover,
+html[data-yy-theme="symbolics"] .item-image-nav:focus-visible {
+    background: #000;
+    box-shadow: 0 0 10px rgba(var(--neo-cyan-rgb), 0.6);
+}
+
 /* ── Badges: outlined pills ── */
 html[data-yy-theme="symbolics"] .badge,
 html[data-yy-theme="symbolics"] .order-status-badge {
