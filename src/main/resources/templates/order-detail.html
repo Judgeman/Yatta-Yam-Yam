@@ -299,9 +299,18 @@
                         <div class="row g-3 mb-3">
                             <div class="col-sm-6 col-lg-6" th:each="item : ${order.itemList.items}">
                                 <div class="item-card">
-                                    <img th:if="${item.imageUrl != null and !item.imageUrl.isEmpty()}"
-                                         th:src="${item.imageUrl}" class="item-image" th:alt="${item.name}"
-                                         onerror="this.style.display='none'"/>
+                                    <!-- Thumbnail opens the large preview (#itemImageModal) -->
+                                    <button th:if="${item.imageUrl != null and !item.imageUrl.isEmpty()}"
+                                            type="button" class="item-image-btn"
+                                            th:attr="data-image-src=${item.imageUrl}, data-item-name=${item.name},
+                                                     data-item-price=${'€' + #numbers.formatDecimal(item.price,1,2)},
+                                                     aria-label=${'Show larger image of ' + item.name}"
+                                            title="Show larger image"
+                                            onclick="openItemImage(this)">
+                                        <img th:src="${item.imageUrl}" class="item-image" th:alt="${item.name}"
+                                             onerror="this.parentElement.style.display='none'"/>
+                                        <i class="bi bi-arrows-angle-expand item-image-zoom" aria-hidden="true"></i>
+                                    </button>
                                     <div th:if="${item.imageUrl == null or item.imageUrl.isEmpty()}"
                                          class="item-image-placeholder">
                                         <i class="bi bi-image text-muted"></i>
@@ -310,28 +319,32 @@
                                         <div class="fw-semibold" th:text="${item.name}">Item</div>
                                         <div class="text-primary fw-bold" th:text="'€' + ${#numbers.formatDecimal(item.price,1,2)}">€0.00</div>
                                     </div>
-                                    <div class="qty-control">
-                                        <button type="button" class="qty-btn" onclick="changeQty(this, -1)">−</button>
-                                        <input type="number" th:name="'qty_' + ${item.id}"
-                                               th:id="'qty_' + ${item.id}"
-                                               class="qty-input"
-                                               value="0" min="0" max="20"
-                                               th:value="${itemQuantities[item.id] != null} ? ${itemQuantities[item.id]} : 0" />
-                                        <button type="button" class="qty-btn" onclick="changeQty(this, 1)">+</button>
+                                    <!-- Quantity and owner buttons move to their own row as one group
+                                         when the name would get too narrow (see .item-actions) -->
+                                    <div class="item-actions">
+                                        <div class="qty-control">
+                                            <button type="button" class="qty-btn" onclick="changeQty(this, -1)">−</button>
+                                            <input type="number" th:name="'qty_' + ${item.id}"
+                                                   th:id="'qty_' + ${item.id}"
+                                                   class="qty-input"
+                                                   value="0" min="0" max="20"
+                                                   th:value="${itemQuantities[item.id] != null} ? ${itemQuantities[item.id]} : 0" />
+                                            <button type="button" class="qty-btn" onclick="changeQty(this, 1)">+</button>
+                                        </div>
+                                        <a th:if="${isOwner}"
+                                           th:href="@{'/orders/itemlist/' + ${order.itemList.id} + '/items/' + ${item.id} + '/edit?orderId=' + ${order.id}}"
+                                           class="btn btn-outline-secondary btn-sm py-0 ms-2">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <!-- Owner: delete item -->
+                                        <button th:if="${isOwner}"
+                                                type="button"
+                                                class="btn btn-outline-danger btn-sm py-0 ms-2"
+                                                th:attr="data-list-id=${order.itemList.id}, data-item-id=${item.id}, data-order-id=${order.id}, data-item-name=${item.name}"
+                                                onclick="deleteItem(this)">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
                                     </div>
-                                    <a th:if="${isOwner}"
-                                       th:href="@{'/orders/itemlist/' + ${order.itemList.id} + '/items/' + ${item.id} + '/edit?orderId=' + ${order.id}}"
-                                       class="btn btn-outline-secondary btn-sm py-0 ms-2">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <!-- Owner: delete item -->
-                                    <button th:if="${isOwner}"
-                                            type="button"
-                                            class="btn btn-outline-danger btn-sm py-0 ms-2"
-                                            th:attr="data-list-id=${order.itemList.id}, data-item-id=${item.id}, data-order-id=${order.id}, data-item-name=${item.name}"
-                                            onclick="deleteItem(this)">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -855,6 +868,36 @@
     </div>
 </div>
 
+<!-- Item image preview: filled by openItemImage() from the clicked thumbnail -->
+<div class="modal fade" id="itemImageModal" tabindex="-1" aria-labelledby="itemImageModalTitle">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="me-3" style="min-width:0;">
+                    <h5 class="modal-title fw-bold text-break" id="itemImageModalTitle">Item</h5>
+                    <span class="text-primary fw-bold" id="itemImageModalPrice">€0.00</span>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body item-image-preview">
+                <img id="itemImageModalImg" alt=""/>
+                <button type="button" class="item-image-nav item-image-nav-prev"
+                        aria-label="Previous image" onclick="stepItemImage(-1)">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <button type="button" class="item-image-nav item-image-nav-next"
+                        aria-label="Next image" onclick="stepItemImage(1)">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <span class="text-muted small" id="itemImageModalCounter"></span>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Confirm Selection Despite Ordered Modal -->
 <div class="modal fade" id="confirmSelectionModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
@@ -919,6 +962,65 @@
         document.getElementById('confirmedOrderedInput').value = 'yes';
         document.getElementById('selectionForm').submit();
     }
+
+    // Item image preview: a thumbnail opens the image large; arrows, arrow keys
+    // or swiping browse through the other item images of the list
+    const itemImageModalEl = document.getElementById('itemImageModal');
+    const itemImageImg = document.getElementById('itemImageModalImg');
+    let itemImageButtons = [];
+    let itemImageIndex = 0;
+
+    function openItemImage(btn) {
+        // Thumbnails whose image failed to load are hidden and skipped
+        itemImageButtons = Array.from(document.querySelectorAll('.item-image-btn'))
+            .filter(b => b.style.display !== 'none');
+        itemImageIndex = Math.max(0, itemImageButtons.indexOf(btn));
+        showItemImage();
+        bootstrap.Modal.getOrCreateInstance(itemImageModalEl).show();
+    }
+
+    function stepItemImage(delta) {
+        const count = itemImageButtons.length;
+        if (count < 2) return;
+        itemImageIndex = (itemImageIndex + delta + count) % count;
+        showItemImage();
+    }
+
+    function showItemImage() {
+        const btn = itemImageButtons[itemImageIndex];
+        if (!btn) return;
+        itemImageImg.src = btn.dataset.imageSrc;
+        itemImageImg.alt = btn.dataset.itemName;
+        document.getElementById('itemImageModalTitle').textContent = btn.dataset.itemName;
+        document.getElementById('itemImageModalPrice').textContent = btn.dataset.itemPrice;
+        const multiple = itemImageButtons.length > 1;
+        itemImageModalEl.querySelectorAll('.item-image-nav')
+            .forEach(nav => nav.classList.toggle('d-none', !multiple));
+        document.getElementById('itemImageModalCounter').textContent =
+            multiple ? (itemImageIndex + 1) + ' / ' + itemImageButtons.length : '';
+    }
+
+    itemImageModalEl.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowLeft') stepItemImage(-1);
+        if (e.key === 'ArrowRight') stepItemImage(1);
+    });
+
+    let itemImageTouchX = null;
+    itemImageImg.addEventListener('touchstart', function (e) {
+        itemImageTouchX = e.changedTouches[0].clientX;
+    }, { passive: true });
+    itemImageImg.addEventListener('touchend', function (e) {
+        if (itemImageTouchX === null) return;
+        const dx = e.changedTouches[0].clientX - itemImageTouchX;
+        itemImageTouchX = null;
+        if (Math.abs(dx) > 50) stepItemImage(dx < 0 ? 1 : -1);
+    });
+
+    // Drop the image when closing so the next one doesn't flash the old picture,
+    // unless the preview was reopened while the backdrop was still fading out
+    itemImageModalEl.addEventListener('hidden.bs.modal', function () {
+        if (!itemImageModalEl.classList.contains('show')) itemImageImg.removeAttribute('src');
+    });
 
     function checkFileSize(input, maxMB) {
         const error = document.getElementById('fileSizeError');
