@@ -39,22 +39,29 @@ public class WrappedService {
     }
 
     // ── Season ────────────────────────────────────────────────────────────────
+    // A year's review is only offered once the year is over: Wrapped 2026 from
+    // 1 January 2027 on. The running year is never shown.
 
-    /** Year shown by default: the past year in January, the current year otherwise. */
+    /** Year shown by default: the past year. */
     public static int defaultYear(LocalDate today) {
-        return today.getMonthValue() == 1 ? today.getYear() - 1 : today.getYear();
+        return today.getYear() - 1;
     }
 
-    /** December and January: the dashboard and the overview point to the Wrapped page. */
+    /** Whether the review of this year may be shown: only years that are over. */
+    public static boolean isAvailable(int year, LocalDate today) {
+        return year < today.getYear();
+    }
+
+    /** January: every page shows a small hint at the bottom right linking to the review. */
     public static boolean isSeason(LocalDate today) {
-        int month = today.getMonthValue();
-        return month == 12 || month == 1;
+        return today.getMonthValue() == 1;
     }
 
-    /** Years with at least one closed or archived order, newest first. */
-    public List<Integer> getYearsWithOrders() {
+    /** Past years with at least one closed or archived order, newest first. */
+    public List<Integer> getYearsWithOrders(LocalDate today) {
         return orderRepo.findOrderDatesByStatusIn(COMPLETED).stream()
                 .map(LocalDate::getYear)
+                .filter(year -> isAvailable(year, today))
                 .distinct()
                 .sorted(Comparator.reverseOrder())
                 .collect(Collectors.toList());

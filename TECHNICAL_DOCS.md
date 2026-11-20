@@ -410,7 +410,7 @@ Die Übersicht (`/`, `AppUserService.getStatsForUser`) und die Seite `/users` (`
 
 ### Jahresrückblick „Wrapped“
 
-`GET /wrapped` zeigt einen Jahresrückblick im Story-Format (wie Spotify Wrapped): Folien zum Durchtippen mit den Zahlen des Jahres, erst für alle und pro Standort, dann für den angemeldeten Nutzer. `?year=2025` zeigt ein anderes Jahr; ohne Parameter (oder mit ungültigem Jahr) gilt im Januar das Vorjahr, sonst das laufende Jahr. Solange das Jahr läuft, steht auf der ersten Folie „so far“.
+`GET /wrapped` zeigt einen Jahresrückblick im Story-Format (wie Spotify Wrapped): Folien zum Durchtippen mit den Zahlen des Jahres, erst für alle und pro Standort, dann für den angemeldeten Nutzer. Angeboten werden nur abgeschlossene Jahre: Wrapped 2026 gibt es ab dem 01.01.2027 (`WrappedService.isAvailable`). Ohne Parameter zeigt die Seite das Vorjahr, `?year=2024` ein früheres Jahr; das laufende, ein zukünftiges oder ein ungültiges Jahr fällt auf das Vorjahr zurück.
 
 **Was zählt** (`WrappedService`): Bestellungen mit Datum im gewählten Jahr im Status CLOSED oder ARCHIVED (die Beträge stehen fest) und mit mindestens einem Teilnehmer nach `OrderService.isParticipant`. Offene und bestellte Bestellungen zählen erst nach dem Schließen; Bestellungen ohne Standort zählen nur in der Gesamtfolie.
 
@@ -447,7 +447,9 @@ Haben mindestens zwei Standorte Bestellungen, vergleicht eine Folie sie direkt (
 
 Bei Gleichstand gewinnt der Eintrag, der im Jahr zuerst vorkam. Der Standort, an dem der Nutzer am häufigsten bestellt hat, kommt zuerst. Wer im Jahr an keiner Bestellung teilgenommen hat, sieht statt der persönlichen Folien eine Hinweisfolie.
 
-**Saison:** Im Dezember und Januar zeigen Dashboard und Übersicht (`/`) ein Banner mit Link auf `/wrapped`. Dafür legt `WrappedBannerAdvice` (`@ControllerAdvice`) `wrappedYear` in jedes Model, außerhalb der Saison `null`. Die Seite selbst ist jederzeit erreichbar, z. B. zum Ausprobieren. Die letzte Folie verlinkt auf weitere Jahre mit Bestellungen.
+**Hinweis im Januar:** Den ganzen Januar über zeigt jede Seite mit angemeldetem Nutzer (Übersicht `/` und alle Unterseiten, nicht `/wrapped` selbst und nicht die öffentliche `/version`) unten rechts einen kleinen Hinweis „🎁 Your 2026 Wrapped“ mit Link auf `/wrapped`. Dafür legt `WrappedHintAdvice` (`@ControllerAdvice`) `wrappedYear` (das Vorjahr) in jedes Model, außerhalb des Januars `null`. Das Fragment `fragments/theme.html` rendert den Hinweis dann als `<template>` im `<head>`, `static/js/wrapped-hint.js` setzt ihn in den `<body>`. Das × verkleinert ihn auf das Geschenk-Symbol; das merkt sich der Browser pro Jahr in `localStorage` (`yy-wrapped-hint-min`). Außerhalb des Januars ist `/wrapped` weiter für abgeschlossene Jahre erreichbar, wird aber nirgends verlinkt. Die letzte Folie verlinkt auf weitere abgeschlossene Jahre mit Bestellungen.
+
+**Release Notes:** Dort ist das Feature bewusst nur als „A secret statistics feature“ ohne Details erwähnt.
 
 **Darstellung:** `wrapped.html` rendert jede Folie als `<section class="wr-slide">`. `static/js/wrapped.js` macht daraus eine Story: rechts tippen, Pfeil rechts, Leertaste oder nach links wischen geht weiter; das linke Drittel, Pfeil links oder nach rechts wischen geht zurück. Oben zeigen Balken den Fortschritt, die Foliennummer steht im URL-Hash (Neuladen bleibt auf der Folie), große Zahlen zählen beim Erscheinen hoch (nicht bei `prefers-reduced-motion`). Ohne JavaScript stehen die Folien untereinander. Styles: `static/css/wrapped.css`.
 
@@ -527,7 +529,7 @@ Yatta-Yam-Yam/
     │   │   ├── OpenDebtInterceptor.java      # Offene Beträge des Nutzers für das Badge in der Menüleiste
     │   │   ├── SecurityConfig.java           # Spring Security Konfiguration
     │   │   ├── WebConfig.java                # Web-Konfiguration (z. B. statische Ressourcen)
-    │   │   └── WrappedBannerAdvice.java      # wrappedYear im Dezember/Januar für das Wrapped-Banner
+    │   │   └── WrappedHintAdvice.java        # wrappedYear im Januar für den Wrapped-Hinweis
     │   ├── controller/
     │   │   ├── ContactController.java        # Kontaktbuch: Liste, Anlegen, Bearbeiten, Löschen
     │   │   ├── LoginController.java          # Cookie-Login, Nutzer-Flow, /users, /version
@@ -567,6 +569,7 @@ Yatta-Yam-Yam/
         │   │   └── logo.png
         │   └── js/
         │       ├── theme.js                  # Hell/dunkel nach Systemeinstellung, Symbolics-Easter-Egg
+        │       ├── wrapped-hint.js           # Januar: Hinweis auf den Jahresrückblick unten rechts
         │       └── wrapped.js                # Story-Navigation des Jahresrückblicks
         └── templates/                        # Thymeleaf HTML-Templates
             ├── index.html                    # Namenseingabe
@@ -589,7 +592,7 @@ Yatta-Yam-Yam/
             ├── wrapped.html                  # Jahresrückblick „Wrapped“ (Story-Folien)
             └── fragments/
                 ├── open-debt-badge.html      # Rotes Badge mit offenem Betrag neben dem Namen
-                └── theme.html                # Einbindung im <head>: theme.js + symbolics.css
+                └── theme.html                # Einbindung im <head>: theme.js + symbolics.css, im Januar der Wrapped-Hinweis
 ```
 
 ---

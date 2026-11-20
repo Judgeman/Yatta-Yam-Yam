@@ -162,28 +162,87 @@ body.page-muted {
     mix-blend-mode: screen;
 }
 
-/* Link to the year-end review (/wrapped), shown in December and January */
-.wrapped-banner {
+/* January: small hint at the bottom right of every page, linking to the year-end
+   review (/wrapped). Markup in fragments/theme.html, placed by js/wrapped-hint.js.
+   The × shrinks it to the gift icon. */
+.wrapped-hint {
+    position: fixed;
+    right: 16px;
+    bottom: max(16px, env(safe-area-inset-bottom));
+    z-index: 1030;
     display: flex;
     align-items: center;
-    gap: 14px;
-    padding: 14px 18px;
-    border-radius: 16px;
-    background: linear-gradient(135deg, var(--yy-accent), var(--yy-accent-2));
-    color: #fff;
+    gap: 2px;
+    padding: 3px 3px 3px 12px;
+    border-radius: 999px;
+    background: var(--yy-surface);
+    border: 1px solid var(--yy-border-soft);
+    box-shadow: 0 4px 16px rgba(17, 12, 46, 0.16);
+    font-size: 13px;
+    opacity: 0.9;
+    transition: opacity 0.2s, box-shadow 0.2s;
+}
+
+.wrapped-hint:hover,
+.wrapped-hint:focus-within {
+    opacity: 1;
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+}
+
+.wrapped-hint-link {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--yy-accent-text);
+    font-weight: 600;
     text-decoration: none;
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.35);
-    transition: transform 0.2s, box-shadow 0.2s;
+    white-space: nowrap;
 }
 
-.wrapped-banner:hover,
-.wrapped-banner:focus-visible {
-    color: #fff;
-    transform: translateY(-2px);
-    box-shadow: 0 10px 26px rgba(102, 126, 234, 0.45);
+.wrapped-hint-link:hover {
+    color: var(--yy-accent-text);
+    text-decoration: underline;
 }
 
-.wrapped-banner-icon {
-    font-size: 1.8rem;
+.wrapped-hint-icon {
+    font-size: 16px;
     line-height: 1;
+}
+
+.wrapped-hint-min {
+    width: 26px;
+    height: 26px;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--bs-secondary-color);
+    font-size: 16px;
+    line-height: 1;
+}
+
+.wrapped-hint-min:hover {
+    background: var(--yy-surface-muted);
+}
+
+.wrapped-hint.is-min {
+    padding: 0;
+}
+
+.wrapped-hint.is-min .wrapped-hint-link {
+    width: 38px;
+    height: 38px;
+    justify-content: center;
+}
+
+.wrapped-hint.is-min .wrapped-hint-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+}
+
+.wrapped-hint.is-min .wrapped-hint-min {
+    display: none;
 }

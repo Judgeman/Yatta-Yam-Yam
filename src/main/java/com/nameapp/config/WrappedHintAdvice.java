@@ -7,12 +7,13 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import java.time.LocalDate;
 
 /**
- * In December and January every page gets "wrappedYear" (the year /wrapped shows);
- * the dashboard and the overview then show a link to it. Outside that season the
- * attribute is null and the link is hidden; /wrapped itself is always reachable.
+ * In January every page gets "wrappedYear" (the past year, which /wrapped shows).
+ * fragments/theme.html then adds a small hint at the bottom right of every page with
+ * a logged-in user. Outside January the attribute is null and there is no hint;
+ * /wrapped itself stays reachable for past years.
  */
 @ControllerAdvice
-public class WrappedBannerAdvice {
+public class WrappedHintAdvice {
 
     @ModelAttribute("wrappedYear")
     public Integer wrappedYear() {

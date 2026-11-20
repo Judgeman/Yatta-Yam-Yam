@@ -410,7 +410,7 @@ The overview (`/`, `AppUserService.getStatsForUser`) and the `/users` page (`get
 
 ### Year-end review "Wrapped"
 
-`GET /wrapped` shows a year-end review in story format (like Spotify Wrapped): slides to tap through with the year's figures, first for everyone and per location, then for the logged-in user. `?year=2025` shows another year; without the parameter (or with an invalid year) it is the past year in January and the current year otherwise. While the year is still running, the first slide says "so far".
+`GET /wrapped` shows a year-end review in story format (like Spotify Wrapped): slides to tap through with the year's figures, first for everyone and per location, then for the logged-in user. Only completed years are offered: Wrapped 2026 is available from 1 January 2027 on (`WrappedService.isAvailable`). Without a parameter the page shows the past year, `?year=2024` an earlier one; the running year, a future or an invalid year falls back to the past year.
 
 **What counts** (`WrappedService`): orders dated in the chosen year with status CLOSED or ARCHIVED (their amounts are final) and at least one participant according to `OrderService.isParticipant`. Open and ordered orders only count once they are closed; orders without a location only count on the "together" slide.
 
@@ -447,7 +447,9 @@ If at least two locations have orders, one slide compares them directly (orders,
 
 On a tie, the entry that came up first in the year wins. The location where the user ordered most often comes first. Anyone who took part in no order that year gets a short note instead of the personal slides.
 
-**Season:** In December and January the dashboard and the overview (`/`) show a banner linking to `/wrapped`. For this, `WrappedBannerAdvice` (`@ControllerAdvice`) adds `wrappedYear` to every model, `null` outside the season. The page itself is always reachable, e.g. to try it out. The last slide links to other years with orders.
+**Hint in January:** Throughout January, every page with a logged-in user (the overview `/` and all subpages, but not `/wrapped` itself and not the public `/version`) shows a small hint "🎁 Your 2026 Wrapped" at the bottom right, linking to `/wrapped`. For this, `WrappedHintAdvice` (`@ControllerAdvice`) adds `wrappedYear` (the past year) to every model, `null` outside January. The fragment `fragments/theme.html` then renders the hint as a `<template>` in `<head>`, and `static/js/wrapped-hint.js` places it in `<body>`. The × shrinks it to the gift icon; the browser remembers that per year in `localStorage` (`yy-wrapped-hint-min`). Outside January, `/wrapped` stays reachable for completed years but is not linked anywhere. The last slide links to other completed years with orders.
+
+**Release notes:** There the feature is deliberately only mentioned as "A secret statistics feature", without details.
 
 **Rendering:** `wrapped.html` renders each slide as a `<section class="wr-slide">`. `static/js/wrapped.js` turns them into a story: tapping on the right, arrow right, space or swiping left moves on; the left third, arrow left or swiping right goes back. Bars at the top show the progress, the slide number is kept in the URL hash (reloading stays on the slide), and big numbers count up when they appear (not with `prefers-reduced-motion`). Without JavaScript the slides are shown one below the other. Styles: `static/css/wrapped.css`.
 
@@ -527,7 +529,7 @@ Yatta-Yam-Yam/
     │   │   ├── OpenDebtInterceptor.java      # The user's open amounts for the navbar badge
     │   │   ├── SecurityConfig.java           # Spring Security configuration
     │   │   ├── WebConfig.java                # Web configuration (e.g. static resources)
-    │   │   └── WrappedBannerAdvice.java      # wrappedYear in December/January for the Wrapped banner
+    │   │   └── WrappedHintAdvice.java        # wrappedYear in January for the Wrapped hint
     │   ├── controller/
     │   │   ├── ContactController.java        # Contact book: list, create, edit, delete
     │   │   ├── LoginController.java          # Cookie login, user flow, /users, /version
@@ -567,6 +569,7 @@ Yatta-Yam-Yam/
         │   │   └── logo.png
         │   └── js/
         │       ├── theme.js                  # Light/dark from the OS setting, Symbolics easter egg
+        │       ├── wrapped-hint.js           # January: hint for the year-end review at the bottom right
         │       └── wrapped.js                # Story navigation of the year-end review
         └── templates/                        # Thymeleaf HTML templates
             ├── index.html                    # Name input
@@ -589,7 +592,7 @@ Yatta-Yam-Yam/
             ├── wrapped.html                  # Year-end review "Wrapped" (story slides)
             └── fragments/
                 ├── open-debt-badge.html      # Red badge with the open amount next to the name
-                └── theme.html                # <head> include: theme.js + symbolics.css
+                └── theme.html                # <head> include: theme.js + symbolics.css, in January the Wrapped hint
 ```
 
 ---

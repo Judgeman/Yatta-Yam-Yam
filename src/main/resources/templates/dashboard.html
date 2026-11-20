@@ -40,16 +40,6 @@
 
 <div class="container py-4">
 
-    <!-- December and January: link to the year-end review (wrappedYear from WrappedBannerAdvice) -->
-    <a th:if="${wrappedYear != null}" th:href="@{/wrapped}" class="wrapped-banner mb-4">
-        <span class="wrapped-banner-icon" aria-hidden="true">🎁</span>
-        <span>
-            <strong th:text="'Yatta-Yam-Yam Wrapped ' + ${wrappedYear}">Yatta-Yam-Yam Wrapped</strong>
-            <span class="d-block small">What everyone ordered this year &ndash; and what you did</span>
-        </span>
-        <span class="ms-auto fs-5" aria-hidden="true">&rarr;</span>
-    </a>
-
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
             <h2 class="fw-bold mb-0">Open Orders</h2>

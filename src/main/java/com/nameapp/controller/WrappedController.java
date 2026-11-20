@@ -17,7 +17,11 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
-/** Year-end review: /wrapped shows the default year, /wrapped?year=2025 any other. */
+/**
+ * Year-end review: /wrapped shows the past year, /wrapped?year=2024 an earlier one.
+ * The running year is never shown (Wrapped 2026 only from 1 January 2027 on); such
+ * a year, or an invalid one, falls back to the past year.
+ */
 @Controller
 public class WrappedController {
 
@@ -38,14 +42,13 @@ public class WrappedController {
         if (user.isEmpty()) return redirectToHome(request);
 
         LocalDate today = LocalDate.now();
-        int shownYear = year != null && year >= FIRST_YEAR && year <= today.getYear()
+        int shownYear = year != null && year >= FIRST_YEAR && WrappedService.isAvailable(year, today)
                 ? year
                 : WrappedService.defaultYear(today);
 
         model.addAttribute("user", user.get());
         model.addAttribute("wrapped", wrappedService.build(shownYear, user.get()));
-        model.addAttribute("years", wrappedService.getYearsWithOrders());
-        model.addAttribute("yearInProgress", shownYear == today.getYear());
+        model.addAttribute("years", wrappedService.getYearsWithOrders(today));
         // The UI is English: weekday and month names in dates, too
         model.addAttribute("en", Locale.ENGLISH);
         return "wrapped";
