@@ -7,7 +7,7 @@
  *   - a donut with sprinkles flaps across the upper half on little wings,
  *   - a wild BURGLIN walks along the bottom edge, its textbox above it,
  *   - a taco dances along the bottom edge,
- *   - a wild GRILLHÄHNCHEN (a roast chicken, like the one in the app's logo) hops along
+ *   - a wild BROILER (a roast chicken, like the one in the app's logo) hops along
  *     the bottom edge, steaming, its textbox above it,
  *   - a rice ball peeks in from an edge and waves,
  *   - a cartridge (red, blue or yellow) comes down on a link cable.
@@ -213,7 +213,7 @@
     // the crust, the meat of the drumsticks, the bones
     var ROAST = { '0': '#3a1f0f', '1': '#8a4a1e', '2': '#c9802f', '3': '#f6e3b4' };
 
-    // A wild GRILLHÄHNCHEN: a roast chicken with both drumsticks up, hopping along and
+    // A wild BROILER: a roast chicken with both drumsticks up, hopping along and
     // steaming, its textbox above it; 66 x 50
     function roastChickenSvg() {
         function puff(x, y, delay) {
@@ -221,7 +221,7 @@
                 + pix(['.00.', '0330', '0330', '.00.'], { '0': '#a8a8b8', '3': '#fbfbff' }, 1, x, y) + '</g>';
         }
         return svg('0 0 66 50', ''
-            + textbox(1, 0, 64, 14, ['A wild GRILLH\u00C4HNCHEN', 'appeared!'])
+            + textbox(1, 0, 64, 14, ['A wild BROILER', 'appeared!'])
             + '<path d="M31 14 L33 17 L35 14" fill="#f8f8f0" stroke="#081820" stroke-width=".8"/>'
             + puff(4, 30, 0) + puff(1, 22, -0.3) + puff(8, 18, -0.6)
             + '<g class="yy-v-bunny-hop">' + pix(CHICKEN, ROAST, 2, 12, 16) + '</g>');
