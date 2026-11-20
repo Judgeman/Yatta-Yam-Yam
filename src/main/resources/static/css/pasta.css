@@ -1,0 +1,180 @@
+/*
+ * Pasta look, link-only (no season): ?theme=pasta shows it as a preview until the tab
+ * is closed. Amalfi-teal menu bar with tagliatelle drying on a wooden pole, tomato-red
+ * buttons, every avatar turned into a plate of spaghetti with the initial on a burrata,
+ * farfalle, penne, fusilli, shells, basil and parmesan drifting down behind the
+ * content, a striped tablecloth with a pot of spaghetti, a colander, a jar of penne,
+ * parmesan and a plate along the bottom edge and a plate of spaghetti next to the app
+ * name. Light and dark mode both get their own palette (lemon-bright kitchen /
+ * trattoria night). Every few minutes farfalle, a meatball or a pasta parade drop by
+ * (pasta.js, css/visitors.css).
+ *
+ * Every rule is scoped to html[data-yy-theme="pasta"], so this file does nothing
+ * otherwise. The images are inline SVG (no extra requests).
+ */
+
+html[data-yy-theme="pasta"] {
+    --pa-drift-opacity: 0.85;
+    --pa-avatar: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%2312708a'/%3E%3Ccircle cx='50' cy='50' r='43' fill='%23fdfcf8'/%3E%3Ccircle cx='50' cy='50' r='40' fill='none' stroke='%238fd0dd' stroke-width='1'/%3E%3Cpath d='M30.0 44.3 A20.8 20.8 0 0 1 59.0 31.2' stroke='%23f6dc95' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M28.5 38.0 A24.6 24.6 0 0 1 70.7 36.8' stroke='%23eac463' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M52.1 71.0 A21.1 21.1 0 0 1 37.6 32.9' stroke='%23eac463' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M25.6 42.1 A25.7 25.7 0 0 1 62.7 27.7' stroke='%23f2d17c' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M62.0 66.9 A20.7 20.7 0 0 1 30.4 43.4' stroke='%23eac463' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M36.3 24.6 A28.9 28.9 0 0 1 71.0 30.3' stroke='%23f6dc95' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M53.3 32.6 A17.7 17.7 0 0 1 59.7 64.8' stroke='%23eac463' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M45.2 25.9 A24.6 24.6 0 0 1 69.1 65.5' stroke='%23f6dc95' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M23.5 63.1 A29.6 29.6 0 0 1 56.1 21.0' stroke='%23f6dc95' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M72.2 40.5 A24.1 24.1 0 0 1 39.0 71.5' stroke='%23f2d17c' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M32.4 50.6 A17.6 17.6 0 0 1 49.6 32.4' stroke='%23f6dc95' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M33.2 32.9 A24.0 24.0 0 0 1 68.3 34.5' stroke='%23f6dc95' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M22.9 36.4 A30.3 30.3 0 0 1 73.0 30.2' stroke='%23eac463' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M71.7 35.1 A26.3 26.3 0 0 1 50.0 76.3' stroke='%23f2d17c' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M80.7 48.3 A30.7 30.7 0 0 1 34.4 76.5' stroke='%23f2d17c' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M37.0 75.0 A28.2 28.2 0 0 1 32.2 28.2' stroke='%23f6dc95' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3Cellipse cx='30' cy='34' rx='6' ry='4' fill='%23c9302c' opacity='.85'/%3E%3Cellipse cx='70' cy='66' rx='7' ry='4.5' fill='%23c9302c' opacity='.85'/%3E%3Cellipse cx='68' cy='30' rx='4' ry='3' fill='%23c9302c' opacity='.85'/%3E%3Cellipse cx='32' cy='70' rx='4.5' ry='3' fill='%23c9302c' opacity='.85'/%3E%3Cg transform='translate(75 47) rotate(25) scale(0.90)'%3E%3Cpath d='M0 -7 C5 -4 5 3 0 7 C-5 3 -5 -4 0 -7Z' fill='%233f9a3c'/%3E%3Cpath d='M0 -6 L0 6' stroke='%232a7a2a' stroke-width='.8'/%3E%3C/g%3E%3Cg transform='translate(26 52) rotate(-30) scale(0.80)'%3E%3Cpath d='M0 -7 C5 -4 5 3 0 7 C-5 3 -5 -4 0 -7Z' fill='%233f9a3c'/%3E%3Cpath d='M0 -6 L0 6' stroke='%232a7a2a' stroke-width='.8'/%3E%3C/g%3E%3Ccircle cx='50' cy='50' r='15' fill='%23fffdf7' stroke='%23ece6d6' stroke-width='1.2'/%3E%3Cellipse cx='45' cy='45' rx='5' ry='3' fill='%23fff' opacity='.9'/%3E%3C/svg%3E");
+    --pa-garland: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='30'%3E%3Cpath d='M6 5 q1.5 6.6 0 11.0 q-1.5 6.6 0 11.0' stroke='%23d4ac52' stroke-width='4' fill='none' stroke-linecap='round'/%3E%3Cpath d='M6 5 q1.5 6.6 0 11.0 q-1.5 6.6 0 11.0' stroke='%23f2d17c' stroke-width='2.6' fill='none' stroke-linecap='round'/%3E%3Cpath d='M18 5 q-1.2 5.1 0 8.5 q1.2 5.1 0 8.5' stroke='%23d4ac52' stroke-width='4' fill='none' stroke-linecap='round'/%3E%3Cpath d='M18 5 q-1.2 5.1 0 8.5 q1.2 5.1 0 8.5' stroke='%23f2d17c' stroke-width='2.6' fill='none' stroke-linecap='round'/%3E%3Cpath d='M31 5 q1.0 7.2 0 12.0 q-1.0 7.2 0 12.0' stroke='%23d4ac52' stroke-width='4' fill='none' stroke-linecap='round'/%3E%3Cpath d='M31 5 q1.0 7.2 0 12.0 q-1.0 7.2 0 12.0' stroke='%23f2d17c' stroke-width='2.6' fill='none' stroke-linecap='round'/%3E%3Cpath d='M44 5 q-1.6 5.7 0 9.5 q1.6 5.7 0 9.5' stroke='%23d4ac52' stroke-width='4' fill='none' stroke-linecap='round'/%3E%3Cpath d='M44 5 q-1.6 5.7 0 9.5 q1.6 5.7 0 9.5' stroke='%23f2d17c' stroke-width='2.6' fill='none' stroke-linecap='round'/%3E%3Cpath d='M57 5 q1.3 6.9 0 11.5 q-1.3 6.9 0 11.5' stroke='%23d4ac52' stroke-width='4' fill='none' stroke-linecap='round'/%3E%3Cpath d='M57 5 q1.3 6.9 0 11.5 q-1.3 6.9 0 11.5' stroke='%23f2d17c' stroke-width='2.6' fill='none' stroke-linecap='round'/%3E%3Cpath d='M66 5 q-1 4.5 0 7.5 q1 4.5 0 7.5' stroke='%23d4ac52' stroke-width='4' fill='none' stroke-linecap='round'/%3E%3Cpath d='M66 5 q-1 4.5 0 7.5 q1 4.5 0 7.5' stroke='%23f2d17c' stroke-width='2.6' fill='none' stroke-linecap='round'/%3E%3Crect x='0' y='1' width='72' height='5' rx='2.5' fill='%23a8763e'/%3E%3Crect x='0' y='2' width='72' height='1.4' fill='%23c99a5c'/%3E%3C/svg%3E");
+    --pa-drift-far: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='520'%3E%3Cg transform='translate(103 121) rotate(106) scale(1.03)'%3E%3Crect x='-10' y='-3.4' width='20' height='6.8' rx='3.4' fill='%23f2d17c' stroke='%23d4ac52' stroke-width='.8'/%3E%3Cpath d='M-7 -3.2 L-4 3.2 M-2 -3.2 L1 3.2 M3 -3.2 L6 3.2' stroke='%23c99a3f' stroke-width='1.3' stroke-linecap='round'/%3E%3C/g%3E%3Cg transform='translate(355 253) rotate(146) scale(0.89)'%3E%3Cpath d='M-4 -2 L3 -3 L5 1 L-1 3 Z' fill='%23fbf1cf' stroke='%23e4d4a0' stroke-width='.6'/%3E%3C/g%3E%3Cg transform='translate(493 179) rotate(181) scale(0.80)'%3E%3Cpath d='M-10 -3 L7 -3 L10 3 L-7 3 Z' fill='%23f2d17c' stroke='%23d4ac52' stroke-width='.8' stroke-linejoin='round'/%3E%3Cpath d='M-5 -3 L-3 3 M-1 -3 L1 3 M3 -3 L5 3' stroke='%23d4ac52' stroke-width='.6'/%3E%3C/g%3E%3Cg transform='translate(326 180) rotate(52) scale(0.91)'%3E%3Cpath d='M0 0 L-10 -6 Q-12 0 -10 6 Z M0 0 L10 -6 Q12 0 10 6 Z' fill='%23f2d17c' stroke='%23d4ac52' stroke-width='.8' stroke-linejoin='round'/%3E%3Cpath d='M-10 -6 l-1 1.5 l1 1.5 l-1 1.5 l1 1.5 l-1 1.5 l1 1.5 l-1 1.5 M10 -6 l1 1.5 l-1 1.5 l1 1.5 l-1 1.5 l1 1.5 l-1 1.5 l1 1.5' stroke='%23d4ac52' stroke-width='.7' fill='none'/%3E%3Cellipse cx='0' cy='0' rx='2.4' ry='3.6' fill='%23e9c063'/%3E%3C/g%3E%3Cg transform='translate(212 460) rotate(304) scale(0.98)'%3E%3Cpath d='M0 -7 C5 -4 5 3 0 7 C-5 3 -5 -4 0 -7Z' fill='%233f9a3c'/%3E%3Cpath d='M0 -6 L0 6' stroke='%232a7a2a' stroke-width='.8'/%3E%3C/g%3E%3Cg transform='translate(496 318) rotate(226) scale(0.99)'%3E%3Crect x='-10' y='-3.4' width='20' height='6.8' rx='3.4' fill='%23f2d17c' stroke='%23d4ac52' stroke-width='.8'/%3E%3Cpath d='M-7 -3.2 L-4 3.2 M-2 -3.2 L1 3.2 M3 -3.2 L6 3.2' stroke='%23c99a3f' stroke-width='1.3' stroke-linecap='round'/%3E%3C/g%3E%3Cg transform='translate(399 317) rotate(84) scale(0.90)'%3E%3Cpath d='M0 0 L-10 -6 Q-12 0 -10 6 Z M0 0 L10 -6 Q12 0 10 6 Z' fill='%23f2d17c' stroke='%23d4ac52' stroke-width='.8' stroke-linejoin='round'/%3E%3Cpath d='M-10 -6 l-1 1.5 l1 1.5 l-1 1.5 l1 1.5 l-1 1.5 l1 1.5 l-1 1.5 M10 -6 l1 1.5 l-1 1.5 l1 1.5 l-1 1.5 l1 1.5 l-1 1.5 l1 1.5' stroke='%23d4ac52' stroke-width='.7' fill='none'/%3E%3Cellipse cx='0' cy='0' rx='2.4' ry='3.6' fill='%23e9c063'/%3E%3C/g%3E%3Cg transform='translate(43 195) rotate(139) scale(0.80)'%3E%3Cpath d='M0 0 L-10 -6 Q-12 0 -10 6 Z M0 0 L10 -6 Q12 0 10 6 Z' fill='%23f2d17c' stroke='%23d4ac52' stroke-width='.8' stroke-linejoin='round'/%3E%3Cpath d='M-10 -6 l-1 1.5 l1 1.5 l-1 1.5 l1 1.5 l-1 1.5 l1 1.5 l-1 1.5 M10 -6 l1 1.5 l-1 1.5 l1 1.5 l-1 1.5 l1 1.5 l-1 1.5 l1 1.5' stroke='%23d4ac52' stroke-width='.7' fill='none'/%3E%3Cellipse cx='0' cy='0' rx='2.4' ry='3.6' fill='%23e9c063'/%3E%3C/g%3E%3Cg transform='translate(166 17) rotate(168) scale(0.84)'%3E%3Cpath d='M-4 -2 L3 -3 L5 1 L-1 3 Z' fill='%23fbf1cf' stroke='%23e4d4a0' stroke-width='.6'/%3E%3C/g%3E%3Cg transform='translate(45 121) rotate(222) scale(0.96)'%3E%3Cpath d='M0 -7 C5 -4 5 3 0 7 C-5 3 -5 -4 0 -7Z' fill='%233f9a3c'/%3E%3Cpath d='M0 -6 L0 6' stroke='%232a7a2a' stroke-width='.8'/%3E%3C/g%3E%3Cg transform='translate(421 146) rotate(70) scale(1.02)'%3E%3Cpath d='M0 0 L-10 -6 Q-12 0 -10 6 Z M0 0 L10 -6 Q12 0 10 6 Z' fill='%23f2d17c' stroke='%23d4ac52' stroke-width='.8' stroke-linejoin='round'/%3E%3Cpath d='M-10 -6 l-1 1.5 l1 1.5 l-1 1.5 l1 1.5 l-1 1.5 l1 1.5 l-1 1.5 M10 -6 l1 1.5 l-1 1.5 l1 1.5 l-1 1.5 l1 1.5 l-1 1.5 l1 1.5' stroke='%23d4ac52' stroke-width='.7' fill='none'/%3E%3Cellipse cx='0' cy='0' rx='2.4' ry='3.6' fill='%23e9c063'/%3E%3C/g%3E%3Cg transform='translate(208 64) rotate(234) scale(0.97)'%3E%3Cpath d='M0 0 L-10 -6 Q-12 0 -10 6 Z M0 0 L10 -6 Q12 0 10 6 Z' fill='%23f2d17c' stroke='%23d4ac52' stroke-width='.8' stroke-linejoin='round'/%3E%3Cpath d='M-10 -6 l-1 1.5 l1 1.5 l-1 1.5 l1 1.5 l-1 1.5 l1 1.5 l-1 1.5 M10 -6 l1 1.5 l-1 1.5 l1 1.5 l-1 1.5 l1 1.5 l-1 1.5 l1 1.5' stroke='%23d4ac52' stroke-width='.7' fill='none'/%3E%3Cellipse cx='0' cy='0' rx='2.4' ry='3.6' fill='%23e9c063'/%3E%3C/g%3E%3Cg transform='translate(493 29) rotate(265) scale(1.01)'%3E%3Cpath d='M0 -7 C5 -4 5 3 0 7 C-5 3 -5 -4 0 -7Z' fill='%233f9a3c'/%3E%3Cpath d='M0 -6 L0 6' stroke='%232a7a2a' stroke-width='.8'/%3E%3C/g%3E%3Cg transform='translate(198 463) rotate(275) scale(0.84)'%3E%3Cpath d='M0 -7 C5 -4 5 3 0 7 C-5 3 -5 -4 0 -7Z' fill='%233f9a3c'/%3E%3Cpath d='M0 -6 L0 6' stroke='%232a7a2a' stroke-width='.8'/%3E%3C/g%3E%3Cg transform='translate(262 479) rotate(39) scale(0.82)'%3E%3Cpath d='M-4 -2 L3 -3 L5 1 L-1 3 Z' fill='%23fbf1cf' stroke='%23e4d4a0' stroke-width='.6'/%3E%3C/g%3E%3C/svg%3E");
+    --pa-drift-near: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='780' height='780'%3E%3Cg transform='translate(144 744) rotate(167) scale(1.30)'%3E%3Cpath d='M-8 3 C-9 -6 9 -6 8 3 C4 6 -4 6 -8 3Z' fill='%23f2d17c' stroke='%23d4ac52' stroke-width='.8'/%3E%3Cpath d='M0 4 L0 -3 M-3 4 L-5 -2 M3 4 L5 -2' stroke='%23d4ac52' stroke-width='.6'/%3E%3C/g%3E%3Cg transform='translate(282 396) rotate(346) scale(1.26)'%3E%3Cpath d='M0 -7 C5 -4 5 3 0 7 C-5 3 -5 -4 0 -7Z' fill='%233f9a3c'/%3E%3Cpath d='M0 -6 L0 6' stroke='%232a7a2a' stroke-width='.8'/%3E%3C/g%3E%3Cg transform='translate(143 106) rotate(187) scale(1.39)'%3E%3Cpath d='M0 -7 C5 -4 5 3 0 7 C-5 3 -5 -4 0 -7Z' fill='%233f9a3c'/%3E%3Cpath d='M0 -6 L0 6' stroke='%232a7a2a' stroke-width='.8'/%3E%3C/g%3E%3Cg transform='translate(667 730) rotate(249) scale(1.46)'%3E%3Cpath d='M-4 -2 L3 -3 L5 1 L-1 3 Z' fill='%23fbf1cf' stroke='%23e4d4a0' stroke-width='.6'/%3E%3C/g%3E%3Cg transform='translate(73 424) rotate(222) scale(1.43)'%3E%3Cpath d='M0 -7 C5 -4 5 3 0 7 C-5 3 -5 -4 0 -7Z' fill='%233f9a3c'/%3E%3Cpath d='M0 -6 L0 6' stroke='%232a7a2a' stroke-width='.8'/%3E%3C/g%3E%3Cg transform='translate(689 286) rotate(6) scale(1.56)'%3E%3Cpath d='M-10 -3 L7 -3 L10 3 L-7 3 Z' fill='%23f2d17c' stroke='%23d4ac52' stroke-width='.8' stroke-linejoin='round'/%3E%3Cpath d='M-5 -3 L-3 3 M-1 -3 L1 3 M3 -3 L5 3' stroke='%23d4ac52' stroke-width='.6'/%3E%3C/g%3E%3Cg transform='translate(232 335) rotate(101) scale(1.48)'%3E%3Cpath d='M-4 -2 L3 -3 L5 1 L-1 3 Z' fill='%23fbf1cf' stroke='%23e4d4a0' stroke-width='.6'/%3E%3C/g%3E%3Cg transform='translate(464 37) rotate(72) scale(1.43)'%3E%3Cpath d='M0 0 L-10 -6 Q-12 0 -10 6 Z M0 0 L10 -6 Q12 0 10 6 Z' fill='%23f2d17c' stroke='%23d4ac52' stroke-width='.8' stroke-linejoin='round'/%3E%3Cpath d='M-10 -6 l-1 1.5 l1 1.5 l-1 1.5 l1 1.5 l-1 1.5 l1 1.5 l-1 1.5 M10 -6 l1 1.5 l-1 1.5 l1 1.5 l-1 1.5 l1 1.5 l-1 1.5 l1 1.5' stroke='%23d4ac52' stroke-width='.7' fill='none'/%3E%3Cellipse cx='0' cy='0' rx='2.4' ry='3.6' fill='%23e9c063'/%3E%3C/g%3E%3Cg transform='translate(201 90) rotate(326) scale(1.35)'%3E%3Cpath d='M0 0 L-10 -6 Q-12 0 -10 6 Z M0 0 L10 -6 Q12 0 10 6 Z' fill='%23f2d17c' stroke='%23d4ac52' stroke-width='.8' stroke-linejoin='round'/%3E%3Cpath d='M-10 -6 l-1 1.5 l1 1.5 l-1 1.5 l1 1.5 l-1 1.5 l1 1.5 l-1 1.5 M10 -6 l1 1.5 l-1 1.5 l1 1.5 l-1 1.5 l1 1.5 l-1 1.5 l1 1.5' stroke='%23d4ac52' stroke-width='.7' fill='none'/%3E%3Cellipse cx='0' cy='0' rx='2.4' ry='3.6' fill='%23e9c063'/%3E%3C/g%3E%3Cg transform='translate(651 292) rotate(323) scale(1.43)'%3E%3Cpath d='M-10 -3 L7 -3 L10 3 L-7 3 Z' fill='%23f2d17c' stroke='%23d4ac52' stroke-width='.8' stroke-linejoin='round'/%3E%3Cpath d='M-5 -3 L-3 3 M-1 -3 L1 3 M3 -3 L5 3' stroke='%23d4ac52' stroke-width='.6'/%3E%3C/g%3E%3Cg transform='translate(121 424) rotate(144) scale(1.36)'%3E%3Cpath d='M-10 -3 L7 -3 L10 3 L-7 3 Z' fill='%23f2d17c' stroke='%23d4ac52' stroke-width='.8' stroke-linejoin='round'/%3E%3Cpath d='M-5 -3 L-3 3 M-1 -3 L1 3 M3 -3 L5 3' stroke='%23d4ac52' stroke-width='.6'/%3E%3C/g%3E%3Cg transform='translate(286 633) rotate(35) scale(1.41)'%3E%3Cpath d='M0 0 L-10 -6 Q-12 0 -10 6 Z M0 0 L10 -6 Q12 0 10 6 Z' fill='%23f2d17c' stroke='%23d4ac52' stroke-width='.8' stroke-linejoin='round'/%3E%3Cpath d='M-10 -6 l-1 1.5 l1 1.5 l-1 1.5 l1 1.5 l-1 1.5 l1 1.5 l-1 1.5 M10 -6 l1 1.5 l-1 1.5 l1 1.5 l-1 1.5 l1 1.5 l-1 1.5 l1 1.5' stroke='%23d4ac52' stroke-width='.7' fill='none'/%3E%3Cellipse cx='0' cy='0' rx='2.4' ry='3.6' fill='%23e9c063'/%3E%3C/g%3E%3C/svg%3E");
+    --pa-bottom: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='480' height='48'%3E%3Crect x='0' y='30' width='12' height='18' fill='%2312708a'/%3E%3Crect x='12' y='30' width='12' height='18' fill='%23fbfaf4'/%3E%3Crect x='24' y='30' width='12' height='18' fill='%2312708a'/%3E%3Crect x='36' y='30' width='12' height='18' fill='%23fbfaf4'/%3E%3Crect x='48' y='30' width='12' height='18' fill='%2312708a'/%3E%3Crect x='60' y='30' width='12' height='18' fill='%23fbfaf4'/%3E%3Crect x='72' y='30' width='12' height='18' fill='%2312708a'/%3E%3Crect x='84' y='30' width='12' height='18' fill='%23fbfaf4'/%3E%3Crect x='96' y='30' width='12' height='18' fill='%2312708a'/%3E%3Crect x='108' y='30' width='12' height='18' fill='%23fbfaf4'/%3E%3Crect x='120' y='30' width='12' height='18' fill='%2312708a'/%3E%3Crect x='132' y='30' width='12' height='18' fill='%23fbfaf4'/%3E%3Crect x='144' y='30' width='12' height='18' fill='%2312708a'/%3E%3Crect x='156' y='30' width='12' height='18' fill='%23fbfaf4'/%3E%3Crect x='168' y='30' width='12' height='18' fill='%2312708a'/%3E%3Crect x='180' y='30' width='12' height='18' fill='%23fbfaf4'/%3E%3Crect x='192' y='30' width='12' height='18' fill='%2312708a'/%3E%3Crect x='204' y='30' width='12' height='18' fill='%23fbfaf4'/%3E%3Crect x='216' y='30' width='12' height='18' fill='%2312708a'/%3E%3Crect x='228' y='30' width='12' height='18' fill='%23fbfaf4'/%3E%3Crect x='240' y='30' width='12' height='18' fill='%2312708a'/%3E%3Crect x='252' y='30' width='12' height='18' fill='%23fbfaf4'/%3E%3Crect x='264' y='30' width='12' height='18' fill='%2312708a'/%3E%3Crect x='276' y='30' width='12' height='18' fill='%23fbfaf4'/%3E%3Crect x='288' y='30' width='12' height='18' fill='%2312708a'/%3E%3Crect x='300' y='30' width='12' height='18' fill='%23fbfaf4'/%3E%3Crect x='312' y='30' width='12' height='18' fill='%2312708a'/%3E%3Crect x='324' y='30' width='12' height='18' fill='%23fbfaf4'/%3E%3Crect x='336' y='30' width='12' height='18' fill='%2312708a'/%3E%3Crect x='348' y='30' width='12' height='18' fill='%23fbfaf4'/%3E%3Crect x='360' y='30' width='12' height='18' fill='%2312708a'/%3E%3Crect x='372' y='30' width='12' height='18' fill='%23fbfaf4'/%3E%3Crect x='384' y='30' width='12' height='18' fill='%2312708a'/%3E%3Crect x='396' y='30' width='12' height='18' fill='%23fbfaf4'/%3E%3Crect x='408' y='30' width='12' height='18' fill='%2312708a'/%3E%3Crect x='420' y='30' width='12' height='18' fill='%23fbfaf4'/%3E%3Crect x='432' y='30' width='12' height='18' fill='%2312708a'/%3E%3Crect x='444' y='30' width='12' height='18' fill='%23fbfaf4'/%3E%3Crect x='456' y='30' width='12' height='18' fill='%2312708a'/%3E%3Crect x='468' y='30' width='12' height='18' fill='%23fbfaf4'/%3E%3Cpath d='M0 30 L480 30' stroke='%230b4458' stroke-width='1.5'/%3E%3Cg transform='translate(60 30)'%3E%3Cpath d='M-8 -16 L-11 -30' stroke='%23d4ac52' stroke-width='1.3'/%3E%3Cpath d='M-4 -16 L-5 -30' stroke='%23d4ac52' stroke-width='1.3'/%3E%3Cpath d='M0 -16 L1 -30' stroke='%23d4ac52' stroke-width='1.3'/%3E%3Cpath d='M4 -16 L6 -30' stroke='%23d4ac52' stroke-width='1.3'/%3E%3Cpath d='M8 -16 L12 -30' stroke='%23d4ac52' stroke-width='1.3'/%3E%3Cpath d='M-6 -16 L-4 -30' stroke='%23d4ac52' stroke-width='1.3'/%3E%3Cpath d='M6 -16 L4 -30' stroke='%23d4ac52' stroke-width='1.3'/%3E%3Cpath d='M-14 -18 L14 -18 L12 0 L-12 0 Z' fill='%23b7bec7'/%3E%3Crect x='-16' y='-20' width='32' height='4' rx='2' fill='%2399a2ad'/%3E%3Crect x='-20' y='-16' width='6' height='3' rx='1.5' fill='%2399a2ad'/%3E%3Crect x='14' y='-16' width='6' height='3' rx='1.5' fill='%2399a2ad'/%3E%3C/g%3E%3Cg transform='translate(150 30)'%3E%3Cpath d='M-14 -12 L14 -12 Q12 0 0 0 Q-12 0 -14 -12Z' fill='%23d8dde3'/%3E%3Ccircle cx='-7' cy='-8' r='1' fill='%238b939d'/%3E%3Ccircle cx='-2' cy='-8' r='1' fill='%238b939d'/%3E%3Ccircle cx='3' cy='-8' r='1' fill='%238b939d'/%3E%3Ccircle cx='8' cy='-8' r='1' fill='%238b939d'/%3E%3Ccircle cx='-4' cy='-4' r='1' fill='%238b939d'/%3E%3Ccircle cx='1' cy='-4' r='1' fill='%238b939d'/%3E%3Ccircle cx='6' cy='-4' r='1' fill='%238b939d'/%3E%3Crect x='-17' y='-14' width='34' height='3' rx='1.5' fill='%23b7bec7'/%3E%3C/g%3E%3Cg transform='translate(240 30)'%3E%3Crect x='-9' y='-24' width='18' height='24' rx='3' fill='%23e9f3f6' opacity='.8' stroke='%23b7cdd3'/%3E%3Crect x='-10' y='-27' width='20' height='4' rx='1.5' fill='%2312708a'/%3E%3Cg transform='translate(-3 -6) rotate(20) scale(0.55)'%3E%3Cpath d='M-10 -3 L7 -3 L10 3 L-7 3 Z' fill='%23f2d17c' stroke='%23d4ac52' stroke-width='.8' stroke-linejoin='round'/%3E%3Cpath d='M-5 -3 L-3 3 M-1 -3 L1 3 M3 -3 L5 3' stroke='%23d4ac52' stroke-width='.6'/%3E%3C/g%3E%3Cg transform='translate(3 -4) rotate(-30) scale(0.55)'%3E%3Cpath d='M-10 -3 L7 -3 L10 3 L-7 3 Z' fill='%23f2d17c' stroke='%23d4ac52' stroke-width='.8' stroke-linejoin='round'/%3E%3Cpath d='M-5 -3 L-3 3 M-1 -3 L1 3 M3 -3 L5 3' stroke='%23d4ac52' stroke-width='.6'/%3E%3C/g%3E%3Cg transform='translate(0 -12) rotate(60) scale(0.55)'%3E%3Cpath d='M-10 -3 L7 -3 L10 3 L-7 3 Z' fill='%23f2d17c' stroke='%23d4ac52' stroke-width='.8' stroke-linejoin='round'/%3E%3Cpath d='M-5 -3 L-3 3 M-1 -3 L1 3 M3 -3 L5 3' stroke='%23d4ac52' stroke-width='.6'/%3E%3C/g%3E%3Cg transform='translate(-4 -17) rotate(-10) scale(0.55)'%3E%3Cpath d='M-10 -3 L7 -3 L10 3 L-7 3 Z' fill='%23f2d17c' stroke='%23d4ac52' stroke-width='.8' stroke-linejoin='round'/%3E%3Cpath d='M-5 -3 L-3 3 M-1 -3 L1 3 M3 -3 L5 3' stroke='%23d4ac52' stroke-width='.6'/%3E%3C/g%3E%3Cg transform='translate(4 -18) rotate(40) scale(0.55)'%3E%3Cpath d='M-10 -3 L7 -3 L10 3 L-7 3 Z' fill='%23f2d17c' stroke='%23d4ac52' stroke-width='.8' stroke-linejoin='round'/%3E%3Cpath d='M-5 -3 L-3 3 M-1 -3 L1 3 M3 -3 L5 3' stroke='%23d4ac52' stroke-width='.6'/%3E%3C/g%3E%3C/g%3E%3Cg transform='translate(330 30)'%3E%3Cpath d='M-14 0 L14 0 L10 -12 Z' fill='%23f6dd8f' stroke='%23d9bb62' stroke-width='.8'/%3E%3Ccircle cx='0' cy='-4' r='1.2' fill='%23e6c470'/%3E%3Ccircle cx='6' cy='-3' r='.9' fill='%23e6c470'/%3E%3Cg transform='translate(24 0)'%3E%3Crect x='-5' y='-20' width='10' height='20' rx='1.5' fill='%23c3c8d2'/%3E%3Ccircle cx='-2' cy='-16' r='.8' fill='%236b737d'/%3E%3Ccircle cx='-2' cy='-12' r='.8' fill='%236b737d'/%3E%3Ccircle cx='-2' cy='-8' r='.8' fill='%236b737d'/%3E%3Ccircle cx='-2' cy='-4' r='.8' fill='%236b737d'/%3E%3Ccircle cx='2' cy='-16' r='.8' fill='%236b737d'/%3E%3Ccircle cx='2' cy='-12' r='.8' fill='%236b737d'/%3E%3Ccircle cx='2' cy='-8' r='.8' fill='%236b737d'/%3E%3Ccircle cx='2' cy='-4' r='.8' fill='%236b737d'/%3E%3C/g%3E%3Cg transform='translate(-20 -2) rotate(10) scale(0.70)'%3E%3Cpath d='M-4 -2 L3 -3 L5 1 L-1 3 Z' fill='%23fbf1cf' stroke='%23e4d4a0' stroke-width='.6'/%3E%3C/g%3E%3Cg transform='translate(14 -1) rotate(-20) scale(0.60)'%3E%3Cpath d='M-4 -2 L3 -3 L5 1 L-1 3 Z' fill='%23fbf1cf' stroke='%23e4d4a0' stroke-width='.6'/%3E%3C/g%3E%3C/g%3E%3Cg transform='translate(420 26)'%3E%3Cellipse rx='26' ry='9' fill='%23fdfcf8' stroke='%2312708a' stroke-width='2'/%3E%3Cellipse rx='15' ry='5' fill='%23f2d17c'/%3E%3Cpath d='M-12 0 q6 -4 12 0 q6 4 12 0 M-10 -2 q5 3 10 0 q5 -3 10 0' stroke='%23d4ac52' stroke-width='1' fill='none'/%3E%3Cellipse cx='0' cy='-1' rx='5' ry='2.2' fill='%23c9302c'/%3E%3Cg transform='translate(6 -3) rotate(40) scale(0.50)'%3E%3Cpath d='M0 -7 C5 -4 5 3 0 7 C-5 3 -5 -4 0 -7Z' fill='%233f9a3c'/%3E%3Cpath d='M0 -6 L0 6' stroke='%232a7a2a' stroke-width='.8'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+
+    --yy-accent: #c9302c;
+    --yy-accent-2: #8f1d1a;
+    --yy-accent-text: #b02a26;
+    --yy-accent-hover: #b42a27;
+    --yy-accent-2-hover: #7a1816;
+    --yy-tint-1: rgba(18, 112, 138, 0.07);
+    --yy-tint-2: rgba(244, 208, 63, 0.10);
+    --yy-page-bg: #fbf6ea;
+    --yy-page-muted-bg: #fbf6ea;
+
+    --bs-primary: #c9302c;
+    --bs-primary-rgb: 201, 48, 44;
+    --bs-link-color: #0f6b84;
+    --bs-link-color-rgb: 15, 107, 132;
+    --bs-link-hover-color: #0b5266;
+    --bs-link-hover-color-rgb: 11, 82, 102;
+}
+
+/* Trattoria night: deep teal surfaces */
+html[data-yy-theme="pasta"][data-bs-theme="dark"] {
+    --pa-drift-opacity: 0.6;
+
+    --yy-accent-text: #ff8a80;
+    --yy-tint-1: rgba(18, 112, 138, 0.14);
+    --yy-tint-2: rgba(244, 208, 63, 0.05);
+    --yy-page-bg: #0d1619;
+    --yy-page-muted-bg: #0d1619;
+    --yy-border-soft: #2a4047;
+    --yy-divider: #213439;
+
+    --bs-body-bg: #142125;              --bs-body-bg-rgb: 20, 33, 37;
+    --bs-secondary-bg: #1d2e33;         --bs-secondary-bg-rgb: 29, 46, 51;
+    --bs-tertiary-bg: #18282c;          --bs-tertiary-bg-rgb: 24, 40, 44;
+    --bs-border-color: #2a4047;
+    --bs-border-color-translucent: rgba(170, 225, 235, 0.15);
+    --bs-link-color: #7fd0e3;
+    --bs-link-color-rgb: 127, 208, 227;
+    --bs-link-hover-color: #a9e1ee;
+    --bs-link-hover-color-rgb: 169, 225, 238;
+}
+
+/* Room for the tablecloth, so the last line of a page is not hidden behind it */
+html[data-yy-theme="pasta"] body {
+    padding-bottom: 46px;
+}
+
+/* ── Pasta shapes, basil and parmesan drifting down, behind the content ── */
+html[data-yy-theme="pasta"] body::before {
+    content: "";
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: -1560px;                        /* 1560px = a multiple of both tile heights */
+    height: calc(100% + 1560px);
+    z-index: -1;
+    pointer-events: none;
+    background-image: var(--pa-drift-near), var(--pa-drift-far);
+    background-size: 780px 780px, 520px 520px;
+    background-position: 0 0, 230px 0;
+    opacity: var(--pa-drift-opacity);
+    animation: yy-pa-drift 95s linear infinite;
+    will-change: transform;
+}
+
+@keyframes yy-pa-drift {
+    from { transform: translate3d(0, 0, 0); }
+    to   { transform: translate3d(0, 1560px, 0); }
+}
+
+/* ── Striped tablecloth with a pot of spaghetti, colander, penne, parmesan and a plate along the bottom edge, on every page ── */
+html[data-yy-theme="pasta"] body::after {
+    content: "";
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 48px;
+    z-index: 1010;                       /* below the menu bar (1020) and modals */
+    pointer-events: none;
+    background: var(--pa-bottom) repeat-x left bottom / 480px 48px;
+}
+
+/* ── Menu bar: Amalfi teal with tagliatelle drying on a pole along its lower edge ── */
+html[data-yy-theme="pasta"] .navbar {
+    background: linear-gradient(135deg, #12708a, #0b4458);
+    box-shadow: 0 2px 12px rgba(18, 112, 138, 0.35);
+}
+
+html[data-yy-theme="pasta"][data-bs-theme="dark"] .navbar {
+    background: linear-gradient(135deg, #0e5a70, #072f3d);
+}
+
+html[data-yy-theme="pasta"] .navbar::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% - 3px);
+    height: 30px;
+    pointer-events: none;
+    background: var(--pa-garland) repeat-x 0 0 / 72px 30px;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
+}
+
+html[data-yy-theme="pasta"] .navbar-brand::after {
+    content: "\01F35D";                  /* 🍝 */
+    margin-left: 0.4em;
+}
+
+/* ── Plate avatars: every avatar becomes a plate of spaghetti, the initial on a burrata ── */
+html[data-yy-theme="pasta"] .avatar-circle,
+html[data-yy-theme="pasta"] .user-badge,
+html[data-yy-theme="pasta"] .mini-avatar {
+    background: var(--pa-avatar) center / cover no-repeat;
+    color: #3a2414;
+}
+
+html[data-yy-theme="pasta"] .avatar-circle {
+    font-size: 1.6rem;
+    box-shadow: 0 4px 15px rgba(18, 112, 138, 0.4);
+}
+
+/* ── Cards, buttons and inputs: lemon glow on hover, teal focus ── */
+html[data-yy-theme="pasta"] .order-card:hover {
+    border-color: rgba(244, 208, 63, 0.8);
+    box-shadow: 0 8px 24px rgba(244, 208, 63, 0.3);
+}
+
+html[data-yy-theme="pasta"] .item-card:hover,
+html[data-yy-theme="pasta"] .item-list-option:hover {
+    border-color: rgba(244, 208, 63, 0.8);
+    box-shadow: 0 2px 8px rgba(244, 208, 63, 0.25);
+}
+
+html[data-yy-theme="pasta"] .form-control:focus,
+html[data-yy-theme="pasta"] .form-select:focus,
+html[data-yy-theme="pasta"] .form-check-input:focus {
+    border-color: #2f97b1;
+    box-shadow: 0 0 0 0.2rem rgba(18, 112, 138, 0.3);
+}
+
+html[data-yy-theme="pasta"] .form-check-input:checked {
+    background-color: var(--yy-accent);
+    border-color: var(--yy-accent);
+}
+
+html[data-yy-theme="pasta"] ::selection {
+    background: rgba(201, 48, 44, 0.85);
+    color: #fff;
+}
+
+/* Nothing moves for people who asked their system for less motion */
+@media (prefers-reduced-motion: reduce) {
+    html[data-yy-theme="pasta"] body::before {
+        animation: none;
+    }
+}

@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <link rel="icon" type="image/svg+xml" href="/images/favicon.svg"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Themes – Yatta-Yam-Yam</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}"/>
+    <style>
+        .look-card {
+            height: 100%;
+        }
+        .look-emoji {
+            font-size: 1.75rem;
+            line-height: 1;
+        }
+        .look-key {
+            font-size: 0.8rem;
+        }
+        .look-url {
+            font-size: 0.8rem;
+        }
+    </style>
+    <th:block th:replace="~{fragments/theme :: head}"></th:block>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-bold" th:href="@{/orders/dashboard}">Yatta-Yam-Yam</a>
+        <div class="d-flex align-items-center gap-3">
+            <a th:href="@{/}" class="d-flex align-items-center gap-2 text-decoration-none">
+                <div class="user-badge">
+                    <span th:text="${#strings.toUpperCase(#strings.substring(user.name,0,1))}">A</span>
+                </div>
+                <span class="text-white fw-semibold" th:text="${user.name}">Name</span>
+                <span th:replace="~{fragments/open-debt-badge :: badge}"></span>
+            </a>
+        </div>
+    </div>
+</nav>
+
+<!-- Hidden page (not linked anywhere): every look of the app with a preview link.
+     The cards are built in the browser from theme.js (seasons and their dates),
+     theme-info.js (names and texts) and visitors.js (call words), so a new look shows
+     up here without touching this page. -->
+<div class="container py-4" style="max-width: 1100px;">
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1"><i class="bi bi-palette"></i> Themes</h2>
+        <p class="text-muted mb-0">
+            Every look of Yatta-Yam-Yam. A link opens the dashboard with a preview of the look in that tab;
+            the preview ends when the tab is closed, or with <code>?theme=default</code>.
+            Seasonal looks also switch on by themselves on the dates shown.
+        </p>
+    </div>
+
+    <div id="themes-list" th:data-dashboard="@{/orders/dashboard}">
+        <p class="text-muted">Loading…</p>
+    </div>
+
+    <div class="version-footer"><a th:href="@{/version}" th:text="'v' + ${@environment.getProperty('spring.application.version')}">v?</a></div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        'use strict';
+
+        var list = document.getElementById('themes-list');
+        var theme = window.yyTheme;
+        var info = window.yyThemeInfo;
+        var visitors = window.yyVisitors;
+        if (!theme || !info) {
+            list.textContent = 'The theme scripts did not load.';
+            return;
+        }
+        var DAY_MS = 24 * 60 * 60 * 1000;
+        var today = new Date();
+        today = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 12);
+        var activeToday = theme.season();
+        var shownHere = document.documentElement.getAttribute('data-yy-theme');
+
+        function addDays(date, days) {
+            return new Date(date.getFullYear(), date.getMonth(), date.getDate() + days, 12);
+        }
+
+        // The current or next stretch of days on which the date calls for this look. A gap
+        // of one or two days inside it (Garlic Day in the Easter weeks) does not end it.
+        function nextWindow(key) {
+            var start = null;
+            var day;
+            if (theme.seasonOn(today) === key) {
+                start = today;
+                while (theme.seasonOn(addDays(start, -1)) === key) {
+                    start = addDays(start, -1);
+                }
+            } else {
+                for (var i = 1; i <= 400 && !start; i++) {
+                    day = addDays(today, i);
+                    if (theme.seasonOn(day) === key) {
+                        start = day;
+                    }
+                }
+            }
+            if (!start) {
+                return null;
+            }
+            var end = start;
+            for (;;) {
+                if (theme.seasonOn(addDays(end, 1)) === key) {
+                    end = addDays(end, 1);
+                } else if (theme.seasonOn(addDays(end, 2)) === key) {
+                    end = addDays(end, 2);
+                } else if (theme.seasonOn(addDays(end, 3)) === key) {
+                    end = addDays(end, 3);
+                } else {
+                    break;
+                }
+            }
+            return { start: start, end: end };
+        }
+
+        function formatDay(date, withYear) {
+            var options = { day: 'numeric', month: 'short' };
+            if (withYear) {
+                options.year = 'numeric';
+            }
+            return date.toLocaleDateString('en-GB', options);
+        }
+
+        function formatWindow(w) {
+            if (w.start.getTime() === w.end.getTime()) {
+                return formatDay(w.start, true);
+            }
+            if (w.start.getMonth() === w.end.getMonth() && w.start.getFullYear() === w.end.getFullYear()) {
+                return w.start.getDate() + '–' + formatDay(w.end, true); // 6–12 Feb 2027
+            }
+            return formatDay(w.start, w.start.getFullYear() !== w.end.getFullYear()) + ' – ' + formatDay(w.end, true);
+        }
+
+        function el(tag, className, text) {
+            var node = document.createElement(tag);
+            if (className) {
+                node.className = className;
+            }
+            if (text) {
+                node.textContent = text;
+            }
+            return node;
+        }
+
+        function previewUrl(value) {
+            return new URL(list.getAttribute('data-dashboard') + '?theme=' + value, window.location.origin).href;
+        }
+
+        function copy(text, button) {
+            var done = function () {
+                var label = button.innerHTML;
+                button.innerHTML = '<i class="bi bi-check2"></i> Copied';
+                setTimeout(function () {
+                    button.innerHTML = label;
+                }, 1500);
+            };
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(done, function () {});
+            } else {
+                var field = button.parentNode.querySelector('input');
+                field.select();
+                try {
+                    document.execCommand('copy');
+                    done();
+                } catch (e) {
+                    // The URL stays selected for Ctrl+C
+                }
+            }
+        }
+
+        // One card: emoji and name, badges, the rule and the dates, visitors, link
+        function card(look) {
+            var col = el('div', 'col-md-6 col-xl-4');
+            col.setAttribute('data-look', look.value);
+            var box = el('div', 'card shadow-sm look-card');
+            var body = el('div', 'card-body d-flex flex-column gap-2');
+
+            var head = el('div', 'd-flex align-items-start gap-2');
+            head.appendChild(el('span', 'look-emoji', look.emoji));
+            var name = el('div', 'flex-grow-1');
+            name.appendChild(el('div', 'fw-semibold', look.title));
+            name.appendChild(el('code', 'look-key text-muted', '?theme=' + look.value));
+            head.appendChild(name);
+            var badges = el('div', 'd-flex flex-column align-items-end gap-1');
+            if (look.key && look.key === activeToday) {
+                badges.appendChild(el('span', 'badge bg-success', 'Active today'));
+            }
+            if (look.key && look.key === shownHere) {
+                badges.appendChild(el('span', 'badge bg-primary', 'Shown in this tab'));
+            }
+            head.appendChild(badges);
+            body.appendChild(head);
+
+            var when = el('div', 'small');
+            when.appendChild(el('i', 'bi bi-calendar-event me-1'));
+            when.appendChild(document.createTextNode(look.when));
+            body.appendChild(when);
+            if (look.next) {
+                body.appendChild(el('div', 'small text-muted', (look.key === activeToday ? 'Now: ' : 'Next: ') + look.next));
+            }
+            if (look.cast) {
+                var cast = el('div', 'small text-muted');
+                cast.appendChild(el('i', 'bi bi-stars me-1'));
+                cast.appendChild(document.createTextNode(look.cast.count + ' visitors · call word “' + look.cast.call + '”'));
+                body.appendChild(cast);
+            }
+
+            var url = previewUrl(look.value);
+            var actions = el('div', 'mt-auto pt-2 d-flex flex-column gap-2');
+            var open = el('a', 'btn btn-primary btn-sm', look.action);
+            open.href = url;
+            open.target = '_blank';
+            open.rel = 'noopener';
+            actions.appendChild(open);
+            var group = el('div', 'input-group input-group-sm');
+            var field = el('input', 'form-control look-url');
+            field.readOnly = true;
+            field.value = url;
+            field.setAttribute('aria-label', 'Link for ' + look.title);
+            field.addEventListener('focus', function () {
+                field.select();
+            });
+            var button = el('button', 'btn btn-outline-secondary');
+            button.type = 'button';
+            button.innerHTML = '<i class="bi bi-clipboard"></i> Copy';
+            button.addEventListener('click', function () {
+                copy(url, button);
+            });
+            group.appendChild(field);
+            group.appendChild(button);
+            actions.appendChild(group);
+            body.appendChild(actions);
+
+            box.appendChild(body);
+            col.appendChild(box);
+            return col;
+        }
+
+        function section(title, hint, looks) {
+            var wrap = el('section', 'mb-4');
+            wrap.appendChild(el('h5', 'fw-bold mb-1', title));
+            wrap.appendChild(el('p', 'small text-muted mb-3', hint));
+            var row = el('div', 'row g-3');
+            looks.forEach(function (look) {
+                row.appendChild(card(look));
+            });
+            wrap.appendChild(row);
+            return wrap;
+        }
+
+        function lookOf(key, extra) {
+            var i = info[key] || { emoji: '', title: key };
+            var look = {
+                key: key,
+                value: key,
+                emoji: i.emoji,
+                title: i.title,
+                cast: visitors && visitors.castOf ? visitors.castOf(key) : null,
+                action: 'Preview on the dashboard'
+            };
+            Object.keys(extra || {}).forEach(function (k) {
+                look[k] = extra[k];
+            });
+            return look;
+        }
+
+        var seasonal = theme.seasons.map(function (key) {
+            var w = nextWindow(key);
+            return lookOf(key, {
+                when: (info[key] && info[key].when) || '',
+                next: w ? formatWindow(w) : null,
+                sortKey: w ? w.start.getTime() : Infinity
+            });
+        }).sort(function (a, b) {
+            return a.sortKey - b.sortKey;
+        });
+
+        var linkOnly = theme.linkOnly.map(function (key) {
+            return lookOf(key, { when: 'Link only – no season, the date never switches it on.' });
+        });
+
+        var other = [
+            lookOf('symbolics', {
+                when: 'Easter egg. The link switches it on for this browser (not just a preview) until '
+                    + 'someone types “symbolics” again or opens a ?theme=default link.',
+                cast: null,
+                action: 'Switch on and open the dashboard'
+            }),
+            {
+                key: null,
+                value: 'default',
+                emoji: '🍽️',
+                title: 'Standard look',
+                when: 'Ends a preview and switches Symbolics off. During a season the seasonal look shows again.',
+                action: 'Open the dashboard in the standard look'
+            }
+        ];
+
+        list.textContent = '';
+        list.appendChild(section('Seasonal looks', 'Switched on by the date, in the order they come next. '
+            + 'The link previews a look at any time.', seasonal));
+        list.appendChild(section('Link-only looks', 'Never switched on by the date – only by sharing the link.', linkOnly));
+        list.appendChild(section('Other', 'The hidden Symbolics mode and the way back to the standard look.', other));
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

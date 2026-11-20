@@ -1,0 +1,180 @@
+/*
+ * Pelmeni look, link-only (no season): ?theme=pelmeni shows it as a preview until the
+ * tab is closed. Gzhel-blue menu bar with a white lace border, beetroot buttons, every
+ * avatar turned into a blue-and-white plate of pelmeni with the initial on a dollop of
+ * smetana, pelmeni, dill and peppercorns drifting down behind the content, a pastry
+ * board with flour, dough circles, a rolling pin and a bowl of pelmeni along the bottom
+ * edge and a dumpling next to the app name. Light and dark mode both get their own
+ * palette (flour-dusted kitchen / Siberian night). Every few minutes pelmeni and their
+ * dumpling friends drop by (pelmeni.js, css/visitors.css).
+ *
+ * Every rule is scoped to html[data-yy-theme="pelmeni"], so this file does nothing
+ * otherwise. The images are inline SVG (no extra requests).
+ */
+
+html[data-yy-theme="pelmeni"] {
+    --pm-drift-opacity: 0.85;
+    --pm-avatar: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%23d9913f'/%3E%3Ccircle cx='50' cy='50' r='44' fill='%23e8b061'/%3E%3Ccircle cx='50' cy='50' r='38' fill='%23d8432b'/%3E%3Cpath d='M24 40 C26 26 44 18 58 22 C74 26 82 40 78 56 C76 72 60 82 44 78 C28 76 20 58 24 40Z' fill='%23fff1c2'/%3E%3Cpath d='M20 64 C24 70 30 72 34 70 C30 66 26 64 20 64Z M74 30 C80 32 82 38 80 42 C76 38 74 34 74 30Z' fill='%23fff1c2'/%3E%3Ccircle cx='28' cy='30' r='7' fill='%23b8322a'/%3E%3Ccircle cx='28' cy='30' r='5.6' fill='%23cf3e33'/%3E%3Ccircle cx='25.6' cy='28.6' r='1.0' fill='%238e2219'/%3E%3Ccircle cx='30.1' cy='32.1' r='0.8' fill='%238e2219'/%3E%3Ccircle cx='29.8' cy='27.2' r='0.7' fill='%238e2219'/%3E%3Ccircle cx='74' cy='66' r='7.5' fill='%23b8322a'/%3E%3Ccircle cx='74' cy='66' r='6.0' fill='%23cf3e33'/%3E%3Ccircle cx='71.4' cy='64.5' r='1.1' fill='%238e2219'/%3E%3Ccircle cx='76.2' cy='68.2' r='0.9' fill='%238e2219'/%3E%3Ccircle cx='75.9' cy='63.0' r='0.8' fill='%238e2219'/%3E%3Ccircle cx='70' cy='24' r='5.5' fill='%23b8322a'/%3E%3Ccircle cx='70' cy='24' r='4.4' fill='%23cf3e33'/%3E%3Ccircle cx='68.1' cy='22.9' r='0.8' fill='%238e2219'/%3E%3Ccircle cx='71.7' cy='25.6' r='0.7' fill='%238e2219'/%3E%3Ccircle cx='71.4' cy='21.8' r='0.6' fill='%238e2219'/%3E%3Ccircle cx='26' cy='70' r='5.5' fill='%23b8322a'/%3E%3Ccircle cx='26' cy='70' r='4.4' fill='%23cf3e33'/%3E%3Ccircle cx='24.1' cy='68.9' r='0.8' fill='%238e2219'/%3E%3Ccircle cx='27.6' cy='71.7' r='0.7' fill='%238e2219'/%3E%3Ccircle cx='27.4' cy='67.8' r='0.6' fill='%238e2219'/%3E%3Cg transform='translate(80 46) rotate(30) scale(1.00)'%3E%3Cpath d='M0 -7 C5 -4 5 3 0 7 C-5 3 -5 -4 0 -7Z' fill='%233f9a3c'/%3E%3Cpath d='M0 -6 L0 6' stroke='%232a7a2a' stroke-width='.8'/%3E%3C/g%3E%3Cg transform='translate(20 50) rotate(-20) scale(0.90)'%3E%3Cpath d='M0 -7 C5 -4 5 3 0 7 C-5 3 -5 -4 0 -7Z' fill='%233f9a3c'/%3E%3Cpath d='M0 -6 L0 6' stroke='%232a7a2a' stroke-width='.8'/%3E%3C/g%3E%3Cg transform='translate(50 86) rotate(90) scale(0.90)'%3E%3Cpath d='M0 -7 C5 -4 5 3 0 7 C-5 3 -5 -4 0 -7Z' fill='%233f9a3c'/%3E%3Cpath d='M0 -6 L0 6' stroke='%232a7a2a' stroke-width='.8'/%3E%3C/g%3E%3C/svg%3E");
+    --pm-avatar: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%231f4e9c'/%3E%3Ccircle cx='95.0' cy='50.0' r='1.8' fill='%23fff'/%3E%3Ccircle cx='92.3' cy='65.4' r='1.8' fill='%23fff'/%3E%3Ccircle cx='84.5' cy='78.9' r='1.8' fill='%23fff'/%3E%3Ccircle cx='72.5' cy='89.0' r='1.8' fill='%23fff'/%3E%3Ccircle cx='57.8' cy='94.3' r='1.8' fill='%23fff'/%3E%3Ccircle cx='42.2' cy='94.3' r='1.8' fill='%23fff'/%3E%3Ccircle cx='27.5' cy='89.0' r='1.8' fill='%23fff'/%3E%3Ccircle cx='15.5' cy='78.9' r='1.8' fill='%23fff'/%3E%3Ccircle cx='7.7' cy='65.4' r='1.8' fill='%23fff'/%3E%3Ccircle cx='5.0' cy='50.0' r='1.8' fill='%23fff'/%3E%3Ccircle cx='7.7' cy='34.6' r='1.8' fill='%23fff'/%3E%3Ccircle cx='15.5' cy='21.1' r='1.8' fill='%23fff'/%3E%3Ccircle cx='27.5' cy='11.0' r='1.8' fill='%23fff'/%3E%3Ccircle cx='42.2' cy='5.7' r='1.8' fill='%23fff'/%3E%3Ccircle cx='57.8' cy='5.7' r='1.8' fill='%23fff'/%3E%3Ccircle cx='72.5' cy='11.0' r='1.8' fill='%23fff'/%3E%3Ccircle cx='84.5' cy='21.1' r='1.8' fill='%23fff'/%3E%3Ccircle cx='92.3' cy='34.6' r='1.8' fill='%23fff'/%3E%3Ccircle cx='50' cy='50' r='40' fill='%23fdfdfb'/%3E%3Ccircle cx='50' cy='50' r='38' fill='none' stroke='%238fb4e8' stroke-width='1.2'/%3E%3Cg transform='translate(50.0 23.0) rotate(0) scale(0.95)'%3E%3Ccircle cx='-7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Ccircle cx='7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Cpath d='M-9 3 C-9 -8 9 -8 9 3 C5 6 -5 6 -9 3Z' fill='%23f6ead0' stroke='%23d9c39a' stroke-width='.8'/%3E%3Cpath d='M-7.5 1 Q-6 -1 -4.5 1 Q-3 -1 -1.5 1 Q0 -1 1.5 1 Q3 -1 4.5 1 Q6 -1 7.5 1' stroke='%23e2cfa6' stroke-width='.9' fill='none'/%3E%3Cellipse cx='-3' cy='-3.5' rx='2.4' ry='1.2' fill='%23fff' opacity='.55'/%3E%3C/g%3E%3Cg transform='translate(73.4 36.5) rotate(60) scale(0.95)'%3E%3Ccircle cx='-7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Ccircle cx='7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Cpath d='M-9 3 C-9 -8 9 -8 9 3 C5 6 -5 6 -9 3Z' fill='%23f6ead0' stroke='%23d9c39a' stroke-width='.8'/%3E%3Cpath d='M-7.5 1 Q-6 -1 -4.5 1 Q-3 -1 -1.5 1 Q0 -1 1.5 1 Q3 -1 4.5 1 Q6 -1 7.5 1' stroke='%23e2cfa6' stroke-width='.9' fill='none'/%3E%3Cellipse cx='-3' cy='-3.5' rx='2.4' ry='1.2' fill='%23fff' opacity='.55'/%3E%3C/g%3E%3Cg transform='translate(73.4 63.5) rotate(120) scale(0.95)'%3E%3Ccircle cx='-7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Ccircle cx='7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Cpath d='M-9 3 C-9 -8 9 -8 9 3 C5 6 -5 6 -9 3Z' fill='%23f6ead0' stroke='%23d9c39a' stroke-width='.8'/%3E%3Cpath d='M-7.5 1 Q-6 -1 -4.5 1 Q-3 -1 -1.5 1 Q0 -1 1.5 1 Q3 -1 4.5 1 Q6 -1 7.5 1' stroke='%23e2cfa6' stroke-width='.9' fill='none'/%3E%3Cellipse cx='-3' cy='-3.5' rx='2.4' ry='1.2' fill='%23fff' opacity='.55'/%3E%3C/g%3E%3Cg transform='translate(50.0 77.0) rotate(180) scale(0.95)'%3E%3Ccircle cx='-7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Ccircle cx='7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Cpath d='M-9 3 C-9 -8 9 -8 9 3 C5 6 -5 6 -9 3Z' fill='%23f6ead0' stroke='%23d9c39a' stroke-width='.8'/%3E%3Cpath d='M-7.5 1 Q-6 -1 -4.5 1 Q-3 -1 -1.5 1 Q0 -1 1.5 1 Q3 -1 4.5 1 Q6 -1 7.5 1' stroke='%23e2cfa6' stroke-width='.9' fill='none'/%3E%3Cellipse cx='-3' cy='-3.5' rx='2.4' ry='1.2' fill='%23fff' opacity='.55'/%3E%3C/g%3E%3Cg transform='translate(26.6 63.5) rotate(240) scale(0.95)'%3E%3Ccircle cx='-7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Ccircle cx='7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Cpath d='M-9 3 C-9 -8 9 -8 9 3 C5 6 -5 6 -9 3Z' fill='%23f6ead0' stroke='%23d9c39a' stroke-width='.8'/%3E%3Cpath d='M-7.5 1 Q-6 -1 -4.5 1 Q-3 -1 -1.5 1 Q0 -1 1.5 1 Q3 -1 4.5 1 Q6 -1 7.5 1' stroke='%23e2cfa6' stroke-width='.9' fill='none'/%3E%3Cellipse cx='-3' cy='-3.5' rx='2.4' ry='1.2' fill='%23fff' opacity='.55'/%3E%3C/g%3E%3Cg transform='translate(26.6 36.5) rotate(300) scale(0.95)'%3E%3Ccircle cx='-7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Ccircle cx='7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Cpath d='M-9 3 C-9 -8 9 -8 9 3 C5 6 -5 6 -9 3Z' fill='%23f6ead0' stroke='%23d9c39a' stroke-width='.8'/%3E%3Cpath d='M-7.5 1 Q-6 -1 -4.5 1 Q-3 -1 -1.5 1 Q0 -1 1.5 1 Q3 -1 4.5 1 Q6 -1 7.5 1' stroke='%23e2cfa6' stroke-width='.9' fill='none'/%3E%3Cellipse cx='-3' cy='-3.5' rx='2.4' ry='1.2' fill='%23fff' opacity='.55'/%3E%3C/g%3E%3Cpath d='M33 52 C30 38 44 30 52 33 C64 30 72 40 67 52 C70 62 58 70 48 67 C36 70 30 62 33 52Z' fill='%23fffdf6' stroke='%23e7e1d2' stroke-width='1'/%3E%3Cg transform='translate(66 38) rotate(30) scale(0.55)' stroke='%235f9a2e' stroke-width='.9' fill='none' stroke-linecap='round'%3E%3Cpath d='M0 8 L0 -8 M0 -2 L-4 -6 M0 -2 L4 -6 M0 3 L-4 -1 M0 3 L4 -1 M0 -6 L-2.5 -9 M0 -6 L2.5 -9'/%3E%3C/g%3E%3Cg transform='translate(34 66) rotate(-40) scale(0.50)' stroke='%235f9a2e' stroke-width='.9' fill='none' stroke-linecap='round'%3E%3Cpath d='M0 8 L0 -8 M0 -2 L-4 -6 M0 -2 L4 -6 M0 3 L-4 -1 M0 3 L4 -1 M0 -6 L-2.5 -9 M0 -6 L2.5 -9'/%3E%3C/g%3E%3C/svg%3E");
+    --pm-garland: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='22'%3E%3Crect x='0' y='0' width='60' height='6' fill='%23fff'/%3E%3Cpath d='M0 5 A10 10 0 0 0 20 5Z' fill='%23fff'/%3E%3Ccircle cx='10' cy='9' r='2' fill='%231f4e9c' opacity='.9'/%3E%3Ccircle cx='15.6' cy='8.2' r='1' fill='%238fb4e8'/%3E%3Ccircle cx='13.2' cy='10.6' r='1' fill='%238fb4e8'/%3E%3Ccircle cx='10.0' cy='11.5' r='1' fill='%238fb4e8'/%3E%3Ccircle cx='6.8' cy='10.6' r='1' fill='%238fb4e8'/%3E%3Ccircle cx='4.4' cy='8.2' r='1' fill='%238fb4e8'/%3E%3Cpath d='M20 5 A10 10 0 0 0 40 5Z' fill='%23fff'/%3E%3Ccircle cx='30' cy='9' r='2' fill='%231f4e9c' opacity='.9'/%3E%3Ccircle cx='35.6' cy='8.2' r='1' fill='%238fb4e8'/%3E%3Ccircle cx='33.2' cy='10.6' r='1' fill='%238fb4e8'/%3E%3Ccircle cx='30.0' cy='11.5' r='1' fill='%238fb4e8'/%3E%3Ccircle cx='26.8' cy='10.6' r='1' fill='%238fb4e8'/%3E%3Ccircle cx='24.4' cy='8.2' r='1' fill='%238fb4e8'/%3E%3Cpath d='M40 5 A10 10 0 0 0 60 5Z' fill='%23fff'/%3E%3Ccircle cx='50' cy='9' r='2' fill='%231f4e9c' opacity='.9'/%3E%3Ccircle cx='55.6' cy='8.2' r='1' fill='%238fb4e8'/%3E%3Ccircle cx='53.2' cy='10.6' r='1' fill='%238fb4e8'/%3E%3Ccircle cx='50.0' cy='11.5' r='1' fill='%238fb4e8'/%3E%3Ccircle cx='46.8' cy='10.6' r='1' fill='%238fb4e8'/%3E%3Ccircle cx='44.4' cy='8.2' r='1' fill='%238fb4e8'/%3E%3Cpath d='M0 2.5 L60 2.5' stroke='%238fb4e8' stroke-width='1' stroke-dasharray='2 2'/%3E%3C/svg%3E");
+    --pm-drift-far: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='520'%3E%3Cg transform='translate(134 261) rotate(58) scale(0.86)' stroke='%235f9a2e' stroke-width='.9' fill='none' stroke-linecap='round'%3E%3Cpath d='M0 8 L0 -8 M0 -2 L-4 -6 M0 -2 L4 -6 M0 3 L-4 -1 M0 3 L4 -1 M0 -6 L-2.5 -9 M0 -6 L2.5 -9'/%3E%3C/g%3E%3Ccircle cx='286' cy='470' r='2.0' fill='%233a2a22'/%3E%3Cg transform='translate(283.7 323.4) rotate(211) scale(1.05)'%3E%3Ccircle cx='-7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Ccircle cx='7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Cpath d='M-9 3 C-9 -8 9 -8 9 3 C5 6 -5 6 -9 3Z' fill='%23f6ead0' stroke='%23d9c39a' stroke-width='.8'/%3E%3Cpath d='M-7.5 1 Q-6 -1 -4.5 1 Q-3 -1 -1.5 1 Q0 -1 1.5 1 Q3 -1 4.5 1 Q6 -1 7.5 1' stroke='%23e2cfa6' stroke-width='.9' fill='none'/%3E%3Cellipse cx='-3' cy='-3.5' rx='2.4' ry='1.2' fill='%23fff' opacity='.55'/%3E%3C/g%3E%3Cg transform='translate(212.7 498.1) rotate(307) scale(0.86)'%3E%3Ccircle cx='-7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Ccircle cx='7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Cpath d='M-9 3 C-9 -8 9 -8 9 3 C5 6 -5 6 -9 3Z' fill='%23f6ead0' stroke='%23d9c39a' stroke-width='.8'/%3E%3Cpath d='M-7.5 1 Q-6 -1 -4.5 1 Q-3 -1 -1.5 1 Q0 -1 1.5 1 Q3 -1 4.5 1 Q6 -1 7.5 1' stroke='%23e2cfa6' stroke-width='.9' fill='none'/%3E%3Cellipse cx='-3' cy='-3.5' rx='2.4' ry='1.2' fill='%23fff' opacity='.55'/%3E%3C/g%3E%3Cg transform='translate(249 415) rotate(64) scale(0.89)' stroke='%235f9a2e' stroke-width='.9' fill='none' stroke-linecap='round'%3E%3Cpath d='M0 8 L0 -8 M0 -2 L-4 -6 M0 -2 L4 -6 M0 3 L-4 -1 M0 3 L4 -1 M0 -6 L-2.5 -9 M0 -6 L2.5 -9'/%3E%3C/g%3E%3Cg transform='translate(400.6 469.8) rotate(274) scale(0.99)'%3E%3Ccircle cx='-7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Ccircle cx='7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Cpath d='M-9 3 C-9 -8 9 -8 9 3 C5 6 -5 6 -9 3Z' fill='%23f6ead0' stroke='%23d9c39a' stroke-width='.8'/%3E%3Cpath d='M-7.5 1 Q-6 -1 -4.5 1 Q-3 -1 -1.5 1 Q0 -1 1.5 1 Q3 -1 4.5 1 Q6 -1 7.5 1' stroke='%23e2cfa6' stroke-width='.9' fill='none'/%3E%3Cellipse cx='-3' cy='-3.5' rx='2.4' ry='1.2' fill='%23fff' opacity='.55'/%3E%3C/g%3E%3Ccircle cx='230' cy='426' r='2.2' fill='%233a2a22'/%3E%3Cg transform='translate(420 420) rotate(295) scale(0.84)' stroke='%235f9a2e' stroke-width='.9' fill='none' stroke-linecap='round'%3E%3Cpath d='M0 8 L0 -8 M0 -2 L-4 -6 M0 -2 L4 -6 M0 3 L-4 -1 M0 3 L4 -1 M0 -6 L-2.5 -9 M0 -6 L2.5 -9'/%3E%3C/g%3E%3Cg transform='translate(499.2 242.4) rotate(6) scale(0.90)'%3E%3Ccircle cx='-7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Ccircle cx='7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Cpath d='M-9 3 C-9 -8 9 -8 9 3 C5 6 -5 6 -9 3Z' fill='%23f6ead0' stroke='%23d9c39a' stroke-width='.8'/%3E%3Cpath d='M-7.5 1 Q-6 -1 -4.5 1 Q-3 -1 -1.5 1 Q0 -1 1.5 1 Q3 -1 4.5 1 Q6 -1 7.5 1' stroke='%23e2cfa6' stroke-width='.9' fill='none'/%3E%3Cellipse cx='-3' cy='-3.5' rx='2.4' ry='1.2' fill='%23fff' opacity='.55'/%3E%3C/g%3E%3Ccircle cx='113' cy='486' r='1.8' fill='%233a2a22'/%3E%3Cg transform='translate(101.9 190.3) rotate(162) scale(0.99)'%3E%3Ccircle cx='-7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Ccircle cx='7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Cpath d='M-9 3 C-9 -8 9 -8 9 3 C5 6 -5 6 -9 3Z' fill='%23f6ead0' stroke='%23d9c39a' stroke-width='.8'/%3E%3Cpath d='M-7.5 1 Q-6 -1 -4.5 1 Q-3 -1 -1.5 1 Q0 -1 1.5 1 Q3 -1 4.5 1 Q6 -1 7.5 1' stroke='%23e2cfa6' stroke-width='.9' fill='none'/%3E%3Cellipse cx='-3' cy='-3.5' rx='2.4' ry='1.2' fill='%23fff' opacity='.55'/%3E%3C/g%3E%3Cg transform='translate(335 497) rotate(299) scale(1.05)' stroke='%235f9a2e' stroke-width='.9' fill='none' stroke-linecap='round'%3E%3Cpath d='M0 8 L0 -8 M0 -2 L-4 -6 M0 -2 L4 -6 M0 3 L-4 -1 M0 3 L4 -1 M0 -6 L-2.5 -9 M0 -6 L2.5 -9'/%3E%3C/g%3E%3Cg transform='translate(472.5 330.8) rotate(194) scale(1.00)'%3E%3Ccircle cx='-7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Ccircle cx='7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Cpath d='M-9 3 C-9 -8 9 -8 9 3 C5 6 -5 6 -9 3Z' fill='%23f6ead0' stroke='%23d9c39a' stroke-width='.8'/%3E%3Cpath d='M-7.5 1 Q-6 -1 -4.5 1 Q-3 -1 -1.5 1 Q0 -1 1.5 1 Q3 -1 4.5 1 Q6 -1 7.5 1' stroke='%23e2cfa6' stroke-width='.9' fill='none'/%3E%3Cellipse cx='-3' cy='-3.5' rx='2.4' ry='1.2' fill='%23fff' opacity='.55'/%3E%3C/g%3E%3Cg transform='translate(469.3 422.6) rotate(302) scale(0.91)'%3E%3Ccircle cx='-7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Ccircle cx='7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Cpath d='M-9 3 C-9 -8 9 -8 9 3 C5 6 -5 6 -9 3Z' fill='%23f6ead0' stroke='%23d9c39a' stroke-width='.8'/%3E%3Cpath d='M-7.5 1 Q-6 -1 -4.5 1 Q-3 -1 -1.5 1 Q0 -1 1.5 1 Q3 -1 4.5 1 Q6 -1 7.5 1' stroke='%23e2cfa6' stroke-width='.9' fill='none'/%3E%3Cellipse cx='-3' cy='-3.5' rx='2.4' ry='1.2' fill='%23fff' opacity='.55'/%3E%3C/g%3E%3C/svg%3E");
+    --pm-drift-near: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='780' height='780'%3E%3Cg transform='translate(749.7 55.0) rotate(261) scale(1.58)'%3E%3Ccircle cx='-7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Ccircle cx='7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Cpath d='M-9 3 C-9 -8 9 -8 9 3 C5 6 -5 6 -9 3Z' fill='%23f6ead0' stroke='%23d9c39a' stroke-width='.8'/%3E%3Cpath d='M-7.5 1 Q-6 -1 -4.5 1 Q-3 -1 -1.5 1 Q0 -1 1.5 1 Q3 -1 4.5 1 Q6 -1 7.5 1' stroke='%23e2cfa6' stroke-width='.9' fill='none'/%3E%3Cellipse cx='-3' cy='-3.5' rx='2.4' ry='1.2' fill='%23fff' opacity='.55'/%3E%3C/g%3E%3Ccircle cx='320' cy='705' r='1.7' fill='%233a2a22'/%3E%3Cg transform='translate(151.7 274.3) rotate(227) scale(1.35)'%3E%3Ccircle cx='-7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Ccircle cx='7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Cpath d='M-9 3 C-9 -8 9 -8 9 3 C5 6 -5 6 -9 3Z' fill='%23f6ead0' stroke='%23d9c39a' stroke-width='.8'/%3E%3Cpath d='M-7.5 1 Q-6 -1 -4.5 1 Q-3 -1 -1.5 1 Q0 -1 1.5 1 Q3 -1 4.5 1 Q6 -1 7.5 1' stroke='%23e2cfa6' stroke-width='.9' fill='none'/%3E%3Cellipse cx='-3' cy='-3.5' rx='2.4' ry='1.2' fill='%23fff' opacity='.55'/%3E%3C/g%3E%3Cg transform='translate(22.3 66.2) rotate(61) scale(1.31)'%3E%3Ccircle cx='-7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Ccircle cx='7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Cpath d='M-9 3 C-9 -8 9 -8 9 3 C5 6 -5 6 -9 3Z' fill='%23f6ead0' stroke='%23d9c39a' stroke-width='.8'/%3E%3Cpath d='M-7.5 1 Q-6 -1 -4.5 1 Q-3 -1 -1.5 1 Q0 -1 1.5 1 Q3 -1 4.5 1 Q6 -1 7.5 1' stroke='%23e2cfa6' stroke-width='.9' fill='none'/%3E%3Cellipse cx='-3' cy='-3.5' rx='2.4' ry='1.2' fill='%23fff' opacity='.55'/%3E%3C/g%3E%3Ccircle cx='599' cy='327' r='2.1' fill='%233a2a22'/%3E%3Ccircle cx='727' cy='447' r='1.8' fill='%233a2a22'/%3E%3Cg transform='translate(121.0 405.4) rotate(191) scale(1.24)'%3E%3Ccircle cx='-7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Ccircle cx='7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Cpath d='M-9 3 C-9 -8 9 -8 9 3 C5 6 -5 6 -9 3Z' fill='%23f6ead0' stroke='%23d9c39a' stroke-width='.8'/%3E%3Cpath d='M-7.5 1 Q-6 -1 -4.5 1 Q-3 -1 -1.5 1 Q0 -1 1.5 1 Q3 -1 4.5 1 Q6 -1 7.5 1' stroke='%23e2cfa6' stroke-width='.9' fill='none'/%3E%3Cellipse cx='-3' cy='-3.5' rx='2.4' ry='1.2' fill='%23fff' opacity='.55'/%3E%3C/g%3E%3Cg transform='translate(153 538) rotate(292) scale(1.37)' stroke='%235f9a2e' stroke-width='.9' fill='none' stroke-linecap='round'%3E%3Cpath d='M0 8 L0 -8 M0 -2 L-4 -6 M0 -2 L4 -6 M0 3 L-4 -1 M0 3 L4 -1 M0 -6 L-2.5 -9 M0 -6 L2.5 -9'/%3E%3C/g%3E%3Cg transform='translate(35.4 17.2) rotate(236) scale(1.38)'%3E%3Ccircle cx='-7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Ccircle cx='7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Cpath d='M-9 3 C-9 -8 9 -8 9 3 C5 6 -5 6 -9 3Z' fill='%23f6ead0' stroke='%23d9c39a' stroke-width='.8'/%3E%3Cpath d='M-7.5 1 Q-6 -1 -4.5 1 Q-3 -1 -1.5 1 Q0 -1 1.5 1 Q3 -1 4.5 1 Q6 -1 7.5 1' stroke='%23e2cfa6' stroke-width='.9' fill='none'/%3E%3Cellipse cx='-3' cy='-3.5' rx='2.4' ry='1.2' fill='%23fff' opacity='.55'/%3E%3C/g%3E%3Cg transform='translate(143.0 106.7) rotate(65) scale(1.44)'%3E%3Ccircle cx='-7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Ccircle cx='7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Cpath d='M-9 3 C-9 -8 9 -8 9 3 C5 6 -5 6 -9 3Z' fill='%23f6ead0' stroke='%23d9c39a' stroke-width='.8'/%3E%3Cpath d='M-7.5 1 Q-6 -1 -4.5 1 Q-3 -1 -1.5 1 Q0 -1 1.5 1 Q3 -1 4.5 1 Q6 -1 7.5 1' stroke='%23e2cfa6' stroke-width='.9' fill='none'/%3E%3Cellipse cx='-3' cy='-3.5' rx='2.4' ry='1.2' fill='%23fff' opacity='.55'/%3E%3C/g%3E%3Cg transform='translate(244.9 431.2) rotate(155) scale(1.50)'%3E%3Ccircle cx='-7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Ccircle cx='7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Cpath d='M-9 3 C-9 -8 9 -8 9 3 C5 6 -5 6 -9 3Z' fill='%23f6ead0' stroke='%23d9c39a' stroke-width='.8'/%3E%3Cpath d='M-7.5 1 Q-6 -1 -4.5 1 Q-3 -1 -1.5 1 Q0 -1 1.5 1 Q3 -1 4.5 1 Q6 -1 7.5 1' stroke='%23e2cfa6' stroke-width='.9' fill='none'/%3E%3Cellipse cx='-3' cy='-3.5' rx='2.4' ry='1.2' fill='%23fff' opacity='.55'/%3E%3C/g%3E%3C/svg%3E");
+    --pm-bottom: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='480' height='48'%3E%3Crect x='0' y='30' width='480' height='18' fill='%23d8b07a'/%3E%3Cpath d='M0 30 L480 30' stroke='%23b88d55' stroke-width='1.5'/%3E%3Cpath d='M10 36 q30 -2 60 0' stroke='%23c79c63' stroke-width='.9' fill='none'/%3E%3Cpath d='M130 41 q30 -2 60 0' stroke='%23c79c63' stroke-width='.9' fill='none'/%3E%3Cpath d='M260 35 q30 -2 60 0' stroke='%23c79c63' stroke-width='.9' fill='none'/%3E%3Cpath d='M380 42 q30 -2 60 0' stroke='%23c79c63' stroke-width='.9' fill='none'/%3E%3Cpath d='M60 45 q30 -2 60 0' stroke='%23c79c63' stroke-width='.9' fill='none'/%3E%3Cpath d='M320 46 q30 -2 60 0' stroke='%23c79c63' stroke-width='.9' fill='none'/%3E%3Cellipse cx='40' cy='33' rx='26' ry='3' fill='%23fff' opacity='.55'/%3E%3Cellipse cx='210' cy='34' rx='30' ry='3.5' fill='%23fff' opacity='.55'/%3E%3Cellipse cx='350' cy='33' rx='22' ry='2.6' fill='%23fff' opacity='.55'/%3E%3Cellipse cx='450' cy='34' rx='18' ry='2.4' fill='%23fff' opacity='.55'/%3E%3Cellipse cx='30' cy='31' rx='11' ry='3.6' fill='%23f3e6c8' stroke='%23dcc9a2' stroke-width='.7'/%3E%3Cellipse cx='56' cy='31' rx='11' ry='3.6' fill='%23f3e6c8' stroke='%23dcc9a2' stroke-width='.7'/%3E%3Cg transform='translate(118 24)'%3E%3Crect x='-6' y='-3' width='12' height='6' rx='2' fill='%23a8763e'/%3E%3Crect x='6' y='-5' width='52' height='10' rx='5' fill='%23e2bd85' stroke='%23b88d55' stroke-width='.8'/%3E%3Crect x='58' y='-3' width='12' height='6' rx='2' fill='%23a8763e'/%3E%3C/g%3E%3Cg transform='translate(170 26) rotate(-8)'%3E%3Crect x='0' y='-1.6' width='30' height='3.2' rx='1.6' fill='%23a8763e'/%3E%3Cellipse cx='-6' cy='0' rx='8' ry='5' fill='%23c08a4c'/%3E%3C/g%3E%3Cg transform='translate(250 30)'%3E%3Cpath d='M-26 -10 L26 -10 Q24 6 0 8 Q-24 6 -26 -10Z' fill='%23fff' stroke='%23cfd7e6' stroke-width='.8'/%3E%3Cpath d='M-25 -6 L25 -6' stroke='%231f4e9c' stroke-width='2.4'/%3E%3Cellipse cx='-9.4' cy='0.0' rx='1.8' ry='1.0' fill='%231f4e9c' transform='rotate(0 -9.4 0.0)'/%3E%3Cellipse cx='-10.7' cy='2.2' rx='1.8' ry='1.0' fill='%231f4e9c' transform='rotate(60 -10.7 2.2)'/%3E%3Cellipse cx='-13.3' cy='2.2' rx='1.8' ry='1.0' fill='%231f4e9c' transform='rotate(120 -13.3 2.2)'/%3E%3Cellipse cx='-14.6' cy='0.0' rx='1.8' ry='1.0' fill='%231f4e9c' transform='rotate(180 -14.6 0.0)'/%3E%3Cellipse cx='-13.3' cy='-2.2' rx='1.8' ry='1.0' fill='%231f4e9c' transform='rotate(240 -13.3 -2.2)'/%3E%3Cellipse cx='-10.7' cy='-2.2' rx='1.8' ry='1.0' fill='%231f4e9c' transform='rotate(300 -10.7 -2.2)'/%3E%3Ccircle cx='-12' cy='0' r='1.1' fill='%238fb4e8'/%3E%3Cellipse cx='14.6' cy='0.0' rx='1.8' ry='1.0' fill='%231f4e9c' transform='rotate(0 14.6 0.0)'/%3E%3Cellipse cx='13.3' cy='2.2' rx='1.8' ry='1.0' fill='%231f4e9c' transform='rotate(60 13.3 2.2)'/%3E%3Cellipse cx='10.7' cy='2.2' rx='1.8' ry='1.0' fill='%231f4e9c' transform='rotate(120 10.7 2.2)'/%3E%3Cellipse cx='9.4' cy='0.0' rx='1.8' ry='1.0' fill='%231f4e9c' transform='rotate(180 9.4 0.0)'/%3E%3Cellipse cx='10.7' cy='-2.2' rx='1.8' ry='1.0' fill='%231f4e9c' transform='rotate(240 10.7 -2.2)'/%3E%3Cellipse cx='13.3' cy='-2.2' rx='1.8' ry='1.0' fill='%231f4e9c' transform='rotate(300 13.3 -2.2)'/%3E%3Ccircle cx='12' cy='0' r='1.1' fill='%238fb4e8'/%3E%3Cg transform='translate(-14.0 -12.0) rotate(-10) scale(0.80)'%3E%3Ccircle cx='-7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Ccircle cx='7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Cpath d='M-9 3 C-9 -8 9 -8 9 3 C5 6 -5 6 -9 3Z' fill='%23f6ead0' stroke='%23d9c39a' stroke-width='.8'/%3E%3Cpath d='M-7.5 1 Q-6 -1 -4.5 1 Q-3 -1 -1.5 1 Q0 -1 1.5 1 Q3 -1 4.5 1 Q6 -1 7.5 1' stroke='%23e2cfa6' stroke-width='.9' fill='none'/%3E%3Cellipse cx='-3' cy='-3.5' rx='2.4' ry='1.2' fill='%23fff' opacity='.55'/%3E%3C/g%3E%3Cg transform='translate(0.0 -14.0) rotate(5) scale(0.85)'%3E%3Ccircle cx='-7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Ccircle cx='7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Cpath d='M-9 3 C-9 -8 9 -8 9 3 C5 6 -5 6 -9 3Z' fill='%23f6ead0' stroke='%23d9c39a' stroke-width='.8'/%3E%3Cpath d='M-7.5 1 Q-6 -1 -4.5 1 Q-3 -1 -1.5 1 Q0 -1 1.5 1 Q3 -1 4.5 1 Q6 -1 7.5 1' stroke='%23e2cfa6' stroke-width='.9' fill='none'/%3E%3Cellipse cx='-3' cy='-3.5' rx='2.4' ry='1.2' fill='%23fff' opacity='.55'/%3E%3C/g%3E%3Cg transform='translate(14.0 -12.0) rotate(15) scale(0.80)'%3E%3Ccircle cx='-7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Ccircle cx='7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Cpath d='M-9 3 C-9 -8 9 -8 9 3 C5 6 -5 6 -9 3Z' fill='%23f6ead0' stroke='%23d9c39a' stroke-width='.8'/%3E%3Cpath d='M-7.5 1 Q-6 -1 -4.5 1 Q-3 -1 -1.5 1 Q0 -1 1.5 1 Q3 -1 4.5 1 Q6 -1 7.5 1' stroke='%23e2cfa6' stroke-width='.9' fill='none'/%3E%3Cellipse cx='-3' cy='-3.5' rx='2.4' ry='1.2' fill='%23fff' opacity='.55'/%3E%3C/g%3E%3Cpath d='M-6 -17 C-6 -23 6 -23 6 -17 C3 -15 -3 -15 -6 -17Z' fill='%23fffdf6' stroke='%23e7e1d2' stroke-width='.6'/%3E%3Cg transform='translate(9 -20) rotate(40) scale(0.50)' stroke='%235f9a2e' stroke-width='.9' fill='none' stroke-linecap='round'%3E%3Cpath d='M0 8 L0 -8 M0 -2 L-4 -6 M0 -2 L4 -6 M0 3 L-4 -1 M0 3 L4 -1 M0 -6 L-2.5 -9 M0 -6 L2.5 -9'/%3E%3C/g%3E%3C/g%3E%3Cg transform='translate(330.0 26.0) rotate(-15) scale(0.90)'%3E%3Ccircle cx='-7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Ccircle cx='7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Cpath d='M-9 3 C-9 -8 9 -8 9 3 C5 6 -5 6 -9 3Z' fill='%23f6ead0' stroke='%23d9c39a' stroke-width='.8'/%3E%3Cpath d='M-7.5 1 Q-6 -1 -4.5 1 Q-3 -1 -1.5 1 Q0 -1 1.5 1 Q3 -1 4.5 1 Q6 -1 7.5 1' stroke='%23e2cfa6' stroke-width='.9' fill='none'/%3E%3Cellipse cx='-3' cy='-3.5' rx='2.4' ry='1.2' fill='%23fff' opacity='.55'/%3E%3C/g%3E%3Cg transform='translate(346.0 27.0) rotate(10) scale(0.90)'%3E%3Ccircle cx='-7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Ccircle cx='7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Cpath d='M-9 3 C-9 -8 9 -8 9 3 C5 6 -5 6 -9 3Z' fill='%23f6ead0' stroke='%23d9c39a' stroke-width='.8'/%3E%3Cpath d='M-7.5 1 Q-6 -1 -4.5 1 Q-3 -1 -1.5 1 Q0 -1 1.5 1 Q3 -1 4.5 1 Q6 -1 7.5 1' stroke='%23e2cfa6' stroke-width='.9' fill='none'/%3E%3Cellipse cx='-3' cy='-3.5' rx='2.4' ry='1.2' fill='%23fff' opacity='.55'/%3E%3C/g%3E%3Cg transform='translate(338.0 20.0) rotate(0) scale(0.90)'%3E%3Ccircle cx='-7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Ccircle cx='7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Cpath d='M-9 3 C-9 -8 9 -8 9 3 C5 6 -5 6 -9 3Z' fill='%23f6ead0' stroke='%23d9c39a' stroke-width='.8'/%3E%3Cpath d='M-7.5 1 Q-6 -1 -4.5 1 Q-3 -1 -1.5 1 Q0 -1 1.5 1 Q3 -1 4.5 1 Q6 -1 7.5 1' stroke='%23e2cfa6' stroke-width='.9' fill='none'/%3E%3Cellipse cx='-3' cy='-3.5' rx='2.4' ry='1.2' fill='%23fff' opacity='.55'/%3E%3C/g%3E%3Cg transform='translate(420.0 26.0) rotate(20) scale(0.90)'%3E%3Ccircle cx='-7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Ccircle cx='7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Cpath d='M-9 3 C-9 -8 9 -8 9 3 C5 6 -5 6 -9 3Z' fill='%23f6ead0' stroke='%23d9c39a' stroke-width='.8'/%3E%3Cpath d='M-7.5 1 Q-6 -1 -4.5 1 Q-3 -1 -1.5 1 Q0 -1 1.5 1 Q3 -1 4.5 1 Q6 -1 7.5 1' stroke='%23e2cfa6' stroke-width='.9' fill='none'/%3E%3Cellipse cx='-3' cy='-3.5' rx='2.4' ry='1.2' fill='%23fff' opacity='.55'/%3E%3C/g%3E%3Cg transform='translate(436.0 27.0) rotate(-5) scale(0.85)'%3E%3Ccircle cx='-7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Ccircle cx='7.5' cy='4' r='2.6' fill='%23f0e0bf' stroke='%23d9c39a' stroke-width='.6'/%3E%3Cpath d='M-9 3 C-9 -8 9 -8 9 3 C5 6 -5 6 -9 3Z' fill='%23f6ead0' stroke='%23d9c39a' stroke-width='.8'/%3E%3Cpath d='M-7.5 1 Q-6 -1 -4.5 1 Q-3 -1 -1.5 1 Q0 -1 1.5 1 Q3 -1 4.5 1 Q6 -1 7.5 1' stroke='%23e2cfa6' stroke-width='.9' fill='none'/%3E%3Cellipse cx='-3' cy='-3.5' rx='2.4' ry='1.2' fill='%23fff' opacity='.55'/%3E%3C/g%3E%3C/svg%3E");
+
+    --yy-accent: #b0284f;
+    --yy-accent-2: #7d1736;
+    --yy-accent-text: #9c2146;
+    --yy-accent-hover: #9b2245;
+    --yy-accent-2-hover: #691230;
+    --yy-tint-1: rgba(31, 78, 156, 0.07);
+    --yy-tint-2: rgba(176, 40, 79, 0.05);
+    --yy-page-bg: #f6f4ef;
+    --yy-page-muted-bg: #f6f4ef;
+
+    --bs-primary: #b0284f;
+    --bs-primary-rgb: 176, 40, 79;
+    --bs-link-color: #1f4e9c;
+    --bs-link-color-rgb: 31, 78, 156;
+    --bs-link-hover-color: #163a75;
+    --bs-link-hover-color-rgb: 22, 58, 117;
+}
+
+/* Siberian night: deep blue surfaces */
+html[data-yy-theme="pelmeni"][data-bs-theme="dark"] {
+    --pm-drift-opacity: 0.6;
+
+    --yy-accent-text: #ff8fb0;
+    --yy-tint-1: rgba(31, 78, 156, 0.14);
+    --yy-tint-2: rgba(176, 40, 79, 0.06);
+    --yy-page-bg: #0e1322;
+    --yy-page-muted-bg: #0e1322;
+    --yy-border-soft: #2c3654;
+    --yy-divider: #222a44;
+
+    --bs-body-bg: #151b2e;              --bs-body-bg-rgb: 21, 27, 46;
+    --bs-secondary-bg: #1f2740;         --bs-secondary-bg-rgb: 31, 39, 64;
+    --bs-tertiary-bg: #1a2136;          --bs-tertiary-bg-rgb: 26, 33, 54;
+    --bs-border-color: #2c3654;
+    --bs-border-color-translucent: rgba(180, 205, 245, 0.15);
+    --bs-link-color: #8fb4e8;
+    --bs-link-color-rgb: 143, 180, 232;
+    --bs-link-hover-color: #b8d0f2;
+    --bs-link-hover-color-rgb: 184, 208, 242;
+}
+
+/* Room for the pastry board, so the last line of a page is not hidden behind it */
+html[data-yy-theme="pelmeni"] body {
+    padding-bottom: 46px;
+}
+
+/* ── Pelmeni, dill and peppercorns drifting down, behind the content ── */
+html[data-yy-theme="pelmeni"] body::before {
+    content: "";
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: -1560px;                        /* 1560px = a multiple of both tile heights */
+    height: calc(100% + 1560px);
+    z-index: -1;
+    pointer-events: none;
+    background-image: var(--pm-drift-near), var(--pm-drift-far);
+    background-size: 780px 780px, 520px 520px;
+    background-position: 0 0, 230px 0;
+    opacity: var(--pm-drift-opacity);
+    animation: yy-pm-drift 95s linear infinite;
+    will-change: transform;
+}
+
+@keyframes yy-pm-drift {
+    from { transform: translate3d(0, 0, 0); }
+    to   { transform: translate3d(0, 1560px, 0); }
+}
+
+/* ── Pastry board with flour, dough, rolling pin and a bowl of pelmeni along the bottom edge, on every page ── */
+html[data-yy-theme="pelmeni"] body::after {
+    content: "";
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 48px;
+    z-index: 1010;                       /* below the menu bar (1020) and modals */
+    pointer-events: none;
+    background: var(--pm-bottom) repeat-x left bottom / 480px 48px;
+}
+
+/* ── Menu bar: Gzhel cobalt with a white lace border along its lower edge ── */
+html[data-yy-theme="pelmeni"] .navbar {
+    background: linear-gradient(135deg, #2457b0, #12306a);
+    box-shadow: 0 2px 12px rgba(31, 78, 156, 0.35);
+}
+
+html[data-yy-theme="pelmeni"][data-bs-theme="dark"] .navbar {
+    background: linear-gradient(135deg, #1b3f86, #0b1f47);
+}
+
+html[data-yy-theme="pelmeni"] .navbar::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% - 3px);
+    height: 22px;
+    pointer-events: none;
+    background: var(--pm-garland) repeat-x 0 0 / 60px 22px;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
+}
+
+html[data-yy-theme="pelmeni"] .navbar-brand::after {
+    content: "\01F95F";                  /* 🥟 */
+    margin-left: 0.4em;
+}
+
+/* ── Plate avatars: every avatar becomes a plate of pelmeni, the initial on the smetana ── */
+html[data-yy-theme="pelmeni"] .avatar-circle,
+html[data-yy-theme="pelmeni"] .user-badge,
+html[data-yy-theme="pelmeni"] .mini-avatar {
+    background: var(--pm-avatar) center / cover no-repeat;
+    color: #1d2a4a;
+}
+
+html[data-yy-theme="pelmeni"] .avatar-circle {
+    font-size: 1.6rem;
+    box-shadow: 0 4px 15px rgba(31, 78, 156, 0.4);
+}
+
+/* ── Cards, buttons and inputs: butter glow on hover, cobalt focus ── */
+html[data-yy-theme="pelmeni"] .order-card:hover {
+    border-color: rgba(240, 196, 90, 0.75);
+    box-shadow: 0 8px 24px rgba(240, 196, 90, 0.25);
+}
+
+html[data-yy-theme="pelmeni"] .item-card:hover,
+html[data-yy-theme="pelmeni"] .item-list-option:hover {
+    border-color: rgba(240, 196, 90, 0.75);
+    box-shadow: 0 2px 8px rgba(240, 196, 90, 0.2);
+}
+
+html[data-yy-theme="pelmeni"] .form-control:focus,
+html[data-yy-theme="pelmeni"] .form-select:focus,
+html[data-yy-theme="pelmeni"] .form-check-input:focus {
+    border-color: #4f7fd0;
+    box-shadow: 0 0 0 0.2rem rgba(31, 78, 156, 0.3);
+}
+
+html[data-yy-theme="pelmeni"] .form-check-input:checked {
+    background-color: var(--yy-accent);
+    border-color: var(--yy-accent);
+}
+
+html[data-yy-theme="pelmeni"] ::selection {
+    background: rgba(176, 40, 79, 0.85);
+    color: #fff;
+}
+
+/* Nothing moves for people who asked their system for less motion */
+@media (prefers-reduced-motion: reduce) {
+    html[data-yy-theme="pelmeni"] body::before {
+        animation: none;
+    }
+}

@@ -168,7 +168,8 @@ public class LoginController {
     @GetMapping("/users")
     public String userList(HttpServletRequest request, Model model) {
         String savedName = getCookieValue(request);
-        if (savedName == null || userService.findByName(savedName).isEmpty())
+        Optional<AppUser> user = savedName != null ? userService.findByName(savedName) : Optional.empty();
+        if (user.isEmpty())
             return "redirect:/";
 
         List<Map<String, Object>> userStats = userService.getAllUserStats();
@@ -181,10 +182,29 @@ public class LoginController {
                 .map(s -> (java.math.BigDecimal) s.get("openAmount"))
                 .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
 
+        // The logged-in user (e.g. for the Wrapped hint in January)
+        model.addAttribute("user", user.get());
         model.addAttribute("userStats", userStats);
         model.addAttribute("totalSpentAll", totalSpentAll);
         model.addAttribute("openAmountAll", openAmountAll);
         return "users";
+    }
+
+    // ─── Hidden overview of all looks with preview links (not linked anywhere) ──
+
+    @GetMapping("/themes")
+    public String themes(HttpServletRequest request, Model model) {
+        String savedName = getCookieValue(request);
+        Optional<AppUser> user = savedName == null ? Optional.empty() : userService.findByName(savedName);
+        if (user.isEmpty()) {
+            // Come back here after the name login
+            String query = request.getQueryString();
+            request.getSession().setAttribute("redirectAfterLogin", query != null ? "/themes?" + query : "/themes");
+            return "redirect:/";
+        }
+        // The list itself is built in the browser from theme.js, theme-info.js and visitors.js
+        model.addAttribute("user", user.get());
+        return "themes";
     }
 
     // ─── Cookie helpers ──────────────────────────────────────────────────────────
