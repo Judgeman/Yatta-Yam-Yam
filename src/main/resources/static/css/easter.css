@@ -1,0 +1,211 @@
+/*
+ * Easter look: sky-blue menu bar with a string of painted eggs, pink buttons and
+ * avatars, bunny ears on the avatars, blossom petals drifting down behind the content,
+ * a meadow with hidden eggs along the bottom edge and a chick next to the app name.
+ * Light and dark mode both get their own palette (spring morning / spring night).
+ * Every few minutes the Easter bunny or a chick drops by (easter.js, css/visitors.css).
+ *
+ * theme.js sets html[data-yy-theme="easter"] from the Monday two weeks before Easter
+ * until Easter Monday, or for a preview via ?theme=easter. Every rule is scoped to
+ * that attribute, so this file does nothing otherwise.
+ *
+ * The ears, eggs, petals and the meadow are inline SVG images (no extra requests).
+ */
+
+html[data-yy-theme="easter"] {
+    --easter-pink: #d6457f;
+    --easter-pink-rgb: 214, 69, 127;
+    --easter-sky: #3e95d3;
+    --easter-sky-rgb: 62, 149, 211;
+    --easter-sun-rgb: 255, 196, 61;
+    --easter-petal-opacity: 0.75;
+    --easter-ears: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 48'%3E %3Cg transform='rotate(-14 22 46)'%3E%3Cellipse cx='22' cy='24' rx='8.5' ry='22' fill='%23fbfbfb' stroke='%23d3d3d3'/%3E%3Cellipse cx='22' cy='26' rx='4.2' ry='15' fill='%23f6a5bf'/%3E%3C/g%3E %3Cg transform='rotate(14 42 46)'%3E%3Cellipse cx='42' cy='24' rx='8.5' ry='22' fill='%23fbfbfb' stroke='%23d3d3d3'/%3E%3Cellipse cx='42' cy='26' rx='4.2' ry='15' fill='%23f6a5bf'/%3E%3C/g%3E %3C/svg%3E");
+    --easter-garland: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='34'%3E%3Cpath d='M0 3Q37.5 13 75 3Q112.5 13 150 3' fill='none' stroke='%238a6a46' stroke-width='1.6'/%3E%3Cg%3E%3Cline x1='24' y1='7.4' x2='24' y2='11.4' stroke='%238a6a46' stroke-width='1'/%3E%3Cg transform='translate(24 21.0)'%3E%3CclipPath id='g0'%3E%3Cpath d='M0 -9.6 C4.07 -9.6 7.4 -2.40 7.4 2.40 C7.4 7.20 4.07 9.6 0 9.6 C-4.07 9.6 -7.4 7.20 -7.4 2.40 C-7.4 -2.40 -4.07 -9.6 0 -9.6Z'/%3E%3C/clipPath%3E%3Cpath d='M0 -9.6 C4.07 -9.6 7.4 -2.40 7.4 2.40 C7.4 7.20 4.07 9.6 0 9.6 C-4.07 9.6 -7.4 7.20 -7.4 2.40 C-7.4 -2.40 -4.07 -9.6 0 -9.6Z' fill='%23f7a8c4'/%3E%3Cg clip-path='url(%23g0)'%3E%3Cpolyline points='-7.4,0.7 -4.9,-2.2 -2.5,0.7 0.0,-2.2 2.5,0.7 4.9,-2.2 7.4,0.7' fill='none' stroke='%23e0679a' stroke-width='1.5' stroke-linejoin='round'/%3E%3Crect x='-7.4' y='4.3' width='14.8' height='1.3' fill='%23fff' opacity='.8'/%3E%3C/g%3E%3Cellipse cx='-3.0' cy='-3.4' rx='1.3' ry='2.1' fill='%23fff' opacity='.55'/%3E%3C/g%3E%3CanimateTransform attributeName='transform' type='rotate' values='-8 24 7.4;8 24 7.4;-8 24 7.4' keyTimes='0;.5;1' calcMode='spline' keySplines='.45 0 .55 1;.45 0 .55 1' dur='2.6s' repeatCount='indefinite'/%3E%3C/g%3E%3Cg%3E%3Cline x1='68' y1='4.7' x2='68' y2='8.7' stroke='%238a6a46' stroke-width='1'/%3E%3Cg transform='translate(68 18.3)'%3E%3CclipPath id='g1'%3E%3Cpath d='M0 -9.6 C4.07 -9.6 7.4 -2.40 7.4 2.40 C7.4 7.20 4.07 9.6 0 9.6 C-4.07 9.6 -7.4 7.20 -7.4 2.40 C-7.4 -2.40 -4.07 -9.6 0 -9.6Z'/%3E%3C/clipPath%3E%3Cpath d='M0 -9.6 C4.07 -9.6 7.4 -2.40 7.4 2.40 C7.4 7.20 4.07 9.6 0 9.6 C-4.07 9.6 -7.4 7.20 -7.4 2.40 C-7.4 -2.40 -4.07 -9.6 0 -9.6Z' fill='%23c9b6f2'/%3E%3Cg clip-path='url(%23g1)'%3E%3Ccircle cx='-3.3' cy='-2.9' r='1.2' fill='%239271d6'/%3E%3Ccircle cx='2.6' cy='-4.3' r='1.2' fill='%239271d6'/%3E%3Ccircle cx='3.7' cy='1.9' r='1.2' fill='%239271d6'/%3E%3Ccircle cx='-1.5' cy='3.4' r='1.2' fill='%239271d6'/%3E%3Ccircle cx='0.0' cy='-0.2' r='1.2' fill='%239271d6'/%3E%3Ccircle cx='-4.4' cy='6.2' r='1.2' fill='%239271d6'/%3E%3Ccircle cx='1.1' cy='7.7' r='1.2' fill='%239271d6'/%3E%3C/g%3E%3Cellipse cx='-3.0' cy='-3.4' rx='1.3' ry='2.1' fill='%23fff' opacity='.55'/%3E%3C/g%3E%3CanimateTransform attributeName='transform' type='rotate' values='-8 68 4.7;8 68 4.7;-8 68 4.7' keyTimes='0;.5;1' calcMode='spline' keySplines='.45 0 .55 1;.45 0 .55 1' dur='3.1s' repeatCount='indefinite'/%3E%3C/g%3E%3Cg%3E%3Cline x1='114' y1='8.0' x2='114' y2='12.0' stroke='%238a6a46' stroke-width='1'/%3E%3Cg transform='translate(114 21.6)'%3E%3CclipPath id='g2'%3E%3Cpath d='M0 -9.6 C4.07 -9.6 7.4 -2.40 7.4 2.40 C7.4 7.20 4.07 9.6 0 9.6 C-4.07 9.6 -7.4 7.20 -7.4 2.40 C-7.4 -2.40 -4.07 -9.6 0 -9.6Z'/%3E%3C/clipPath%3E%3Cpath d='M0 -9.6 C4.07 -9.6 7.4 -2.40 7.4 2.40 C7.4 7.20 4.07 9.6 0 9.6 C-4.07 9.6 -7.4 7.20 -7.4 2.40 C-7.4 -2.40 -4.07 -9.6 0 -9.6Z' fill='%23a8e6cf'/%3E%3Cg clip-path='url(%23g2)'%3E%3Crect x='-7.4' y='-3.4' width='14.8' height='1.5' fill='%234fbf8f'/%3E%3Crect x='-7.4' y='0.5' width='14.8' height='2.5' fill='%23fff' opacity='.85'/%3E%3Crect x='-7.4' y='4.8' width='14.8' height='1.5' fill='%234fbf8f'/%3E%3C/g%3E%3Cellipse cx='-3.0' cy='-3.4' rx='1.3' ry='2.1' fill='%23fff' opacity='.55'/%3E%3C/g%3E%3CanimateTransform attributeName='transform' type='rotate' values='-8 114 8.0;8 114 8.0;-8 114 8.0' keyTimes='0;.5;1' calcMode='spline' keySplines='.45 0 .55 1;.45 0 .55 1' dur='2.3s' repeatCount='indefinite'/%3E%3C/g%3E%3Cg transform='translate(150 0)'%3E%3Cpath d='M0 3Q37.5 13 75 3Q112.5 13 150 3' fill='none' stroke='%238a6a46' stroke-width='1.6'/%3E%3Cg%3E%3Cline x1='24' y1='7.4' x2='24' y2='11.4' stroke='%238a6a46' stroke-width='1'/%3E%3Cg transform='translate(24 21.0)'%3E%3CclipPath id='h0'%3E%3Cpath d='M0 -9.6 C4.07 -9.6 7.4 -2.40 7.4 2.40 C7.4 7.20 4.07 9.6 0 9.6 C-4.07 9.6 -7.4 7.20 -7.4 2.40 C-7.4 -2.40 -4.07 -9.6 0 -9.6Z'/%3E%3C/clipPath%3E%3Cpath d='M0 -9.6 C4.07 -9.6 7.4 -2.40 7.4 2.40 C7.4 7.20 4.07 9.6 0 9.6 C-4.07 9.6 -7.4 7.20 -7.4 2.40 C-7.4 -2.40 -4.07 -9.6 0 -9.6Z' fill='%23ffe082'/%3E%3Cg clip-path='url(%23h0)'%3E%3Ccircle cx='-3.3' cy='-2.9' r='1.2' fill='%23f2b632'/%3E%3Ccircle cx='2.6' cy='-4.3' r='1.2' fill='%23f2b632'/%3E%3Ccircle cx='3.7' cy='1.9' r='1.2' fill='%23f2b632'/%3E%3Ccircle cx='-1.5' cy='3.4' r='1.2' fill='%23f2b632'/%3E%3Ccircle cx='0.0' cy='-0.2' r='1.2' fill='%23f2b632'/%3E%3Ccircle cx='-4.4' cy='6.2' r='1.2' fill='%23f2b632'/%3E%3Ccircle cx='1.1' cy='7.7' r='1.2' fill='%23f2b632'/%3E%3C/g%3E%3Cellipse cx='-3.0' cy='-3.4' rx='1.3' ry='2.1' fill='%23fff' opacity='.55'/%3E%3C/g%3E%3CanimateTransform attributeName='transform' type='rotate' values='7 24 7.4;-7 24 7.4;7 24 7.4' keyTimes='0;.5;1' calcMode='spline' keySplines='.45 0 .55 1;.45 0 .55 1' dur='2.9s' repeatCount='indefinite'/%3E%3C/g%3E%3Cg%3E%3Cline x1='68' y1='4.7' x2='68' y2='8.7' stroke='%238a6a46' stroke-width='1'/%3E%3Cg transform='translate(68 18.3)'%3E%3CclipPath id='h1'%3E%3Cpath d='M0 -9.6 C4.07 -9.6 7.4 -2.40 7.4 2.40 C7.4 7.20 4.07 9.6 0 9.6 C-4.07 9.6 -7.4 7.20 -7.4 2.40 C-7.4 -2.40 -4.07 -9.6 0 -9.6Z'/%3E%3C/clipPath%3E%3Cpath d='M0 -9.6 C4.07 -9.6 7.4 -2.40 7.4 2.40 C7.4 7.20 4.07 9.6 0 9.6 C-4.07 9.6 -7.4 7.20 -7.4 2.40 C-7.4 -2.40 -4.07 -9.6 0 -9.6Z' fill='%239fd3f7'/%3E%3Cg clip-path='url(%23h1)'%3E%3Cpolyline points='-7.4,0.7 -4.9,-2.2 -2.5,0.7 0.0,-2.2 2.5,0.7 4.9,-2.2 7.4,0.7' fill='none' stroke='%234fa3dc' stroke-width='1.5' stroke-linejoin='round'/%3E%3Crect x='-7.4' y='4.3' width='14.8' height='1.3' fill='%23fff' opacity='.8'/%3E%3C/g%3E%3Cellipse cx='-3.0' cy='-3.4' rx='1.3' ry='2.1' fill='%23fff' opacity='.55'/%3E%3C/g%3E%3CanimateTransform attributeName='transform' type='rotate' values='7 68 4.7;-7 68 4.7;7 68 4.7' keyTimes='0;.5;1' calcMode='spline' keySplines='.45 0 .55 1;.45 0 .55 1' dur='2.4s' repeatCount='indefinite'/%3E%3C/g%3E%3Cg%3E%3Cline x1='114' y1='8.0' x2='114' y2='12.0' stroke='%238a6a46' stroke-width='1'/%3E%3Cg transform='translate(114 21.6)'%3E%3CclipPath id='h2'%3E%3Cpath d='M0 -9.6 C4.07 -9.6 7.4 -2.40 7.4 2.40 C7.4 7.20 4.07 9.6 0 9.6 C-4.07 9.6 -7.4 7.20 -7.4 2.40 C-7.4 -2.40 -4.07 -9.6 0 -9.6Z'/%3E%3C/clipPath%3E%3Cpath d='M0 -9.6 C4.07 -9.6 7.4 -2.40 7.4 2.40 C7.4 7.20 4.07 9.6 0 9.6 C-4.07 9.6 -7.4 7.20 -7.4 2.40 C-7.4 -2.40 -4.07 -9.6 0 -9.6Z' fill='%23ffc7a1'/%3E%3Cg clip-path='url(%23h2)'%3E%3Crect x='-7.4' y='-3.4' width='14.8' height='1.5' fill='%23f08a4b'/%3E%3Crect x='-7.4' y='0.5' width='14.8' height='2.5' fill='%23fff' opacity='.85'/%3E%3Crect x='-7.4' y='4.8' width='14.8' height='1.5' fill='%23f08a4b'/%3E%3C/g%3E%3Cellipse cx='-3.0' cy='-3.4' rx='1.3' ry='2.1' fill='%23fff' opacity='.55'/%3E%3C/g%3E%3CanimateTransform attributeName='transform' type='rotate' values='7 114 8.0;-7 114 8.0;7 114 8.0' keyTimes='0;.5;1' calcMode='spline' keySplines='.45 0 .55 1;.45 0 .55 1' dur='3.3s' repeatCount='indefinite'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    --easter-garland-still: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='34'%3E%3Cpath d='M0 3Q37.5 13 75 3Q112.5 13 150 3' fill='none' stroke='%238a6a46' stroke-width='1.6'/%3E%3Cg%3E%3Cline x1='24' y1='7.4' x2='24' y2='11.4' stroke='%238a6a46' stroke-width='1'/%3E%3Cg transform='translate(24 21.0)'%3E%3CclipPath id='g0'%3E%3Cpath d='M0 -9.6 C4.07 -9.6 7.4 -2.40 7.4 2.40 C7.4 7.20 4.07 9.6 0 9.6 C-4.07 9.6 -7.4 7.20 -7.4 2.40 C-7.4 -2.40 -4.07 -9.6 0 -9.6Z'/%3E%3C/clipPath%3E%3Cpath d='M0 -9.6 C4.07 -9.6 7.4 -2.40 7.4 2.40 C7.4 7.20 4.07 9.6 0 9.6 C-4.07 9.6 -7.4 7.20 -7.4 2.40 C-7.4 -2.40 -4.07 -9.6 0 -9.6Z' fill='%23f7a8c4'/%3E%3Cg clip-path='url(%23g0)'%3E%3Cpolyline points='-7.4,0.7 -4.9,-2.2 -2.5,0.7 0.0,-2.2 2.5,0.7 4.9,-2.2 7.4,0.7' fill='none' stroke='%23e0679a' stroke-width='1.5' stroke-linejoin='round'/%3E%3Crect x='-7.4' y='4.3' width='14.8' height='1.3' fill='%23fff' opacity='.8'/%3E%3C/g%3E%3Cellipse cx='-3.0' cy='-3.4' rx='1.3' ry='2.1' fill='%23fff' opacity='.55'/%3E%3C/g%3E%3C/g%3E%3Cg%3E%3Cline x1='68' y1='4.7' x2='68' y2='8.7' stroke='%238a6a46' stroke-width='1'/%3E%3Cg transform='translate(68 18.3)'%3E%3CclipPath id='g1'%3E%3Cpath d='M0 -9.6 C4.07 -9.6 7.4 -2.40 7.4 2.40 C7.4 7.20 4.07 9.6 0 9.6 C-4.07 9.6 -7.4 7.20 -7.4 2.40 C-7.4 -2.40 -4.07 -9.6 0 -9.6Z'/%3E%3C/clipPath%3E%3Cpath d='M0 -9.6 C4.07 -9.6 7.4 -2.40 7.4 2.40 C7.4 7.20 4.07 9.6 0 9.6 C-4.07 9.6 -7.4 7.20 -7.4 2.40 C-7.4 -2.40 -4.07 -9.6 0 -9.6Z' fill='%23c9b6f2'/%3E%3Cg clip-path='url(%23g1)'%3E%3Ccircle cx='-3.3' cy='-2.9' r='1.2' fill='%239271d6'/%3E%3Ccircle cx='2.6' cy='-4.3' r='1.2' fill='%239271d6'/%3E%3Ccircle cx='3.7' cy='1.9' r='1.2' fill='%239271d6'/%3E%3Ccircle cx='-1.5' cy='3.4' r='1.2' fill='%239271d6'/%3E%3Ccircle cx='0.0' cy='-0.2' r='1.2' fill='%239271d6'/%3E%3Ccircle cx='-4.4' cy='6.2' r='1.2' fill='%239271d6'/%3E%3Ccircle cx='1.1' cy='7.7' r='1.2' fill='%239271d6'/%3E%3C/g%3E%3Cellipse cx='-3.0' cy='-3.4' rx='1.3' ry='2.1' fill='%23fff' opacity='.55'/%3E%3C/g%3E%3C/g%3E%3Cg%3E%3Cline x1='114' y1='8.0' x2='114' y2='12.0' stroke='%238a6a46' stroke-width='1'/%3E%3Cg transform='translate(114 21.6)'%3E%3CclipPath id='g2'%3E%3Cpath d='M0 -9.6 C4.07 -9.6 7.4 -2.40 7.4 2.40 C7.4 7.20 4.07 9.6 0 9.6 C-4.07 9.6 -7.4 7.20 -7.4 2.40 C-7.4 -2.40 -4.07 -9.6 0 -9.6Z'/%3E%3C/clipPath%3E%3Cpath d='M0 -9.6 C4.07 -9.6 7.4 -2.40 7.4 2.40 C7.4 7.20 4.07 9.6 0 9.6 C-4.07 9.6 -7.4 7.20 -7.4 2.40 C-7.4 -2.40 -4.07 -9.6 0 -9.6Z' fill='%23a8e6cf'/%3E%3Cg clip-path='url(%23g2)'%3E%3Crect x='-7.4' y='-3.4' width='14.8' height='1.5' fill='%234fbf8f'/%3E%3Crect x='-7.4' y='0.5' width='14.8' height='2.5' fill='%23fff' opacity='.85'/%3E%3Crect x='-7.4' y='4.8' width='14.8' height='1.5' fill='%234fbf8f'/%3E%3C/g%3E%3Cellipse cx='-3.0' cy='-3.4' rx='1.3' ry='2.1' fill='%23fff' opacity='.55'/%3E%3C/g%3E%3C/g%3E%3Cg transform='translate(150 0)'%3E%3Cpath d='M0 3Q37.5 13 75 3Q112.5 13 150 3' fill='none' stroke='%238a6a46' stroke-width='1.6'/%3E%3Cg%3E%3Cline x1='24' y1='7.4' x2='24' y2='11.4' stroke='%238a6a46' stroke-width='1'/%3E%3Cg transform='translate(24 21.0)'%3E%3CclipPath id='h0'%3E%3Cpath d='M0 -9.6 C4.07 -9.6 7.4 -2.40 7.4 2.40 C7.4 7.20 4.07 9.6 0 9.6 C-4.07 9.6 -7.4 7.20 -7.4 2.40 C-7.4 -2.40 -4.07 -9.6 0 -9.6Z'/%3E%3C/clipPath%3E%3Cpath d='M0 -9.6 C4.07 -9.6 7.4 -2.40 7.4 2.40 C7.4 7.20 4.07 9.6 0 9.6 C-4.07 9.6 -7.4 7.20 -7.4 2.40 C-7.4 -2.40 -4.07 -9.6 0 -9.6Z' fill='%23ffe082'/%3E%3Cg clip-path='url(%23h0)'%3E%3Ccircle cx='-3.3' cy='-2.9' r='1.2' fill='%23f2b632'/%3E%3Ccircle cx='2.6' cy='-4.3' r='1.2' fill='%23f2b632'/%3E%3Ccircle cx='3.7' cy='1.9' r='1.2' fill='%23f2b632'/%3E%3Ccircle cx='-1.5' cy='3.4' r='1.2' fill='%23f2b632'/%3E%3Ccircle cx='0.0' cy='-0.2' r='1.2' fill='%23f2b632'/%3E%3Ccircle cx='-4.4' cy='6.2' r='1.2' fill='%23f2b632'/%3E%3Ccircle cx='1.1' cy='7.7' r='1.2' fill='%23f2b632'/%3E%3C/g%3E%3Cellipse cx='-3.0' cy='-3.4' rx='1.3' ry='2.1' fill='%23fff' opacity='.55'/%3E%3C/g%3E%3C/g%3E%3Cg%3E%3Cline x1='68' y1='4.7' x2='68' y2='8.7' stroke='%238a6a46' stroke-width='1'/%3E%3Cg transform='translate(68 18.3)'%3E%3CclipPath id='h1'%3E%3Cpath d='M0 -9.6 C4.07 -9.6 7.4 -2.40 7.4 2.40 C7.4 7.20 4.07 9.6 0 9.6 C-4.07 9.6 -7.4 7.20 -7.4 2.40 C-7.4 -2.40 -4.07 -9.6 0 -9.6Z'/%3E%3C/clipPath%3E%3Cpath d='M0 -9.6 C4.07 -9.6 7.4 -2.40 7.4 2.40 C7.4 7.20 4.07 9.6 0 9.6 C-4.07 9.6 -7.4 7.20 -7.4 2.40 C-7.4 -2.40 -4.07 -9.6 0 -9.6Z' fill='%239fd3f7'/%3E%3Cg clip-path='url(%23h1)'%3E%3Cpolyline points='-7.4,0.7 -4.9,-2.2 -2.5,0.7 0.0,-2.2 2.5,0.7 4.9,-2.2 7.4,0.7' fill='none' stroke='%234fa3dc' stroke-width='1.5' stroke-linejoin='round'/%3E%3Crect x='-7.4' y='4.3' width='14.8' height='1.3' fill='%23fff' opacity='.8'/%3E%3C/g%3E%3Cellipse cx='-3.0' cy='-3.4' rx='1.3' ry='2.1' fill='%23fff' opacity='.55'/%3E%3C/g%3E%3C/g%3E%3Cg%3E%3Cline x1='114' y1='8.0' x2='114' y2='12.0' stroke='%238a6a46' stroke-width='1'/%3E%3Cg transform='translate(114 21.6)'%3E%3CclipPath id='h2'%3E%3Cpath d='M0 -9.6 C4.07 -9.6 7.4 -2.40 7.4 2.40 C7.4 7.20 4.07 9.6 0 9.6 C-4.07 9.6 -7.4 7.20 -7.4 2.40 C-7.4 -2.40 -4.07 -9.6 0 -9.6Z'/%3E%3C/clipPath%3E%3Cpath d='M0 -9.6 C4.07 -9.6 7.4 -2.40 7.4 2.40 C7.4 7.20 4.07 9.6 0 9.6 C-4.07 9.6 -7.4 7.20 -7.4 2.40 C-7.4 -2.40 -4.07 -9.6 0 -9.6Z' fill='%23ffc7a1'/%3E%3Cg clip-path='url(%23h2)'%3E%3Crect x='-7.4' y='-3.4' width='14.8' height='1.5' fill='%23f08a4b'/%3E%3Crect x='-7.4' y='0.5' width='14.8' height='2.5' fill='%23fff' opacity='.85'/%3E%3Crect x='-7.4' y='4.8' width='14.8' height='1.5' fill='%23f08a4b'/%3E%3C/g%3E%3Cellipse cx='-3.0' cy='-3.4' rx='1.3' ry='2.1' fill='%23fff' opacity='.55'/%3E%3C/g%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    --easter-petals-far: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='280' height='280'%3E%3Cpath d='M0 -5C3.2 -5 4.2 -1 0 5C-4.2 -1 -3.2 -5 0 -5Z' fill='%23f8b9cf' stroke='%23e2799f' stroke-opacity='.5' stroke-width='.6' transform='translate(71 152) rotate(133) scale(0.98)'/%3E%3Cpath d='M0 -5C3.2 -5 4.2 -1 0 5C-4.2 -1 -3.2 -5 0 -5Z' fill='%23f9c6d8' stroke='%23e2799f' stroke-opacity='.5' stroke-width='.6' transform='translate(168 248) rotate(169) scale(0.97)'/%3E%3Cpath d='M0 -5C3.2 -5 4.2 -1 0 5C-4.2 -1 -3.2 -5 0 -5Z' fill='%23f9c6d8' stroke='%23e2799f' stroke-opacity='.5' stroke-width='.6' transform='translate(271 132) rotate(301) scale(0.94)'/%3E%3Cpath d='M0 -5C3.2 -5 4.2 -1 0 5C-4.2 -1 -3.2 -5 0 -5Z' fill='%23f8b9cf' stroke='%23e2799f' stroke-opacity='.5' stroke-width='.6' transform='translate(69 48) rotate(333) scale(0.92)'/%3E%3Cpath d='M0 -5C3.2 -5 4.2 -1 0 5C-4.2 -1 -3.2 -5 0 -5Z' fill='%23f4a3c0' stroke='%23e2799f' stroke-opacity='.5' stroke-width='.6' transform='translate(185 25) rotate(273) scale(0.98)'/%3E%3Cpath d='M0 -5C3.2 -5 4.2 -1 0 5C-4.2 -1 -3.2 -5 0 -5Z' fill='%23fbd3e1' stroke='%23e2799f' stroke-opacity='.5' stroke-width='.6' transform='translate(214 225) rotate(97) scale(0.98)'/%3E%3Cpath d='M0 -5C3.2 -5 4.2 -1 0 5C-4.2 -1 -3.2 -5 0 -5Z' fill='%23fbd3e1' stroke='%23e2799f' stroke-opacity='.5' stroke-width='.6' transform='translate(197 251) rotate(142) scale(1.04)'/%3E%3Cpath d='M0 -5C3.2 -5 4.2 -1 0 5C-4.2 -1 -3.2 -5 0 -5Z' fill='%23fbd3e1' stroke='%23e2799f' stroke-opacity='.5' stroke-width='.6' transform='translate(263 43) rotate(132) scale(0.81)'/%3E%3Cpath d='M0 -5C3.2 -5 4.2 -1 0 5C-4.2 -1 -3.2 -5 0 -5Z' fill='%23f4a3c0' stroke='%23e2799f' stroke-opacity='.5' stroke-width='.6' transform='translate(65 263) rotate(157) scale(0.99)'/%3E%3C/svg%3E");
+    --easter-petals-near: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='420'%3E%3Cpath d='M0 -5C3.2 -5 4.2 -1 0 5C-4.2 -1 -3.2 -5 0 -5Z' fill='%23f8b9cf' stroke='%23e2799f' stroke-opacity='.5' stroke-width='.6' transform='translate(195 159) rotate(50) scale(1.73)'/%3E%3Cpath d='M0 -5C3.2 -5 4.2 -1 0 5C-4.2 -1 -3.2 -5 0 -5Z' fill='%23f8b9cf' stroke='%23e2799f' stroke-opacity='.5' stroke-width='.6' transform='translate(145 195) rotate(218) scale(1.47)'/%3E%3Cpath d='M0 -5C3.2 -5 4.2 -1 0 5C-4.2 -1 -3.2 -5 0 -5Z' fill='%23fbd3e1' stroke='%23e2799f' stroke-opacity='.5' stroke-width='.6' transform='translate(302 76) rotate(341) scale(1.78)'/%3E%3Cpath d='M0 -5C3.2 -5 4.2 -1 0 5C-4.2 -1 -3.2 -5 0 -5Z' fill='%23f8b9cf' stroke='%23e2799f' stroke-opacity='.5' stroke-width='.6' transform='translate(71 104) rotate(40) scale(1.55)'/%3E%3Cpath d='M0 -5C3.2 -5 4.2 -1 0 5C-4.2 -1 -3.2 -5 0 -5Z' fill='%23f4a3c0' stroke='%23e2799f' stroke-opacity='.5' stroke-width='.6' transform='translate(321 163) rotate(269) scale(1.35)'/%3E%3Cpath d='M0 -5C3.2 -5 4.2 -1 0 5C-4.2 -1 -3.2 -5 0 -5Z' fill='%23f4a3c0' stroke='%23e2799f' stroke-opacity='.5' stroke-width='.6' transform='translate(91 99) rotate(285) scale(1.74)'/%3E%3Cpath d='M0 -5C3.2 -5 4.2 -1 0 5C-4.2 -1 -3.2 -5 0 -5Z' fill='%23f8b9cf' stroke='%23e2799f' stroke-opacity='.5' stroke-width='.6' transform='translate(376 168) rotate(123) scale(1.32)'/%3E%3C/svg%3E");
+    --easter-meadow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='480' height='44'%3E%3Cpath d='M0 44 L0.0 40 Q5.8 34.3 7.4 27.9 Q6.8 35.9 7.0 40 L7.0 40 Q8.0 28.3 6.9 17.8 Q9.0 30.9 14.0 40 L14.0 40 Q16.6 30.8 16.4 22.1 Q17.6 33.0 21.0 40 L21.0 40 Q26.3 29.3 27.7 19.6 Q27.3 31.8 28.0 40 L28.0 40 Q27.2 34.7 25.0 28.5 Q28.2 36.2 35.0 40 L35.0 40 Q37.5 27.6 37.1 16.6 Q38.5 30.3 42.0 40 L42.0 40 Q41.0 28.3 38.6 17.8 Q42.0 30.9 49.0 40 L49.0 40 Q53.8 31.3 54.8 22.9 Q54.8 33.4 56.0 40 L56.0 40 Q62.6 33.4 64.7 26.3 Q63.6 35.2 63.0 40 L63.0 40 Q62.2 26.9 60.0 15.6 Q63.2 29.8 70.0 40 L70.0 40 Q73.3 35.4 73.5 29.6 Q74.3 36.8 77.0 40 L77.0 40 Q79.0 26.6 78.5 15.0 Q80.0 29.5 84.0 40 L84.0 40 Q86.4 33.5 86.0 26.5 Q87.4 35.3 91.0 40 L91.0 40 Q91.8 35.3 90.4 29.5 Q92.8 36.8 98.0 40 L98.0 40 Q101.0 31.4 100.9 23.0 Q102.0 33.5 105.0 40 L105.0 40 Q105.8 33.4 104.6 26.3 Q106.8 35.1 112.0 40 L112.0 40 Q114.7 33.5 114.5 26.5 Q115.7 35.2 119.0 40 L119.0 40 Q118.2 32.8 115.9 25.4 Q119.2 34.7 126.0 40 L126.0 40 Q129.5 27.6 129.7 16.6 Q130.5 30.3 133.0 40 L133.0 40 Q133.5 29.4 132.0 19.7 Q134.5 31.9 140.0 40 L140.0 40 Q145.9 26.1 147.6 14.1 Q146.9 29.1 147.0 40 L147.0 40 Q148.7 34.4 147.9 28.1 Q149.7 36.0 154.0 40 L154.0 40 Q158.7 28.7 159.7 18.5 Q159.7 31.2 161.0 40 L161.0 40 Q163.4 26.6 163.0 15.0 Q164.4 29.5 168.0 40 L168.0 40 Q172.4 27.6 173.2 16.7 Q173.4 30.4 175.0 40 L175.0 40 Q178.7 32.7 179.1 25.1 Q179.7 34.6 182.0 40 L182.0 40 Q187.8 27.1 189.4 15.9 Q188.8 29.9 189.0 40 L189.0 40 Q192.7 30.7 193.1 21.9 Q193.7 33.0 196.0 40 L196.0 40 Q196.9 35.3 195.7 29.4 Q197.9 36.7 203.0 40 L203.0 40 Q205.3 27.9 204.9 17.2 Q206.3 30.6 210.0 40 L210.0 40 Q213.4 33.9 213.6 27.2 Q214.4 35.6 217.0 40 L217.0 40 Q221.4 28.9 222.2 18.8 Q222.4 31.4 224.0 40 L224.0 40 Q226.5 32.0 226.2 24.0 Q227.5 34.0 231.0 40 L231.0 40 Q236.2 30.7 237.6 21.9 Q237.2 32.9 238.0 40 L238.0 40 Q240.1 30.6 239.6 21.7 Q241.1 32.8 245.0 40 L245.0 40 Q244.2 30.9 242.0 22.2 Q245.2 33.1 252.0 40 L252.0 40 Q256.6 35.2 257.6 29.3 Q257.6 36.7 259.0 40 L259.0 40 Q262.7 26.2 263.2 14.3 Q263.7 29.1 266.0 40 L266.0 40 Q266.4 31.8 264.8 23.7 Q267.4 33.9 273.0 40 L273.0 40 Q279.9 30.8 282.2 22.0 Q280.9 33.0 280.0 40 L280.0 40 Q283.3 28.2 283.5 17.7 Q284.3 30.8 287.0 40 L287.0 40 Q287.9 27.3 286.6 16.2 Q288.9 30.1 294.0 40 L294.0 40 Q300.6 30.7 302.8 21.8 Q301.6 32.9 301.0 40 L301.0 40 Q303.7 30.1 303.5 20.8 Q304.7 32.4 308.0 40 L308.0 40 Q311.4 33.0 311.6 25.7 Q312.4 34.8 315.0 40 L315.0 40 Q314.0 26.4 311.7 14.7 Q315.0 29.3 322.0 40 L322.0 40 Q327.6 28.1 329.1 17.5 Q328.6 30.7 329.0 40 L329.0 40 Q333.9 27.1 335.1 15.8 Q334.9 29.9 336.0 40 L336.0 40 Q339.1 27.8 339.2 17.1 Q340.1 30.5 343.0 40 L343.0 40 Q345.4 30.2 345.1 21.0 Q346.4 32.5 350.0 40 L350.0 40 Q356.0 35.1 357.7 29.1 Q357.0 36.6 357.0 40 L357.0 40 Q357.6 30.1 356.2 20.9 Q358.6 32.4 364.0 40 L364.0 40 Q366.9 30.8 366.8 21.9 Q367.9 33.0 371.0 40 L371.0 40 Q372.8 32.2 372.0 24.3 Q373.8 34.1 378.0 40 L378.0 40 Q382.0 30.4 382.6 21.4 Q383.0 32.7 385.0 40 L385.0 40 Q387.7 29.7 387.5 20.2 Q388.7 32.1 392.0 40 L392.0 40 Q392.8 35.3 391.5 29.6 Q393.8 36.8 399.0 40 L399.0 40 Q402.7 33.9 403.1 27.2 Q403.7 35.6 406.0 40 L406.0 40 Q411.4 27.3 412.8 16.2 Q412.4 30.1 413.0 40 L413.0 40 Q418.5 27.9 420.1 17.2 Q419.5 30.6 420.0 40 L420.0 40 Q425.7 33.1 427.4 25.9 Q426.7 35.0 427.0 40 L427.0 40 Q426.7 29.1 424.7 19.2 Q427.7 31.6 434.0 40 L434.0 40 Q433.1 35.4 430.8 29.7 Q434.1 36.9 441.0 40 L441.0 40 Q442.0 28.3 440.8 17.9 Q443.0 31.0 448.0 40 L448.0 40 Q452.0 34.5 452.6 28.2 Q453.0 36.1 455.0 40 L455.0 40 Q454.6 32.3 452.5 24.5 Q455.6 34.2 462.0 40 L462.0 40 Q465.2 34.1 465.4 27.4 Q466.2 35.7 469.0 40 L469.0 40 Q470.2 34.0 469.1 27.3 Q471.2 35.7 476.0 40 L476.0 40 Q478.6 28.8 478.4 18.6 Q479.6 31.3 483.0 40 L480 44Z' fill='%234c9a48'/%3E%3Cpath d='M150 22 L150 44' stroke='%233f8a3c' stroke-width='1.4'/%3E%3Cellipse cx='150' cy='18' rx='1.8' ry='4' fill='%23fff' transform='rotate(0 150 22)'/%3E%3Cellipse cx='150' cy='18' rx='1.8' ry='4' fill='%23fff' transform='rotate(45 150 22)'/%3E%3Cellipse cx='150' cy='18' rx='1.8' ry='4' fill='%23fff' transform='rotate(90 150 22)'/%3E%3Cellipse cx='150' cy='18' rx='1.8' ry='4' fill='%23fff' transform='rotate(135 150 22)'/%3E%3Cellipse cx='150' cy='18' rx='1.8' ry='4' fill='%23fff' transform='rotate(180 150 22)'/%3E%3Cellipse cx='150' cy='18' rx='1.8' ry='4' fill='%23fff' transform='rotate(225 150 22)'/%3E%3Cellipse cx='150' cy='18' rx='1.8' ry='4' fill='%23fff' transform='rotate(270 150 22)'/%3E%3Cellipse cx='150' cy='18' rx='1.8' ry='4' fill='%23fff' transform='rotate(315 150 22)'/%3E%3Ccircle cx='150' cy='22' r='2.6' fill='%23ffcf33'/%3E%3Cpath d='M310 18 L310 44' stroke='%233f8a3c' stroke-width='1.4'/%3E%3Cellipse cx='310' cy='14' rx='1.8' ry='4' fill='%23fff' transform='rotate(0 310 18)'/%3E%3Cellipse cx='310' cy='14' rx='1.8' ry='4' fill='%23fff' transform='rotate(45 310 18)'/%3E%3Cellipse cx='310' cy='14' rx='1.8' ry='4' fill='%23fff' transform='rotate(90 310 18)'/%3E%3Cellipse cx='310' cy='14' rx='1.8' ry='4' fill='%23fff' transform='rotate(135 310 18)'/%3E%3Cellipse cx='310' cy='14' rx='1.8' ry='4' fill='%23fff' transform='rotate(180 310 18)'/%3E%3Cellipse cx='310' cy='14' rx='1.8' ry='4' fill='%23fff' transform='rotate(225 310 18)'/%3E%3Cellipse cx='310' cy='14' rx='1.8' ry='4' fill='%23fff' transform='rotate(270 310 18)'/%3E%3Cellipse cx='310' cy='14' rx='1.8' ry='4' fill='%23fff' transform='rotate(315 310 18)'/%3E%3Ccircle cx='310' cy='18' r='2.6' fill='%23ffcf33'/%3E%3Cpath d='M452 20 L452 44' stroke='%233f8a3c' stroke-width='1.6'/%3E%3Cpath d='M447 12 L449.5 15 L452 11 L454.5 15 L457 12 Q457 22 452 22 Q447 22 447 12Z' fill='%23f2709c'/%3E%3Cpath d='M18 24 L18 44' stroke='%233f8a3c' stroke-width='1.6'/%3E%3Cpath d='M13 16 L15.5 19 L18 15 L20.5 19 L23 16 Q23 26 18 26 Q13 26 13 16Z' fill='%23ffb347'/%3E%3Cg transform='translate(70 33)'%3E%3CclipPath id='a'%3E%3Cpath d='M0 -9 C3.85 -9 7 -2.25 7 2.25 C7 6.75 3.85 9 0 9 C-3.85 9 -7 6.75 -7 2.25 C-7 -2.25 -3.85 -9 0 -9Z'/%3E%3C/clipPath%3E%3Cpath d='M0 -9 C3.85 -9 7 -2.25 7 2.25 C7 6.75 3.85 9 0 9 C-3.85 9 -7 6.75 -7 2.25 C-7 -2.25 -3.85 -9 0 -9Z' fill='%23c9b6f2'/%3E%3Cg clip-path='url(%23a)'%3E%3Cpolyline points='-7.0,0.6 -4.7,-2.1 -2.3,0.6 0.0,-2.1 2.3,0.6 4.7,-2.1 7.0,0.6' fill='none' stroke='%239271d6' stroke-width='1.4' stroke-linejoin='round'/%3E%3Crect x='-7' y='4.0' width='14' height='1.3' fill='%23fff' opacity='.8'/%3E%3C/g%3E%3Cellipse cx='-2.8' cy='-3.1' rx='1.3' ry='2.0' fill='%23fff' opacity='.55'/%3E%3C/g%3E%3Cg transform='translate(236 34)'%3E%3CclipPath id='b'%3E%3Cpath d='M0 -8.5 C3.58 -8.5 6.5 -2.12 6.5 2.12 C6.5 6.38 3.58 8.5 0 8.5 C-3.58 8.5 -6.5 6.38 -6.5 2.12 C-6.5 -2.12 -3.58 -8.5 0 -8.5Z'/%3E%3C/clipPath%3E%3Cpath d='M0 -8.5 C3.58 -8.5 6.5 -2.12 6.5 2.12 C6.5 6.38 3.58 8.5 0 8.5 C-3.58 8.5 -6.5 6.38 -6.5 2.12 C-6.5 -2.12 -3.58 -8.5 0 -8.5Z' fill='%23ffe082'/%3E%3Cg clip-path='url(%23b)'%3E%3Ccircle cx='-2.9' cy='-2.5' r='1.1' fill='%23e0679a'/%3E%3Ccircle cx='2.3' cy='-3.8' r='1.1' fill='%23e0679a'/%3E%3Ccircle cx='3.2' cy='1.7' r='1.1' fill='%23e0679a'/%3E%3Ccircle cx='-1.3' cy='3.0' r='1.1' fill='%23e0679a'/%3E%3Ccircle cx='0.0' cy='-0.2' r='1.1' fill='%23e0679a'/%3E%3Ccircle cx='-3.9' cy='5.5' r='1.1' fill='%23e0679a'/%3E%3Ccircle cx='1.0' cy='6.8' r='1.1' fill='%23e0679a'/%3E%3C/g%3E%3Cellipse cx='-2.6' cy='-3.0' rx='1.2' ry='1.9' fill='%23fff' opacity='.55'/%3E%3C/g%3E%3Cg transform='translate(392 33)'%3E%3CclipPath id='c'%3E%3Cpath d='M0 -9 C3.85 -9 7 -2.25 7 2.25 C7 6.75 3.85 9 0 9 C-3.85 9 -7 6.75 -7 2.25 C-7 -2.25 -3.85 -9 0 -9Z'/%3E%3C/clipPath%3E%3Cpath d='M0 -9 C3.85 -9 7 -2.25 7 2.25 C7 6.75 3.85 9 0 9 C-3.85 9 -7 6.75 -7 2.25 C-7 -2.25 -3.85 -9 0 -9Z' fill='%239fd3f7'/%3E%3Cg clip-path='url(%23c)'%3E%3Crect x='-7' y='-3.1' width='14' height='1.4' fill='%234fa3dc'/%3E%3Crect x='-7' y='0.5' width='14' height='2.3' fill='%23fff' opacity='.85'/%3E%3Crect x='-7' y='4.5' width='14' height='1.4' fill='%234fa3dc'/%3E%3C/g%3E%3Cellipse cx='-2.8' cy='-3.1' rx='1.3' ry='2.0' fill='%23fff' opacity='.55'/%3E%3C/g%3E%3Cpath d='M0 44 L0.0 40 Q6.6 32.3 8.7 24.6 Q7.6 34.3 6.0 40 L6.0 40 Q5.7 39.4 3.7 36.3 Q6.7 40.1 12.0 40 L12.0 40 Q16.9 33.3 18.0 26.1 Q17.9 35.1 18.0 40 L18.0 40 Q19.5 34.6 18.5 28.3 Q20.5 36.1 24.0 40 L24.0 40 Q27.9 35.1 28.4 29.1 Q28.9 36.6 30.0 40 L30.0 40 Q30.3 35.3 28.6 29.4 Q31.3 36.7 36.0 40 L36.0 40 Q38.1 36.4 37.6 31.4 Q39.1 37.7 42.0 40 L42.0 40 Q49.0 34.2 51.3 27.6 Q50.0 35.8 48.0 40 L48.0 40 Q51.4 32.4 51.6 24.7 Q52.4 34.3 54.0 40 L54.0 40 Q55.1 36.3 54.0 31.2 Q56.1 37.6 60.0 40 L60.0 40 Q59.2 39.5 57.0 36.5 Q60.2 40.3 66.0 40 L66.0 40 Q67.5 36.2 66.7 31.0 Q68.5 37.5 72.0 40 L72.0 40 Q78.1 36.8 80.0 32.1 Q79.1 38.0 78.0 40 L78.0 40 Q81.5 35.7 81.8 30.2 Q82.5 37.1 84.0 40 L84.0 40 Q83.2 38.0 80.9 33.9 Q84.2 39.0 90.0 40 L90.0 40 Q90.1 37.3 88.3 32.8 Q91.1 38.4 96.0 40 L96.0 40 Q103.0 35.8 105.4 30.4 Q104.0 37.2 102.0 40 L102.0 40 Q102.5 34.5 100.9 28.2 Q103.5 36.1 108.0 40 L108.0 40 Q113.4 32.8 114.8 25.4 Q114.4 34.7 114.0 40 L114.0 40 Q120.3 34.1 122.2 27.5 Q121.3 35.7 120.0 40 L120.0 40 Q125.3 33.8 126.7 27.1 Q126.3 35.5 126.0 40 L126.0 40 Q132.8 37.0 135.2 32.4 Q133.8 38.2 132.0 40 L132.0 40 Q132.3 32.3 130.7 24.5 Q133.3 34.2 138.0 40 L138.0 40 Q142.7 33.9 143.8 27.2 Q143.7 35.6 144.0 40 L144.0 40 Q147.2 36.2 147.4 31.0 Q148.2 37.5 150.0 40 L150.0 40 Q156.4 36.0 158.4 30.6 Q157.4 37.3 156.0 40 L156.0 40 Q161.7 35.9 163.2 30.5 Q162.7 37.2 162.0 40 L162.0 40 Q168.1 37.0 169.9 32.4 Q169.1 38.2 168.0 40 L168.0 40 Q170.7 32.8 170.5 25.3 Q171.7 34.7 174.0 40 L174.0 40 Q180.4 35.4 182.4 29.6 Q181.4 36.8 180.0 40 L180.0 40 Q182.9 34.2 182.8 27.6 Q183.9 35.8 186.0 40 L186.0 40 Q187.6 38.1 186.8 34.1 Q188.6 39.1 192.0 40 L192.0 40 Q192.3 34.3 190.7 27.9 Q193.3 36.0 198.0 40 L198.0 40 Q199.1 32.7 198.0 25.2 Q200.1 34.6 204.0 40 L204.0 40 Q205.5 32.7 204.6 25.2 Q206.5 34.6 210.0 40 L210.0 40 Q214.6 32.3 215.6 24.6 Q215.6 34.3 216.0 40 L216.0 40 Q219.1 35.9 219.2 30.4 Q220.1 37.2 222.0 40 L222.0 40 Q225.7 34.7 226.1 28.5 Q226.7 36.3 228.0 40 L228.0 40 Q228.7 37.4 227.3 32.9 Q229.7 38.5 234.0 40 L234.0 40 Q240.5 35.8 242.6 30.3 Q241.5 37.2 240.0 40 L240.0 40 Q239.6 34.9 237.6 28.9 Q240.6 36.4 246.0 40 L246.0 40 Q250.8 33.4 251.9 26.3 Q251.8 35.2 252.0 40 L252.0 40 Q252.5 32.7 251.0 25.2 Q253.5 34.6 258.0 40 L258.0 40 Q257.5 34.0 255.4 27.3 Q258.5 35.7 264.0 40 L264.0 40 Q265.2 34.7 264.1 28.5 Q266.2 36.3 270.0 40 L270.0 40 Q276.0 38.0 277.8 34.1 Q277.0 39.0 276.0 40 L276.0 40 Q279.2 39.0 279.3 35.6 Q280.2 39.8 282.0 40 L282.0 40 Q283.0 33.1 281.7 25.9 Q284.0 34.9 288.0 40 L288.0 40 Q294.0 38.2 295.9 34.3 Q295.0 39.1 294.0 40 L294.0 40 Q298.7 36.5 299.8 31.5 Q299.7 37.8 300.0 40 L300.0 40 Q301.9 39.6 301.2 36.6 Q302.9 40.3 306.0 40 L306.0 40 Q310.4 38.5 311.2 34.8 Q311.4 39.4 312.0 40 L312.0 40 Q318.6 39.2 320.8 35.9 Q319.6 40.0 318.0 40 L318.0 40 Q322.8 39.6 323.9 36.7 Q323.8 40.3 324.0 40 L324.0 40 Q325.0 39.6 323.9 36.7 Q326.0 40.4 330.0 40 L330.0 40 Q330.3 33.5 328.6 26.4 Q331.3 35.2 336.0 40 L336.0 40 Q340.5 38.4 341.5 34.6 Q341.5 39.3 342.0 40 L342.0 40 Q341.3 36.8 339.2 32.0 Q342.3 38.0 348.0 40 L348.0 40 Q348.2 32.1 346.5 24.1 Q349.2 34.1 354.0 40 L354.0 40 Q355.8 39.5 355.0 36.5 Q356.8 40.3 360.0 40 L360.0 40 Q364.9 35.0 366.1 29.0 Q365.9 36.5 366.0 40 L366.0 40 Q367.7 38.9 366.9 35.5 Q368.7 39.8 372.0 40 L372.0 40 Q374.6 39.6 374.3 36.6 Q375.6 40.3 378.0 40 L378.0 40 Q382.9 33.8 384.1 27.0 Q383.9 35.5 384.0 40 L384.0 40 Q389.0 32.8 390.3 25.3 Q390.0 34.6 390.0 40 L390.0 40 Q394.6 33.1 395.6 25.8 Q395.6 34.9 396.0 40 L396.0 40 Q396.8 36.1 395.5 30.9 Q397.8 37.4 402.0 40 L402.0 40 Q403.5 34.6 402.6 28.4 Q404.5 36.2 408.0 40 L408.0 40 Q410.6 39.0 410.3 35.7 Q411.6 39.8 414.0 40 L414.0 40 Q414.0 33.0 412.2 25.6 Q415.0 34.8 420.0 40 L420.0 40 Q422.1 35.2 421.6 29.4 Q423.1 36.7 426.0 40 L426.0 40 Q426.2 35.8 424.4 30.3 Q427.2 37.2 432.0 40 L432.0 40 Q433.1 32.3 431.9 24.5 Q434.1 34.3 438.0 40 L438.0 40 Q440.4 35.1 440.0 29.1 Q441.4 36.6 444.0 40 L444.0 40 Q447.5 39.7 447.7 36.8 Q448.5 40.4 450.0 40 L450.0 40 Q449.5 38.7 447.3 35.2 Q450.5 39.6 456.0 40 L456.0 40 Q456.3 39.5 454.7 36.6 Q457.3 40.3 462.0 40 L462.0 40 Q466.1 39.1 466.7 35.8 Q467.1 39.9 468.0 40 L468.0 40 Q474.9 35.8 477.2 30.4 Q475.9 37.2 474.0 40 L474.0 40 Q481.0 32.5 483.3 24.9 Q482.0 34.4 480.0 40 L480 44Z' fill='%2379c267'/%3E%3C/svg%3E");
+
+    --yy-accent: #e0558a;
+    --yy-accent-2: #b03670;
+    --yy-accent-text: #b0306a;
+    --yy-accent-hover: #cc4479;
+    --yy-accent-2-hover: #962a5e;
+    --yy-tint-1: rgba(var(--easter-sun-rgb), 0.16);
+    --yy-tint-2: rgba(var(--easter-sky-rgb), 0.14);
+    --yy-page-bg: #f3f8f1;              /* a light spring green-white */
+    --yy-page-muted-bg: #f3f8f1;
+
+    --bs-primary: var(--easter-pink);
+    --bs-primary-rgb: var(--easter-pink-rgb);
+    --bs-link-color: #2a6db5;
+    --bs-link-color-rgb: 42, 109, 181;
+    --bs-link-hover-color: #1d528c;
+    --bs-link-hover-color-rgb: 29, 82, 140;
+}
+
+/* Spring night: deep indigo surfaces */
+html[data-yy-theme="easter"][data-bs-theme="dark"] {
+    --easter-petal-opacity: 0.55;
+
+    --yy-accent-text: #ff9cc4;
+    --yy-tint-1: rgba(var(--easter-sun-rgb), 0.06);
+    --yy-tint-2: rgba(var(--easter-sky-rgb), 0.12);
+    --yy-page-bg: #11142b;
+    --yy-page-muted-bg: #11142b;
+    --yy-border-soft: #2c3460;
+    --yy-divider: #232a4f;
+
+    --bs-body-bg: #171b36;              --bs-body-bg-rgb: 23, 27, 54;
+    --bs-secondary-bg: #20264a;         --bs-secondary-bg-rgb: 32, 38, 74;
+    --bs-tertiary-bg: #1b2040;          --bs-tertiary-bg-rgb: 27, 32, 64;
+    --bs-border-color: #2f3766;
+    --bs-border-color-translucent: rgba(180, 190, 255, 0.15);
+    --bs-link-color: #8ccaf6;
+    --bs-link-color-rgb: 140, 202, 246;
+    --bs-link-hover-color: #b5ddfa;
+    --bs-link-hover-color-rgb: 181, 221, 250;
+}
+
+/* Room for the meadow, so the last line of a page is not hidden behind it */
+html[data-yy-theme="easter"] body {
+    padding-bottom: 40px;
+}
+
+/* ── Blossom petals drifting down, behind the content ── */
+html[data-yy-theme="easter"] body::before {
+    content: "";
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: -840px;                         /* 840px = a multiple of both tile heights */
+    height: calc(100% + 840px);
+    z-index: -1;
+    pointer-events: none;
+    background-image: var(--easter-petals-near), var(--easter-petals-far);
+    background-size: 420px 420px, 280px 280px;
+    background-position: 0 0, 90px 0;
+    opacity: var(--easter-petal-opacity);
+    animation: yy-easter-petals 70s linear infinite;
+    will-change: transform;
+}
+
+@keyframes yy-easter-petals {
+    from { transform: translate3d(0, 0, 0); }
+    to   { transform: translate3d(0, 840px, 0); }
+}
+
+/* ── Meadow with hidden eggs along the bottom edge, on every page ── */
+html[data-yy-theme="easter"] body::after {
+    content: "";
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 44px;
+    z-index: 1010;                       /* below the menu bar (1020) and modals */
+    pointer-events: none;
+    background: var(--easter-meadow) repeat-x left bottom / 480px 44px;
+}
+
+html[data-yy-theme="easter"][data-bs-theme="dark"] body::after {
+    filter: brightness(0.72) saturate(0.9);
+}
+
+/* ── Menu bar: spring sky with a string of painted eggs along its lower edge ── */
+html[data-yy-theme="easter"] .navbar {
+    background: linear-gradient(135deg, #3e95d3, #2b62ab);
+    box-shadow: 0 2px 12px rgba(var(--easter-sky-rgb), 0.35);
+}
+
+html[data-yy-theme="easter"][data-bs-theme="dark"] .navbar {
+    background: linear-gradient(135deg, #2a6aa8, #1b3f73);
+}
+
+html[data-yy-theme="easter"] .navbar::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% - 3px);
+    height: 34px;
+    pointer-events: none;
+    background: var(--easter-garland) repeat-x 0 0 / 300px 34px;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
+}
+
+html[data-yy-theme="easter"] .navbar-brand::after {
+    content: "\01F423";                  /* 🐣 */
+    margin-left: 0.4em;
+}
+
+/* ── Bunny ears on every avatar ── */
+html[data-yy-theme="easter"] .avatar-circle,
+html[data-yy-theme="easter"] .user-badge,
+html[data-yy-theme="easter"] .mini-avatar {
+    position: relative;
+}
+
+html[data-yy-theme="easter"] .avatar-circle::before,
+html[data-yy-theme="easter"] .user-badge::before,
+html[data-yy-theme="easter"] .mini-avatar::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: -56%;
+    width: 78%;
+    aspect-ratio: 64 / 48;
+    background: var(--easter-ears) center / contain no-repeat;
+    transform: translateX(-50%);
+    pointer-events: none;
+}
+
+/* The badge in the menu bar sits close to the top of the screen: shorter ears */
+html[data-yy-theme="easter"] .user-badge::before {
+    top: -30%;
+    width: 64%;
+}
+
+html[data-yy-theme="easter"] .avatar-circle {
+    box-shadow: 0 4px 15px rgba(var(--easter-pink-rgb), 0.35);
+}
+
+/* ── Cards, buttons and inputs: sunny glow on hover, sky-blue focus ── */
+html[data-yy-theme="easter"] .order-card:hover {
+    border-color: rgba(var(--easter-sun-rgb), 0.8);
+    box-shadow: 0 8px 24px rgba(var(--easter-sun-rgb), 0.25);
+}
+
+html[data-yy-theme="easter"] .item-card:hover,
+html[data-yy-theme="easter"] .item-list-option:hover {
+    border-color: rgba(var(--easter-sun-rgb), 0.8);
+    box-shadow: 0 2px 8px rgba(var(--easter-sun-rgb), 0.2);
+}
+
+html[data-yy-theme="easter"] .form-control:focus,
+html[data-yy-theme="easter"] .form-select:focus,
+html[data-yy-theme="easter"] .form-check-input:focus {
+    border-color: #5aa9de;
+    box-shadow: 0 0 0 0.2rem rgba(var(--easter-sky-rgb), 0.3);
+}
+
+html[data-yy-theme="easter"] .form-check-input:checked {
+    background-color: var(--yy-accent);
+    border-color: var(--yy-accent);
+}
+
+html[data-yy-theme="easter"] ::selection {
+    background: rgba(var(--easter-pink-rgb), 0.85);
+    color: #fff;
+}
+
+/* Nothing drifts or swings for people who asked their system for less motion */
+@media (prefers-reduced-motion: reduce) {
+    html[data-yy-theme="easter"] body::before {
+        animation: none;
+    }
+
+    html[data-yy-theme="easter"] .navbar::before {
+        background-image: var(--easter-garland-still);
+    }
+}

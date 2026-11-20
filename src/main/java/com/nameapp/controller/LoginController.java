@@ -187,6 +187,23 @@ public class LoginController {
         return "users";
     }
 
+    // ─── Hidden overview of all looks with preview links (not linked anywhere) ──
+
+    @GetMapping("/themes")
+    public String themes(HttpServletRequest request, Model model) {
+        String savedName = getCookieValue(request);
+        Optional<AppUser> user = savedName == null ? Optional.empty() : userService.findByName(savedName);
+        if (user.isEmpty()) {
+            // Come back here after the name login
+            String query = request.getQueryString();
+            request.getSession().setAttribute("redirectAfterLogin", query != null ? "/themes?" + query : "/themes");
+            return "redirect:/";
+        }
+        // The list itself is built in the browser from theme.js, theme-info.js and visitors.js
+        model.addAttribute("user", user.get());
+        return "themes";
+    }
+
     // ─── Cookie helpers ──────────────────────────────────────────────────────────
 
     private String getCookieValue(HttpServletRequest request) {

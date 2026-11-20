@@ -40,6 +40,7 @@ Yatta-Yam-Yam ist eine interne Web-App zur kollektiven Essensbestellung. Nutzer 
 - Benutzerstatistiken (Gesamtausgaben, offene Beträge)
 - Rotes Badge mit dem offenen Betrag neben dem eigenen Namen in der Menüleiste
 - Dark Mode, der der Einstellung des Betriebssystems folgt
+- Saisonale Looks mit gelegentlichen Besuchern: Pizza (6.–12. Februar), Ostern (zwei Wochen vor Ostern bis Ostermontag), Knoblauch (19. April und 6. Oktober), Halloween (18.–31. Oktober), Día de los Muertos (1.–7. November), Weihnachten (Montag nach Totensonntag bis 26. Dezember)
 
 ---
 
@@ -253,6 +254,7 @@ Der Cookie hat eine Ablaufzeit von `Integer.MAX_VALUE` Sekunden (~68 Jahre), ist
 | POST    | `/rename`          | Nutzernamen ändern, Cookie aktualisieren           |
 | GET     | `/version`         | Versionsseite (öffentlich)                         |
 | GET     | `/users`           | Nutzerstatistiken (nur für eingeloggte Nutzer)     |
+| GET     | `/themes`          | Alle Looks mit Vorschau-Links (versteckte Seite, nirgends verlinkt; nur für eingeloggte Nutzer) |
 
 ### Bestellungen (`OrderController`, Präfix `/orders`)
 
@@ -506,14 +508,39 @@ Yatta-Yam-Yam/
         ├── application.properties
         ├── static/
         │   ├── css/
+        │   │   ├── christmas.css             # Weihnachts-Look (ohne Wirkung außerhalb der Saison)
         │   │   ├── dashboard.css
+        │   │   ├── easter.css                # Oster-Look (ohne Wirkung außerhalb der Saison)
+        │   │   ├── garlic.css                # Knoblauch-Look (ohne Wirkung außerhalb der zwei Tage)
+        │   │   ├── gta.css                   # GTA-VI-Hommage (nur per Link, ohne Saison)
+        │   │   ├── halloween.css             # Halloween-Look (ohne Wirkung außerhalb der Saison)
+        │   │   ├── mario.css                 # Super-Mario-Hommage (MAR10-Tag, 10. März)
+        │   │   ├── muertos.css               # Día-de-los-Muertos-Look (ohne Wirkung außerhalb der Saison)
+        │   │   ├── pasta.css                 # Pasta-Look (nur per Link, ohne Saison)
+        │   │   ├── pelmeni.css               # Pelmeni-Look (nur per Link, ohne Saison)
+        │   │   ├── pokemon.css               # Pokémon-Hommage (nur per Link, ohne Saison)
+        │   │   ├── pizza.css                 # Pizza-Look (ohne Wirkung außerhalb der Pizza-Woche)
         │   │   ├── style.css                 # Basis-Styles + Farb-Tokens (--yy-*) für hell/dunkel
-        │   │   └── symbolics.css             # Easter Egg: Symbolics-Modus (ohne Wirkung, solange aus)
+        │   │   ├── symbolics.css             # Easter Egg: Symbolics-Modus (ohne Wirkung, solange aus)
+        │   │   └── visitors.css              # Besucher: Bühne und Animationen
         │   ├── images/
         │   │   ├── favicon.svg
         │   │   └── logo.png
         │   └── js/
-        │       └── theme.js                  # Hell/dunkel nach Systemeinstellung, Symbolics-Easter-Egg
+        │       ├── christmas.js              # Weihnachts-Besucher: Weihnachtsmann und Rentiere
+        │       ├── easter.js                 # Oster-Besucher: Osterhase und Küken
+        │       ├── garlic.js                 # Knoblauch-Besucher: Knolle, Fledermaus, Vampir
+        │       ├── gta.js                    # GTA-Besucher: Verfolgungsjagd, Hubschrauber, Speedboot, Flamingo, Geldsack
+        │       ├── halloween.js              # Halloween-Besucher: Hexe, Skelett, Gespenst, Spinne, Katze
+        │       ├── mario.js                  # Mario-Besucher: Pixel-Koch, Brokkoli, Vogel mit Pizza, Ziegelblock
+        │       ├── muertos.js                # Día-de-los-Muertos-Besucher: Monarchfalter, Catrina, Skelett mit Gitarre
+        │       ├── pasta.js                  # Pasta-Besucher: Farfalle, Fleischbällchen, Nudel-Parade
+        │       ├── pelmeni.js                # Pelmeni-Besucher: Löffel-Surfer, Teigtaschen-Parade, Gabel
+        │       ├── pokemon.js                # Pokémon-Besucher: erfundene Pixel-Essensmonster, Grillhähnchen, Spielmodul
+        │       ├── pizza.js                  # Pizza-Besucher: fliegende Pizza, Pizzastück, Pizzabäcker
+        │       ├── theme-info.js             # (i)-Knopf in der Menüleiste mit Infos zum aktiven Look
+        │       ├── theme.js                  # Hell/dunkel nach Systemeinstellung, Saison-Looks, Symbolics-Easter-Egg
+        │       └── visitors.js               # Besucher: Zeitplan, Bewegungen, Rufwort
         └── templates/                        # Thymeleaf HTML-Templates
             ├── index.html                    # Namenseingabe
             ├── confirm.html                  # Bestehenden Nutzer bestätigen
@@ -530,11 +557,12 @@ Yatta-Yam-Yam/
             ├── contacts.html                 # Kontaktbuch (Liste mit Standortfilter)
             ├── contact-edit.html             # Kontakt anlegen / bearbeiten
             ├── itemlists.html                # Versteckte Seite: alle Menülisten + Sichtbarkeitsschalter
+            ├── themes.html                   # Versteckte Seite: alle Looks mit Vorschau-Links
             ├── users.html                    # Nutzerstatistiken
             ├── version.html                  # Versionsinfo
             └── fragments/
                 ├── open-debt-badge.html      # Rotes Badge mit offenem Betrag neben dem Namen
-                └── theme.html                # Einbindung im <head>: theme.js + symbolics.css
+                └── theme.html                # Einbindung im <head>: Theme-Skripte und -Styles
 ```
 
 ---
@@ -552,12 +580,72 @@ Die App folgt der Hell/Dunkel-Einstellung des Betriebssystems; einen eigenen Ums
 - Keine fest codierten Farben: `--yy-*`-Tokens oder Bootstrap-Variablen (`--bs-body-bg`, `--bs-border-color`, `--bs-secondary-color`, …) verwenden.
 - `bg-light` und `text-bg-light` vermeiden, sie bleiben im Dark Mode hell; stattdessen `bg-body-tertiary` und `text-body-emphasis`. Zentrierte Ein-Karten-Seiten nutzen `<body class="page-muted">`.
 
+### Saisonale Looks: Feste und Aktionstage
+
+Zu sieben Zeiten im Jahr zieht sich die App von selbst um. `theme.js` prüft dafür beim Laden jeder Seite das lokale Datum des Browsers und setzt `data-yy-theme` auf `<html>` (`pizza`, `mario`, `easter`, `garlic`, `halloween`, `muertos`, `christmas`); kein Server-Code, keine Konfiguration. Alle Looks folgen weiter der Hell/Dunkel-Einstellung des Systems und haben je eine eigene helle und dunkle Palette.
+
+**Pizza** – die Woche um den Tag der Pizza (9. Februar): vom 6. bis einschließlich 12. Februar. Tomatenrote Menüleiste mit einer rot-weiß gestreiften Pizzeria-Markise, basilikumgrüne Buttons, jeder Avatar wird zur Pizza (die Initiale liegt auf dem Mozzarella), herabfallende Beläge (Salami, Basilikum, Oliven, Pilze, Tomaten) hinter den Inhalten, eine rot-weiß karierte Tischdecke mit Pizza, Olivenöl, Basilikum und Streuern am unteren Rand (44 px Abstand unten), ein 🍕 neben dem App-Namen; Paletten „Trattoria“ / „Holzofen-Nacht“. Styles: `static/css/pizza.css`.
+
+**Super-Mario-Hommage** („Lunch World 1-1“) – nur am MAR10-Tag (10. März, abgekürzt geschrieben „MAR10“), von 0:00 bis 23:59 Uhr. Eine Verbeugung vor den 8-Bit-Jump-'n'-Runs, als eigene Pixel-Grafik – keine Figuren, Gegner, Gegenstände, Logos, Musik oder Levelgrafiken aus den Spielen (kein Klempner, keine Pilze, Schildkröten, „?“-Blöcke oder Röhren). Menüleiste als Ziegelmauer mit sich drehenden Münzen darunter, rote Buttons, jeder Avatar wird zur großen Pixel-Münze mit der Initiale, herabfallende Münzen und Ziegelbrocken, Bodenblöcke mit Büschen und Münzen am unteren Rand (48 px Abstand unten), ein 🕹️ neben dem App-Namen. Hell ist „über der Erde“ (braune Ziegel, heller Himmel), dunkel „unter der Erde“ (blaue Ziegel). Das (i)-Fenster enthält eine Hommage aus Sicht eines Kindes der NES-Zeit; der Hinweis im Symbolics-Modus nennt den Anlass „MAR10 Day“ (`occasion` in `theme-info.js`). Fällt der 10. März in die Osterwochen (nur bei Ostersonntag am 22. oder 23. März, zuletzt 2008), hat Mario an diesem Tag Vorrang. Styles: `static/css/mario.css`.
+
+**Ostern** – vom Montag zwei Wochen vor Ostersonntag (dem Montag vor Palmsonntag), 0:00 Uhr, bis einschließlich Ostermontag (ab dem Dienstag danach, 0:00 Uhr, wieder aus). Der Ostersonntag wird mit der Gaußschen Osterformel (gregorianisch) berechnet; 2027 läuft der Look also vom 15. bis 29. März. Himmelblaue Menüleiste mit einer Schnur bemalter Ostereier, die leicht schaukeln, rosa Buttons und Avatare, Hasenohren auf allen Avataren, langsam herabschwebende Blütenblätter hinter den Inhalten, eine Wiese mit versteckten Eiern und Blumen am unteren Rand (jede Seite bekommt dafür 40 px Abstand unten), ein 🐣 neben dem App-Namen; Paletten „Frühlingsmorgen“ / „Frühlingsnacht“. Styles: `static/css/easter.css`.
+
+**Knoblauch** – nur am Knoblauch-Tag (19. April) und am Tag der Knoblauch-Fans (6. Oktober), jeweils von 0:00 bis 23:59 Uhr. Olivgrüne Menüleiste mit einem schaukelnden Knoblauchzopf, knoblauchviolette Buttons, jeder Avatar wird zur Knoblauchknolle (die Initiale in der Mitte), herabfallende Knoblauchzehen hinter den Inhalten, ein Knoblauchbeet mit aufsteigendem Duft am unteren Rand (46 px Abstand unten), ein 🧄 neben dem App-Namen; Paletten „Küche“ / „Gartennacht“. Styles: `static/css/garlic.css`. Fällt der 19. April in die Osterwochen (z. B. 2025, oder 2030 auf Karfreitag), hat Knoblauch an diesem einen Tag Vorrang.
+
+**Halloween** – vom 18. Oktober, 0:00 Uhr, bis einschließlich 31. Oktober (ab dem 1. November, 0:00 Uhr, wieder aus). Nachtviolette Menüleiste mit einer Kette flackernder Kürbislaternen, orange Buttons, jeder Avatar wird zum Totenkopf (Augenhöhlen über der Initiale, Zahnreihe darunter – die Initiale bleibt lesbar), langsam herabfallendes Herbstlaub hinter den Inhalten, ein Friedhof mit Grabsteinen, Zaun und Kürbissen am unteren Rand (jede Seite bekommt dafür 44 px Abstand unten), ein 🎃 neben dem App-Namen; Paletten „neblige Dämmerung“ / „Geisternacht“. Styles: `static/css/halloween.css`.
+
+**Día de los Muertos** (mexikanisches Totenfest) – in der ersten Novemberwoche (1. bis 7. November), direkt nach Halloween (ab dem 8. November, 0:00 Uhr, wieder aus). Menüleiste in Rosa mexicano bis Violett mit einer flatternden Girlande aus Papel picado (Scherenschnitt-Fähnchen mit Blüten, Rauten und Schädeln), pinke Buttons, jeder Avatar wird zum Zuckerschädel (Calavera: Augen mit Blütenkränzen, Ringelblume auf der Stirn, genähtes Lächeln – die Initiale bleibt in der Mitte lesbar), herabschwebende Cempasúchil-Blüten (Studentenblumen) hinter den Inhalten, eine Ofrenda mit flackernden Kerzen, Blüten und kleinen Zuckerschädeln am unteren Rand (jede Seite bekommt dafür 50 px Abstand unten), ein 🌼 neben dem App-Namen; Paletten „warmer Tag“ / „Kerzennacht“. Styles: `static/css/muertos.css`.
+
+**Weihnachten** – vom Montag nach Totensonntag, 0:00 Uhr, bis einschließlich 26. Dezember (ab dem 27. Dezember, 0:00 Uhr, wieder aus). Totensonntag ist der letzte Sonntag vor dem 1. Advent, also immer zwischen dem 20. und 26. November (2026: Start am 23. November). Tannengrüne Menüleiste mit funkelnder Lichterkette (auf Seiten ohne Menüleiste am oberen Rand), rote Buttons und Avatare, Nikolausmützen auf allen Avataren, leise fallender Schnee hinter den Inhalten, ein 🎄 neben dem App-Namen; Paletten „verschneiter Tag“ / „Winternacht“. Styles: `static/css/christmas.css`.
+
+**Nur per Link** – Looks ohne Saison, zum gezielten Verteilen an bestimmten Tagen (Liste `LINK_ONLY` in `theme.js`). Sie gelten wie jede Vorschau nur in diesem Browser-Tab, bis er geschlossen wird, und das Datum schaltet sie nie ein. Ihr (i)-Fenster zeigt nur Titel, Ankündigung und Tipp (`when: null`, `previewNote: false` in `theme-info.js`).
+
+**Pelmeni** („Triple-T (Teig-Taschen-Tag)“, `?theme=pelmeni`): Gzhel-blaue Menüleiste mit weißer Spitzenborte, rote-Bete-farbene Buttons, jeder Avatar wird zum blau-weißen Teller mit Pelmeni (die Initiale liegt auf einem Klecks Smetana), herabfallende Pelmeni, Dill und Pfefferkörner hinter den Inhalten, ein Nudelbrett mit Mehl, Teigkreisen, Nudelholz und einer Schüssel Pelmeni am unteren Rand (46 px Abstand unten), ein 🥟 neben dem App-Namen; Paletten „Mehlküche“ / „Sibirische Nacht“. Styles: `static/css/pelmeni.css`.
+
+**Pasta** („Pasta Day“, `?theme=pasta`): Menüleiste in Amalfi-Petrol mit Tagliatelle, die an einer Holzstange trocknen, tomatenrote Buttons, jeder Avatar wird zum Teller Spaghetti (die Initiale liegt auf einer Burrata), herabfallende Farfalle, Penne, Fusilli, Muschelnudeln, Basilikum und Parmesan, eine blau-weiß gestreifte Tischdecke mit Spaghettitopf, Sieb, einem Glas Penne, Parmesan und einem Teller am unteren Rand (46 px Abstand unten), ein 🍝 neben dem App-Namen; Paletten „Zitronenküche“ / „Trattoria-Nacht“. Styles: `static/css/pasta.css`.
+
+**GTA-VI-Hommage** („Food Order in Vice City“, `?theme=gta`): eigene Zeichnungen im Miami-Neon-Stil, keine Inhalte aus dem Spiel (keine Logos, Figuren, Schriften oder Grafiken von Rockstar). Menüleiste von Nachtviolett zu Neonpink mit flackernden Neonröhren an der Unterkante, pinke Buttons, jeder Avatar wird zur gestreiften Synthwave-Sonne (die Initiale darauf), herabfallende Dollarscheine und Palmwedel, eine Ocean-Drive-Skyline mit Art-déco-Hotels, Palmen und Meer am unteren Rand (52 px Abstand unten, nachts mit Neonrand), ein 🌴 neben dem App-Namen; Paletten „Sonnenuntergang“ / „Neonnacht“. Das (i)-Fenster enthält eine Hommage aus Sicht eines Fans, der seit GTA V (2013) gewartet hat. Styles: `static/css/gta.css`.
+
+**Pokémon-Hommage** („A Wild Lunch Appeared!“, `?theme=pokemon`): eine Verbeugung vor den 151 und der Roten, Blauen und Gelben Edition für den Game Boy, als eigene Pixel-Grafik – keine Pokémon, kein Poké Ball, keine Logos, Sprites, Musik oder Slogans aus den Spielen. Die vier Grüntöne des alten Handheld-Bildschirms (Pixel scharf gerendert), dunkelgrüne Menüleiste mit roten, blauen und gelben Spielmodulen an einem Link-Kabel, Buttons in der Farbe der A/B-Knöpfe, jeder Avatar wird zum kleinen grünen Handheld-Bildschirm mit der Initiale, herabfallende Pixel-Herzen, -Sterne, -Noten und -Blätter, hohes Pixel-Gras mit Blumen in den drei Editionsfarben am unteren Rand (40 px Abstand unten), ein 🎮 neben dem App-Namen; Paletten „Schulbusfenster“ / „unter der Bettdecke mit Taschenlampe“. Das (i)-Fenster enthält eine Hommage aus Sicht eines 90er-Kindes. Styles: `static/css/pokemon.css`.
+
+**Übersicht `/themes`:** Eine versteckte Seite (nirgends verlinkt, nur nach Login) listet alle Looks als Karten: Saison-Looks in der Reihenfolge, in der sie als Nächstes kommen, mit Regel, aktuellem bzw. nächstem Zeitraum (aus `theme.js` berechnet), Zahl der Besucher und Rufwort; danach die Link-Looks, Symbolics und der Standard-Look. Jede Karte hat einen Knopf, der das Dashboard mit `?theme=…` in einem neuen Tab öffnet, und den Link zum Kopieren. Die Karten entstehen im Browser aus `window.yyTheme` (`theme.js`), `window.yyThemeInfo` (`theme-info.js`) und `yyVisitors.castOf()` (`visitors.js`) – ein neuer Look erscheint dort also von selbst.
+
+- **Vorschau per Link:** `?theme=pizza`, `?theme=mario`, `?theme=easter`, `?theme=garlic`, `?theme=halloween`, `?theme=muertos` bzw. `?theme=christmas` (und die Link-Looks `?theme=pelmeni`, `?theme=pasta`, `?theme=gta`, `?theme=pokemon`) an die URL einer beliebigen Seite hängen (z. B. `/orders/dashboard?theme=pizza`, bzw. `&theme=pizza`). Der Parameter übersteht beide Login-Schritte und wird danach aus der Adressleiste entfernt. Die Vorschau gilt nur für diesen Browser-Tab, bis er geschlossen wird (`sessionStorage`, `yy-theme-preview` = Name des Looks) – eine vergessene Vorschau bleibt also nicht über den Anlass hinaus hängen. `?theme=default` beendet sie vorher.
+- **Info-Knopf:** Solange ein besonderer Look aktiv ist (auch der Symbolics-Modus), steht in der Menüleiste ganz vorne in der rechten Gruppe ein (i)-Knopf. Er öffnet ein Bootstrap-Modal mit dem Anlass in ein paar Sätzen, dem Zeitraum, einem Hinweis auf die Besucher samt Rufwort und – bei einer Vorschau – dem Hinweis, wie sie endet. `static/js/theme-info.js` setzt den Knopf per Skript in jede Seite mit Menüleiste (Formularseiten, deren Leiste nur den App-Namen zeigt, bekommen rechts eine eigene Gruppe) und blendet ihn ein, aus oder um, sobald sich `data-yy-theme` ändert. Die Texte stehen in `INFO` in derselben Datei; Seiten ohne Menüleiste (Login, Namenseingabe, Startseite, Release Notes) haben keinen Knopf.
+- **Hinweis im Symbolics-Modus:** Symbolics verdeckt die Saison-Looks. Damit auch diese Nutzer sie mitbekommen, erscheint auf jeder Seite unten rechts (über der Kommandozeile) ein Fenster „Incoming message“, solange Symbolics an ist und das Datum einen Saison-Look vorsieht – mit dem Anlass und dem Knopf „Switch to the standard look“. Der schaltet Symbolics an Ort und Stelle ab (ohne Neuladen, Eingaben bleiben erhalten; ohne JavaScript führt der Link auf `?theme=default`), danach ist der Saison-Look zu sehen; `symbolics` tippen bringt den Modus zurück. „Not now“ (×) blendet den Hinweis für den Rest dieses Anlasses aus (`localStorage`, `yy-season-hint-dismissed` = z. B. `christmas:2026`, bei Knoblauch mit Monat, weil er zweimal im Jahr kommt); beim nächsten Anlass erscheint er wieder. Derselbe Weg zurück steht im (i)-Fenster des Symbolics-Modus. Umgesetzt in `theme-info.js` (über `window.yyTheme` aus `theme.js`), Styles in `symbolics.css`.
+- **Vorrang:** Vorschau in diesem Tab › eingeschalteter Symbolics-Modus › Look des Tages (einzelne Aktionstage vor mehrwöchigen Festen) › normaler Look. Wer Symbolics an hat, behält es also auch in der Saison; Ausschalten (`symbolics` tippen oder `?theme=default`) führt zum Look des Tages zurück. Einen Schalter, um einen Look abzuwählen, gibt es nicht.
+- Bei „Bewegung reduzieren“ im Betriebssystem (`prefers-reduced-motion`) fällt und schwebt nichts, Girlanden, Kerzen und Lichter stehen still und es kommen keine Besucher.
+- Alle Regeln sind auf `html[data-yy-theme="…"]` des jeweiligen Looks beschränkt, die Dateien wirken also sonst nicht. Alle Bilder (Hüte, Ohren, Masken, Girlanden, Herabfallendes, Ränder unten) sind Inline-SVGs in CSS-Variablen (keine zusätzlichen Requests). Das Herabfallende liegt mit `z-index: -1` hinter allen Karten; nichts davon fängt Klicks ab.
+
+### Besucher
+
+Während eines Looks kommt alle 1–5 Minuten (zufällig) ein Besucher über den Bildschirm, nie zweimal derselbe hintereinander. Der Auftritt in der Spalte „Fliegt“ kommt doppelt so häufig wie die anderen (bei Knoblauch der tanzende Knoblauch, bei GTA die Verfolgungsjagd, bei Mario der springende Koch).
+
+| Look (Skript) | Fliegt durch die obere Hälfte | Am unteren Rand entlang | Lässt sich von oben herab | Schaut vom Rand herein und winkt | Rufwort |
+|---|---|---|---|---|---|
+| Pizza (`pizza.js`) | Pizza dreht sich wie eine Frisbee | Pizzastück tanzt; Pizzabäcker wirft Teig | Pizzastück an einem Käsefaden | Pizzastück | `pizza` |
+| Super-Mario-Hommage (`mario.js`) | Vogel mit einem Stück Pizza im Schnabel | springender Pixel-Koch mit zwei Münzen (doppelt so häufig); grimmiger Brokkoli | Ziegelblock an der Kette, aus dem eine Münze springt | Pixel-Koch | `mario` |
+| Ostern (`easter.js`) | Osterhase im Ei-Heißluftballon | Osterhase hoppelt mit Körbchen; Küken tanzt | – | Osterhase oder Küken im Ei | `hoppel` |
+| Knoblauch (`garlic.js`) | Fledermaus auf der Flucht | Knoblauchknolle tanzt | Knoblauch an der Schnur | Vampir („Ugh, garlic!“) oder Knoblauchknolle | `knoblauch` |
+| Halloween (`halloween.js`) | Hexe auf dem Besen mit schwarzer Katze | Skelett mit Fliege tanzt; Gespenst schwebt | Spinne | schwarze Katze oder Gespenst („Boo!“) | `spuk` |
+| Día de los Muertos (`muertos.js`) | Schwarm Monarchfalter | Catrina tanzt; Skelett mit Blumenkranz spielt Gitarre | – | Skelett im bestickten Hemd oder die Catrina | `calavera` |
+| Weihnachten (`christmas.js`) | Weihnachtsmann im Schlitten mit zwei Rentieren | Weihnachtsmann oder Rentier tanzt | – | Weihnachtsmann oder Rentier | `hohoho` |
+| Pelmeni, nur per Link (`pelmeni.js`) | Pelmen surft auf einem Holzlöffel | Parade aus Gyoza, Ravioli und Pelmen; Pelmen mit Dillfrisur tanzt | Gabel mit aufgespießtem Pelmen | Pelmen mit Smetana-Häubchen | `pelmeni` |
+| GTA-VI-Hommage, nur per Link (`gta.js`) | Hubschrauber mit Suchscheinwerfer | Verfolgungsjagd Sportwagen und Polizeiauto (doppelt so häufig); Speedboot | Geldsack am Seil | Flamingo mit Sonnenbrille | `vicecity` |
+| Pokémon-Hommage, nur per Link (`pokemon.js`) | Donut mit Flügeln | wilder BURGLIN mit Textbox „A wild BURGLIN appeared!“; tanzender Taco; hüpfendes, dampfendes Grillhähnchen („A wild BROILER appeared!“, goldbraun wie mit dem Super Game Boy eingefärbt) | Spielmodul (rot, blau oder gelb) am Link-Kabel | Reisbällchen | `pokemon` |
+| Pasta, nur per Link (`pasta.js`) | Schwarm Farfalle | Fleischbällchen mit Spaghetti-Haaren tanzt; Parade aus Penne, Fusilli und Muschelnudel | Fleischbällchen an einem Spaghetti | Fleischbällchen | `pasta` |
+
+- Zeitplan, Bewegungen und Rufwort steuert `static/js/visitors.js`; die Skripte der Looks (`static/js/*.js` aus der Tabelle) zeichnen nur die Figuren und melden sie mit `yyVisitors.add(...)` an (alle laden mit `defer`, `visitors.js` zuerst).
+- Das Rufwort tippt man außerhalb eines Formularfelds; es ruft sofort einen Besucher, aber nur während des passenden Looks.
+- Der nächste Termin steht in `sessionStorage` (`yy-visitor-next`), damit der Rhythmus über Seitenwechsel hinweg weiterläuft statt bei jedem Klick neu zu starten; ist er beim Laden einer Seite schon fällig, kommt der Besuch 3 Sekunden später. Fällt er in eine Zeit, in der der Tab im Hintergrund ist, kommt er 3 Sekunden nach der Rückkehr. Beim ersten Aufruf einer Vorschau (`?theme=…`) erscheint der erste Besucher schon nach 3 Sekunden.
+- Die Figuren sind Inline-SVGs, fangen keine Klicks ab (`pointer-events: none`) und werden danach wieder entfernt. Bewegung über die Web Animations API, Arme, Beine, Ohren und Flügel per CSS (`.yy-v-*` in `static/css/visitors.css`); der Faden beim Herablassen ist `.yy-visitor-drop::before` (Farbe und Stärke pro Besucher).
+
 ### Easter Egg: Symbolics-Modus
 
 Ein versteckter dritter Look im Stil von symbolics.com, der ersten jemals registrierten .com-Domain: Neon-Retro-Terminal mit Scanlines auf Schwarz, leuchtenden cyanfarbenen Überschriften und Rahmen, grüner Monospace-Schrift, Magenta- und Gelb-Akzenten, Fenstertiteln mit drei Punkten und einer Kommandozeile am unteren Rand (`C:\YATTA-YAM-YAM\ORDERS\DASHBOARD>`), die anzeigt, welchen Befehl ein Klick auf das Element unter dem Mauszeiger ausführen würde.
 
 - **Ein/aus:** irgendwo außerhalb eines Formularfelds `symbolics` tippen oder auf `/version` 7-mal hintereinander auf das Versions-Badge tippen (funktioniert auch auf dem Handy).
-- **Per Link:** `?theme=symbolics` an die URL einer beliebigen Seite hängen (z. B. `/orders/12?theme=symbolics`, bzw. `&theme=symbolics`, wenn die URL schon Parameter hat); `?theme=default` schaltet zurück. Der Parameter übersteht beide Login-Schritte. Sobald die Wahl gespeichert ist, entfernt `theme.js` ihn aus der Adressleiste, damit Neuladen oder Kopieren der URL nicht erneut umschaltet.
+- **Per Link:** `?theme=symbolics` an die URL einer beliebigen Seite hängen (z. B. `/orders/12?theme=symbolics`, bzw. `&theme=symbolics`, wenn die URL schon Parameter hat); `?theme=default` schaltet zurück (und beendet auch eine Saison-Vorschau). Der Parameter übersteht beide Login-Schritte. Sobald die Wahl gespeichert ist, entfernt `theme.js` ihn aus der Adressleiste, damit Neuladen oder Kopieren der URL nicht erneut umschaltet.
 - Die Wahl wird pro Browser in `localStorage` gespeichert (`yy-theme` = `symbolics`); andere offene Tabs ziehen mit. Ist der Speicher blockiert, gilt der Modus nur für die aktuelle Seite.
 - Styles: `static/css/symbolics.css`. Alle Regeln sind auf `html[data-yy-theme="symbolics"]` beschränkt, die Datei wirkt also sonst nicht. In diesem Modus ist `data-bs-theme` unabhängig von der Systemeinstellung immer `dark`.
 - Bewusst nicht in den Release Notes erwähnt.
