@@ -1,8 +1,8 @@
 /*
  * Super Mario homage visitors (see visitors.js for when and how they appear). The look
- * is link-only (?theme=mario), see theme.js. A nod to the 8-bit jump-and-run days in
- * our own pixel art: none of the figures is, or looks like, a character, enemy or item
- * from the games.
+ * shows on MAR10 Day (10 March) and as a ?theme=mario preview, see theme.js. A nod to
+ * the 8-bit jump-and-run days in our own pixel art: none of the figures is, or looks
+ * like, a character, enemy or item from the games.
  *   - our hero, a pixel chef in a white toque, jumps along the bottom edge past two coins,
  *   - a grumpy broccoli marches along the bottom edge,
  *   - a bird flaps across the upper half with a slice of pizza in its beak,

@@ -35,8 +35,14 @@
  *      toppings, a checked tablecloth along the bottom edge. Visitors: a flying pizza, a
  *      pizza slice, a pizzaiolo tossing dough, a slice on a string of cheese
  *      (js/pizza.js). Styles: css/pizza.css.
+ *    - Super Mario homage ("Lunch World 1-1"): only on MAR10 Day (10 March, written the
+ *      short way it reads MAR10). A nod to the 8-bit jump-and-run days as our own pixel
+ *      art, nothing from the games. Brick-wall menu bar with spinning coins, coin
+ *      avatars, ground blocks along the bottom edge (blue underground bricks in dark
+ *      mode). Visitors: a jumping pixel chef, a grumpy broccoli, a bird with a slice of
+ *      pizza (js/mario.js). Styles: css/mario.css.
  *    Preview at any time: append ?theme=christmas, ?theme=easter, ?theme=halloween,
- *    ?theme=muertos, ?theme=garlic or ?theme=pizza to any page URL.
+ *    ?theme=muertos, ?theme=garlic, ?theme=pizza or ?theme=mario to any page URL.
  *
  * 3. Link-only looks have no season and only ever show as a preview, for links shared
  *    on purpose on a particular day:
@@ -58,11 +64,6 @@
  *      games. Handheld-screen greens, cartridges on a link cable, tall grass along the
  *      bottom edge. Visitors: made-up pixel lunch monsters (js/pokemon.js).
  *      Styles: css/pokemon.css.
- *    - Super Mario homage (?theme=mario, "Lunch World 1-1"): a nod to the 8-bit
- *      jump-and-run days as our own pixel art, nothing from the games. Brick-wall menu
- *      bar with spinning coins, coin avatars, ground blocks along the bottom edge (blue
- *      underground bricks in dark mode). Visitors: a jumping pixel chef, a grumpy
- *      broccoli, a bird with a slice of pizza (js/mario.js). Styles: css/mario.css.
  *    The hidden page /themes lists every look with a preview link.
  *    The preview lasts until the browser tab is closed (sessionStorage),
  *    ?theme=default ends it.
@@ -96,8 +97,8 @@
     var GTA = 'gta';
     var POKEMON = 'pokemon';
     var MARIO = 'mario';
-    var SEASONS = [XMAS, EASTER, HALLOWEEN, MUERTOS, GARLIC, PIZZA];
-    var LINK_ONLY = [PELMENI, PASTA, GTA, POKEMON, MARIO]; // no season: only ever shown as a preview
+    var SEASONS = [XMAS, EASTER, HALLOWEEN, MUERTOS, GARLIC, PIZZA, MARIO];
+    var LINK_ONLY = [PELMENI, PASTA, GTA, POKEMON]; // no season: only ever shown as a preview
     var PREVIEWABLE = SEASONS.concat(LINK_ONLY);
     var URL_PARAM = 'theme';
     var URL_OFF = 'default';
@@ -250,10 +251,19 @@
         return now.getMonth() === 1 && now.getDate() >= 6 && now.getDate() <= 12;
     }
 
-    // The single days come first: Garlic Day can fall into the Easter weeks
+    // MAR10 Day: 10 March, which written the short way reads MAR10
+    function isMarioDay(now) {
+        return now.getMonth() === 2 && now.getDate() === 10;
+    }
+
+    // The single days come first: Garlic Day can fall into the Easter weeks (and so can
+    // MAR10 Day, when Easter Sunday is as early as 22 or 23 March)
     function seasonOf(now) {
         if (isGarlicDay(now)) {
             return GARLIC;
+        }
+        if (isMarioDay(now)) {
+            return MARIO;
         }
         if (isPizzaWeek(now)) {
             return PIZZA;

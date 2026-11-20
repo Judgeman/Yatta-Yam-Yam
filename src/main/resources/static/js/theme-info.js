@@ -127,9 +127,10 @@
         mario: {
             emoji: '\uD83D\uDD79\uFE0F',
             title: 'Lunch World 1-1',
-            when: null,                 // link-only, like Triple-T: no dates, no preview note
-            previewNote: false,
-            text: 'Some of us learned to jump before we learned to read. A grey box under the TV, a cartridge that '
+            occasion: 'MAR10 Day',      // for the Symbolics note: "MAR10 Day in Yatta-Yam-Yam!"
+            when: 'Only on MAR10 Day, 10 March.',
+            text: 'Write 10 March the short way and it reads MAR10 \u2013 so today is Mario Day. '
+                + 'Some of us learned to jump before we learned to read. A grey box under the TV, a cartridge that '
                 + 'only worked after you blew into it, and World 1-1 of Super Mario Bros., which we could play with '
                 + 'our eyes closed: run right, jump on everything, bump every brick, grab every coin. We rescued a '
                 + 'princess more times than we can count and never once got lunch for it. Today it\u2019s the other '
@@ -277,8 +278,10 @@
             + '<p class="small text-muted mt-2 mb-0">Type \u201Csymbolics\u201D to come back any time.</p>'
             + '</div>';
         hint.querySelector('[data-field="emoji"]').textContent = info.emoji;
-        hint.querySelector('[data-field="headline"]').textContent = info.title + ' in Yatta-Yam-Yam!';
-        hint.querySelector('[data-field="text"]').textContent = 'There is a special ' + info.title
+        // The occasion's name, where the modal title is something else ("Lunch World 1-1")
+        var occasion = info.occasion || info.title;
+        hint.querySelector('[data-field="headline"]').textContent = occasion + ' in Yatta-Yam-Yam!';
+        hint.querySelector('[data-field="text"]').textContent = 'There is a special ' + occasion
             + ' look right now, with a few surprises. Symbolics mode hides it.';
         hint.querySelector('[data-field="action"]').appendChild(
             standardLink('btn btn-primary btn-sm', 'Switch to the standard look'));
@@ -371,7 +374,7 @@
         box.hidden = !season;
         box.textContent = '';
         if (season) {
-            box.appendChild(document.createTextNode(INFO[season].emoji + ' Right now it\u2019s ' + INFO[season].title + '. '));
+            box.appendChild(document.createTextNode(INFO[season].emoji + ' Right now it\u2019s ' + (INFO[season].occasion || INFO[season].title) + '. '));
             box.appendChild(standardLink('alert-link', 'Switch to the standard look to see it.', function () {
                 window.bootstrap.Modal.getOrCreateInstance(el).hide();
             }));
