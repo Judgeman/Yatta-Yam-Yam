@@ -1,6 +1,6 @@
 # Yatta-Yam-Yam – Technische Dokumentation
 
-**Version:** 1.11.0  
+**Version:** 1.12.0  
 **Stand:** November 2026
 
 ---
@@ -30,6 +30,7 @@ Yatta-Yam-Yam ist eine interne Web-App zur kollektiven Essensbestellung. Nutzer 
 - Gemeinsames Zugangspasswort für die App, danach namensbasierte Anmeldung ohne persönliches Passwort (Cookie)
 - Verwaltung von Bestellungen mit Statuslebenszyklus
 - Wiederverwendbare Menülisten mit Sichtbarkeitsschalter (ausgeblendete Listen erscheinen nicht bei neuen Bestellungen)
+- Artikelbilder in der Bestellung per Klick groß ansehen (Modal mit Name und Preis, Blättern per Pfeil, Pfeiltaste oder Wischen)
 - Standortfilter (Kassel / Frankfurt)
 - Trinkgeldverteilung pro Kopf
 - Bestellart „Cost split": eine Person kauft alles ein, der Gesamtbetrag wird gleichmäßig auf alle Angemeldeten verteilt
@@ -459,7 +460,7 @@ Anwendung erreichbar unter: `http://localhost:38443`
 
 ```bash
 mvn package
-java -DYATTA_YAM_YAM_PASSWORD=deinPasswort -jar target/yatta-yam-yam-1.11.0.jar
+java -DYATTA_YAM_YAM_PASSWORD=deinPasswort -jar target/yatta-yam-yam-1.12.0.jar
 ```
 
 ---
