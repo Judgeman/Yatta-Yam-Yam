@@ -3,6 +3,7 @@
  *
  * Lists every payment made for an order (PayPal, Wero or cash) grouped by order and
  * lets people filter it by "Paid by", payment type, PayPal / Wero link and order date.
+ * Archived orders are hidden unless "Include archived orders" is switched on.
  * Orders or single payments can be unticked, the viewer's own open debts can be
  * subtracted and a free adjustment added. Everything is added up in cents in the
  * browser; nothing is saved on the server. The filters (and the debts switch) are
@@ -111,8 +112,9 @@
 
     // ── Settings (filters + debts switch), kept per browser ──
 
+    // Archived orders are left out unless "Include archived orders" is switched on
     function emptyFilters() {
-        return {payee: {}, type: {}, paypal: {}, wero: {}, from: '', to: ''};
+        return {payee: {}, type: {}, paypal: {}, wero: {}, from: '', to: '', archived: false};
     }
 
     function loadSettings() {
@@ -128,6 +130,7 @@
             });
             filters.from = typeof saved.from === 'string' ? saved.from : '';
             filters.to = typeof saved.to === 'string' ? saved.to : '';
+            filters.archived = saved.archived === true;
             debtsOn = saved.debts === true;
         } catch (e) {
             // Blocked storage or broken entry: start without filters
@@ -135,7 +138,7 @@
     }
 
     function saveSettings() {
-        var data = {from: filters.from, to: filters.to, debts: debtsOn};
+        var data = {from: filters.from, to: filters.to, archived: filters.archived, debts: debtsOn};
         FACETS.forEach(function (facet) {
             data[facet] = Object.keys(filters[facet]);
         });
@@ -156,9 +159,22 @@
         return (!filters.from || iso >= filters.from) && (!filters.to || iso <= filters.to);
     }
 
-    // No chip selected in a group = no restriction. Link chips work across both link
-    // groups: with any link selected, only payments made through a selected link count.
+    function isArchived(p) {
+        return p.status === 'ARCHIVED';
+    }
+
+    function archiveOk(p) {
+        return filters.archived || !isArchived(p);
+    }
+
     function matches(p) {
+        return archiveOk(p) && matchesFilters(p);
+    }
+
+    // All filters except the archive switch. No chip selected in a group = no restriction.
+    // Link chips work across both link groups: with any link selected, only payments
+    // made through a selected link count.
+    function matchesFilters(p) {
         if (hasAny(filters.payee) && !filters.payee[p.payeeKey]) {
             return false;
         }
@@ -181,7 +197,7 @@
 
     // ── Filter chips ──
 
-    function payeeOptions() {
+    function payeeOptions(pool) {
         var seen = {};
         var options = [];
         function add(name) {
@@ -191,7 +207,7 @@
                 options.push({key: key, label: name.trim()});
             }
         }
-        payments.forEach(function (p) { add(p.paidBy); });
+        pool.forEach(function (p) { add(p.paidBy); });
         debts.forEach(function (d) { add(d.payee); });
         return options.sort(function (a, b) {
             return a.label.localeCompare(b.label, undefined, {sensitivity: 'base'});
@@ -206,10 +222,10 @@
         return options;
     }
 
-    function linkOptions(type) {
+    function linkOptions(type, pool) {
         var seen = {};
         var options = [];
-        payments.forEach(function (p) {
+        pool.forEach(function (p) {
             if (p.typeKey === type && !seen[p.linkKey]) {
                 seen[p.linkKey] = true;
                 options.push(p.linkKey
@@ -266,15 +282,32 @@
         }
     }
 
-    function renderFilters() {
-        var facets = {
-            payee: payeeOptions(),
+    function facetOptions(pool) {
+        return {
+            payee: payeeOptions(pool),
             type: typeOptions(),
-            paypal: linkOptions('PAYPAL'),
-            wero: linkOptions('WERO')
+            paypal: linkOptions('PAYPAL', pool),
+            wero: linkOptions('WERO', pool)
         };
-        FACETS.forEach(function (facet) { prune(facet, facets[facet]); });
+    }
+
+    function renderFilters() {
+        // Remembered chips are only forgotten when they no longer exist at all ...
+        var all = facetOptions(payments);
+        FACETS.forEach(function (facet) { prune(facet, all[facet]); });
         saveSettings();
+
+        // ... but only chips from the shown orders are offered (plus any still selected),
+        // so archived orders don't add chips while they are hidden
+        var shown = facetOptions(payments.filter(archiveOk));
+        var facets = {};
+        FACETS.forEach(function (facet) {
+            var offered = {};
+            shown[facet].forEach(function (o) { offered[o.key] = true; });
+            facets[facet] = all[facet].filter(function (o) {
+                return offered[o.key] || filters[facet][o.key] === true;
+            });
+        });
 
         renderFacet('payee', 'calcFacetPayee', facets.payee);
         renderFacet('type', 'calcFacetType', facets.type);
@@ -288,6 +321,10 @@
 
         byId('calcDateFrom').value = filters.from;
         byId('calcDateTo').value = filters.to;
+
+        // Archive switch only when there are archived orders with payments
+        byId('calcArchivedToggle').checked = filters.archived;
+        byId('calcFilterArchive').classList.toggle('d-none', !filters.archived && !payments.some(isArchived));
     }
 
     // ── Payments, grouped by order ──
@@ -370,7 +407,7 @@
 
     // Number of active filters, shown next to "Filter" (useful while the block is collapsed)
     function renderFilterCount() {
-        var count = (filters.from ? 1 : 0) + (filters.to ? 1 : 0);
+        var count = (filters.from ? 1 : 0) + (filters.to ? 1 : 0) + (filters.archived ? 1 : 0);
         FACETS.forEach(function (facet) { count += Object.keys(filters[facet]).length; });
         var badge = byId('calcFilterCount');
         badge.textContent = count;
@@ -402,7 +439,10 @@
             : 'No payments yet.';
         byId('calcSelectAll').disabled = !groups.length;
         byId('calcSelectNone').disabled = !groups.length;
-        byId('calcMatchInfo').textContent = plural(visible.length, 'payment') + ' in ' + plural(groups.length, 'order');
+        var hiddenArchived = filters.archived ? 0
+            : payments.filter(function (p) { return isArchived(p) && matchesFilters(p); }).length;
+        byId('calcMatchInfo').textContent = plural(visible.length, 'payment') + ' in ' + plural(groups.length, 'order')
+            + (hiddenArchived ? ' · ' + hiddenArchived + ' from archived orders hidden' : '');
 
         renderDebts();
         update();
@@ -599,6 +639,13 @@
             view.rows.forEach(function (r) { setExcluded(r.payment, true); });
         });
         update();
+    });
+
+    byId('calcArchivedToggle').addEventListener('change', function () {
+        filters.archived = byId('calcArchivedToggle').checked;
+        saveSettings();
+        renderFilters();
+        renderList();
     });
 
     byId('calcDebtsToggle').addEventListener('change', function () {

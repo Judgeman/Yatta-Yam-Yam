@@ -398,12 +398,13 @@ Amount per order = own items + tip share or cost share (`OrderService.getOpenDeb
 
 The "Calculator" button next to "New Order" opens a dialog that lists payments from orders and adds them up — for example when someone collects money via another person's PayPal and that person passes the amount on in cash. It also opens with the shortcut **Alt+C** (Mac: **⌥C**) on the dashboard and via the link `/orders/dashboard?calculator` (the parameter survives both login steps and is then removed from the address bar). A short note at the top of the dialog explains what it is for. The calculator changes no data and is available to every user.
 
-- **Payments:** every participation (`isParticipant`) that is marked as paid by the participant or confirmed by the creator, in orders of any status (archived ones too). Amount = own items + tip share or cost share (`getPerPersonCharge`). Grouped by order (newest first) with place, date, creator and — if different — payer; each row shows participant, payment type and amount.
+- **Payments:** every participation (`isParticipant`) that is marked as paid by the participant or confirmed by the creator, in orders of any status. Archived orders are hidden by default (see the *Archive* filter). Amount = own items + tip share or cost share (`getPerPersonCharge`). Grouped by order (newest first) with place, date, creator and — if different — payer; each row shows participant, payment type and amount.
 - **Filters** (multiple choice; nothing selected = no restriction; different filters apply together):
   - *Paid by:* who receives the money (`OrderService.getPayee`: `paidByName`, otherwise the creator; case-insensitive)
   - *Payment type:* PayPal, Wero, Cash (plus "Not specified" for old rows without a payment type)
   - *PayPal link / Wero link:* the orders' links. With at least one link selected, only payments made through a selected link count — PayPal payments through the order's PayPal link, Wero payments through its Wero link. Cash payments drop out then.
   - *Order date:* from/to
+  - *Archive:* switch "Include archived orders", off by default. While it is off, the list states how many payments from archived orders are hidden, and filter chips that only come from archived orders are not offered.
 - **Unticking:** whole orders (checkbox in the header, half-ticked for a partial selection) or single payments can be left out; the total updates right away. "Select all"/"Select none" apply to the payments currently shown.
 - **Offset own debts** (optional, switch "Offset my open debts"): the open amounts from `getOpenDebts` (the same as in the red badge), each can be unticked; with a "Paid by" filter set, only debts to those people. They are subtracted from the total.
 - **Adjustment (±):** a free amount, e.g. cash already handed over (negative).
