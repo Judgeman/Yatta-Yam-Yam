@@ -507,6 +507,11 @@
     color: var(--bs-secondary-color);
 }
 
+/* Amounts not paid yet (amber, like the CLOSED badge) */
+.calc-unpaid {
+    color: var(--yy-badge-closed-fg);
+}
+
 /* Unticked: faded and struck through, the checkbox itself stays clear */
 .calc-off .calc-order-title,
 .calc-off .calc-row-label,
