@@ -161,3 +161,29 @@ body.page-muted {
     filter: invert(1) brightness(0.88);
     mix-blend-mode: screen;
 }
+
+/* Link to the year-end review (/wrapped), shown in December and January */
+.wrapped-banner {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--yy-accent), var(--yy-accent-2));
+    color: #fff;
+    text-decoration: none;
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.35);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.wrapped-banner:hover,
+.wrapped-banner:focus-visible {
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 26px rgba(102, 126, 234, 0.45);
+}
+
+.wrapped-banner-icon {
+    font-size: 1.8rem;
+    line-height: 1;
+}

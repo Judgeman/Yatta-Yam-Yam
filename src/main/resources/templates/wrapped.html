@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <link rel="icon" type="image/svg+xml" href="/images/favicon.svg"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+    <title th:text="'Wrapped ' + ${wrapped.year} + ' – Yatta-Yam-Yam'">Wrapped – Yatta-Yam-Yam</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link rel="stylesheet" th:href="@{/css/wrapped.css}"/>
+    <th:block th:replace="~{fragments/theme :: head}"></th:block>
+</head>
+<body class="wr-body">
+
+<!-- Yatta-Yam-Yam Wrapped: one <section class="wr-slide"> per story slide.
+     wrapped.js turns them into a story (tap/swipe/arrow keys); without JavaScript
+     they are simply shown one below the other. Figures: WrappedService. -->
+<main id="wrapped" class="wr-stage"
+      th:with="me=${wrapped.me}, all=${wrapped.overall}">
+
+    <div class="wr-progress" aria-hidden="true" hidden></div>
+    <a th:href="@{/orders/dashboard}" class="wr-close" aria-label="Close and go to the dashboard">&times;</a>
+
+    <!-- ── Intro ─────────────────────────────────────────────────────────── -->
+    <section class="wr-slide wr-theme-indigo" tabindex="-1" aria-label="Intro">
+        <div class="wr-content wr-center">
+            <div class="wr-kicker">Yatta-Yam-Yam Wrapped</div>
+            <div class="wr-year" th:text="${wrapped.year}">2026</div>
+            <div th:if="${yearInProgress}" class="wr-pill">so far</div>
+            <p class="wr-lead">
+                A year of ordering together. Let's see what everyone ate &mdash;
+                and what you did, <strong th:text="${user.name}">Name</strong>.
+            </p>
+            <div class="wr-hint" data-wr-hint>Tap to continue &rarr;</div>
+        </div>
+    </section>
+
+    <!-- ── Nothing to show yet ───────────────────────────────────────────── -->
+    <section th:if="${all.empty}" class="wr-slide wr-theme-night" tabindex="-1" aria-label="No orders">
+        <div class="wr-content wr-center">
+            <div class="wr-emoji">🍽️</div>
+            <h2 class="wr-title">No completed orders in <span th:text="${wrapped.year}">2026</span> yet</h2>
+            <p class="wr-lead">Orders count once they are closed. Come back after the next lunch!</p>
+        </div>
+    </section>
+
+    <th:block th:unless="${all.empty}">
+
+        <!-- ── Everyone together ─────────────────────────────────────────── -->
+        <section class="wr-slide wr-theme-night" tabindex="-1" aria-label="All orders">
+            <div class="wr-content wr-center">
+                <div class="wr-kicker">Together in <span th:text="${wrapped.year}">2026</span></div>
+                <div class="wr-big" th:data-wr-count="${all.orderCount}"
+                     th:text="${#numbers.formatInteger(all.orderCount,1,'COMMA')}">0</div>
+                <div class="wr-big-label">orders</div>
+                <p class="wr-lead">
+                    <strong th:text="'€' + ${#numbers.formatDecimal(all.totalPaid,1,'COMMA',2,'POINT')}">€0</strong> paid
+                    in total by <strong th:text="${all.peopleCount}">0</strong>
+                    <span th:text="${all.peopleCount == 1} ? 'person' : 'people'">people</span><th:block th:if="${all.dishCount > 0}">
+                    for <strong th:text="${#numbers.formatInteger(all.dishCount,1,'COMMA')}">0</strong>
+                    <span th:text="${all.dishCount == 1} ? 'dish' : 'dishes'">dishes</span></th:block>.
+                </p>
+            </div>
+        </section>
+
+        <!-- ── Per location: figures, then favourites ────────────────────── -->
+        <th:block th:each="loc, iter : ${wrapped.activeLocations}">
+            <section class="wr-slide" tabindex="-1"
+                     th:classappend="${iter.even} ? 'wr-theme-sunset' : 'wr-theme-ocean'"
+                     th:aria-label="${loc.name} + ' in numbers'">
+                <div class="wr-content">
+                    <div class="wr-kicker">📍 <span th:text="${loc.name}">Frankfurt</span></div>
+                    <div class="wr-big" th:data-wr-count="${loc.orderCount}"
+                         th:text="${#numbers.formatInteger(loc.orderCount,1,'COMMA')}">0</div>
+                    <div class="wr-big-label"
+                         th:text="(${loc.orderCount == 1} ? 'order' : 'orders') + ' in ' + ${loc.name}">orders</div>
+
+                    <div class="wr-grid">
+                        <div class="wr-tile">
+                            <div class="wr-tile-value" th:data-wr-count="${loc.totalPaid}" data-wr-decimals="2" data-wr-prefix="€"
+                                 th:text="'€' + ${#numbers.formatDecimal(loc.totalPaid,1,'COMMA',2,'POINT')}">€0.00</div>
+                            <div class="wr-tile-label">paid in total</div>
+                        </div>
+                        <div class="wr-tile">
+                            <div class="wr-tile-value" th:data-wr-count="${loc.dishCount}"
+                                 th:text="${#numbers.formatInteger(loc.dishCount,1,'COMMA')}">0</div>
+                            <div class="wr-tile-label">dishes ordered</div>
+                        </div>
+                        <div class="wr-tile" th:if="${loc.avgTip != null}">
+                            <div class="wr-tile-value"
+                                 th:text="'€' + ${#numbers.formatDecimal(loc.tipTotal,1,'COMMA',2,'POINT')}">€0.00</div>
+                            <div class="wr-tile-label">tip in total</div>
+                        </div>
+                        <div class="wr-tile" th:if="${loc.avgTip != null}">
+                            <div class="wr-tile-value"
+                                 th:text="'€' + ${#numbers.formatDecimal(loc.avgTip,1,'COMMA',2,'POINT')}">€0.00</div>
+                            <div class="wr-tile-label">
+                                Ø tip per order<th:block th:if="${loc.tipPercent != null}">
+                                · <span th:text="${#numbers.formatDecimal(loc.tipPercent,1,1)} + ' %'">0 %</span></th:block>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="wr-note">
+                        <strong th:text="${loc.peopleCount}">0</strong>
+                        <span th:text="${loc.peopleCount == 1} ? 'person' : 'people'">people</span> ordered along.
+                    </p>
+                </div>
+            </section>
+
+            <section class="wr-slide" tabindex="-1"
+                     th:classappend="${iter.even} ? 'wr-theme-berry' : 'wr-theme-forest'"
+                     th:aria-label="${loc.name} + ' favourites'">
+                <div class="wr-content">
+                    <div class="wr-kicker">📍 <span th:text="${loc.name}">Frankfurt</span> · Favourites</div>
+
+                    <th:block th:if="${loc.topProduct != null}">
+                        <div class="wr-label">Most popular dish</div>
+                        <div class="wr-hero" th:text="${loc.topProduct.name}">Pizza Margherita</div>
+                        <p class="wr-sub">
+                            ordered <strong th:text="${loc.topProduct.count} + '×'">0×</strong><th:block
+                                th:if="${loc.topProduct.detail != null}">, mostly from
+                            <strong th:text="${loc.topProduct.detail}">Place</strong></th:block>
+                        </p>
+                        <ol class="wr-ranks" th:unless="${loc.runnerUpProducts.empty}" start="2">
+                            <li th:each="p : ${loc.runnerUpProducts}">
+                                <span class="wr-rank-name" th:text="${p.name}">Dish</span>
+                                <span class="wr-rank-count" th:text="${p.count} + '×'">0×</span>
+                            </li>
+                        </ol>
+                    </th:block>
+
+                    <div class="wr-facts">
+                        <div class="wr-fact" th:if="${loc.topRestaurant != null}">
+                            <span class="wr-fact-icon">🏆</span>
+                            <div><div class="wr-fact-label">Favourite place</div>
+                                <div class="wr-fact-value"><span th:text="${loc.topRestaurant.name}">Place</span>
+                                    <span class="wr-fact-extra" th:text="'· ' + ${loc.topRestaurant.count} + (${loc.topRestaurant.count == 1} ? ' order' : ' orders')">· 0 orders</span></div></div>
+                        </div>
+                        <div class="wr-fact" th:if="${loc.busiestWeekday != null}">
+                            <span class="wr-fact-icon">📅</span>
+                            <div><div class="wr-fact-label">Busiest day</div>
+                                <div class="wr-fact-value"><span th:text="${loc.busiestWeekday.name}">Friday</span>
+                                    <span class="wr-fact-extra" th:text="'· ' + ${loc.busiestWeekday.count} + (${loc.busiestWeekday.count == 1} ? ' order' : ' orders')">· 0 orders</span></div></div>
+                        </div>
+                        <div class="wr-fact" th:if="${loc.biggestOrder != null and loc.biggestOrderPeople > 1}">
+                            <span class="wr-fact-icon">🎉</span>
+                            <div><div class="wr-fact-label">Biggest feast</div>
+                                <div class="wr-fact-value"><span th:text="${loc.biggestOrderPeople} + ' people'">0 people</span>
+                                    <span class="wr-fact-extra" th:text="'· ' + ${loc.biggestOrder.placeName} + ', ' + ${#temporals.format(loc.biggestOrder.orderDate,'d MMM',en)}">· Place, 1 Jan</span></div></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </th:block>
+
+        <!-- ── Locations head to head ─────────────────────────────────────── -->
+        <section th:if="${!wrapped.duel.empty}" class="wr-slide wr-theme-sunset" tabindex="-1"
+                 aria-label="Locations compared">
+            <div class="wr-content">
+                <div class="wr-kicker">Head to head</div>
+                <h2 class="wr-title">
+                    <th:block th:each="loc, iter : ${wrapped.activeLocations}"><span th:text="${loc.name}">Frankfurt</span><span
+                            th:unless="${iter.last}" class="wr-vs"> vs </span></th:block>
+                </h2>
+                <table class="wr-duel">
+                    <thead>
+                    <tr>
+                        <th scope="col"><span class="visually-hidden">Figure</span></th>
+                        <th scope="col" th:each="loc : ${wrapped.activeLocations}" th:text="${loc.name}">Frankfurt</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="row : ${wrapped.duel}">
+                        <th scope="row" th:text="${row.label}">Orders</th>
+                        <td th:each="v, vi : ${row.values}" th:classappend="${vi.index == row.leader} ? 'is-leader' : ''">
+                            <th:block th:if="${v == null}">—</th:block>
+                            <th:block th:if="${v != null and row.money}" th:text="'€' + ${#numbers.formatDecimal(v,1,'COMMA',2,'POINT')}">€0</th:block>
+                            <th:block th:if="${v != null and !row.money}" th:text="${#numbers.formatInteger(v,1,'COMMA')}">0</th:block>
+                            <span th:if="${vi.index == row.leader}" class="wr-crown" aria-label="ahead">👑</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </th:block>
+
+    <!-- ── You ───────────────────────────────────────────────────────────── -->
+    <section th:if="${me.empty and !all.empty}" class="wr-slide wr-theme-indigo" tabindex="-1" aria-label="Your year">
+        <div class="wr-content wr-center">
+            <div class="wr-kicker">And you, <span th:text="${user.name}">Name</span>?</div>
+            <div class="wr-emoji">🥡</div>
+            <h2 class="wr-title">You didn't join any orders in <span th:text="${wrapped.year}">2026</span></h2>
+            <p class="wr-lead">There's always the next lunch.</p>
+        </div>
+    </section>
+
+    <th:block th:unless="${me.empty}">
+        <section class="wr-slide wr-theme-indigo" tabindex="-1" aria-label="Your spending">
+            <div class="wr-content">
+                <div class="wr-kicker">And now: you, <span th:text="${user.name}">Name</span></div>
+                <div class="wr-label">You spent</div>
+                <div class="wr-big" th:data-wr-count="${me.spent}" data-wr-decimals="2" data-wr-prefix="€"
+                     th:text="'€' + ${#numbers.formatDecimal(me.spent,1,'COMMA',2,'POINT')}">€0.00</div>
+                <div class="wr-big-label">on food in <span th:text="${wrapped.year}">2026</span></div>
+
+                <div class="wr-grid">
+                    <div class="wr-tile">
+                        <div class="wr-tile-value" th:data-wr-count="${me.orderCount}" th:text="${me.orderCount}">0</div>
+                        <div class="wr-tile-label" th:text="${me.orderCount == 1} ? 'order joined' : 'orders joined'">orders joined</div>
+                    </div>
+                    <div class="wr-tile">
+                        <div class="wr-tile-value"
+                             th:text="'€' + ${#numbers.formatDecimal(me.avgPerOrder,1,'COMMA',2,'POINT')}">€0.00</div>
+                        <div class="wr-tile-label">Ø per order</div>
+                    </div>
+                    <div class="wr-tile" th:if="${me.dishCount > 0}">
+                        <div class="wr-tile-value" th:data-wr-count="${me.dishCount}" th:text="${me.dishCount}">0</div>
+                        <div class="wr-tile-label" th:text="${me.dishCount == 1} ? 'dish' : 'dishes'">dishes</div>
+                    </div>
+                    <div class="wr-tile" th:if="${me.costSplitCount > 0}">
+                        <div class="wr-tile-value" th:text="${me.costSplitCount}">0</div>
+                        <div class="wr-tile-label" th:text="${me.costSplitCount == 1} ? 'cost split' : 'cost splits'">cost splits</div>
+                    </div>
+                </div>
+                <p th:if="${me.rankShown}" class="wr-note">
+                    That's place <strong th:text="'#' + ${me.rank}">#1</strong> of
+                    <span th:text="${me.rankOf}">0</span> by orders joined.
+                    <span th:if="${me.rank == 1}">Nobody ordered more! 🏅</span>
+                </p>
+            </div>
+        </section>
+
+        <section th:if="${me.topItem != null}" class="wr-slide wr-theme-sunset" tabindex="-1" aria-label="Your top dish">
+            <div class="wr-content wr-center">
+                <div class="wr-kicker">Your number one</div>
+                <div class="wr-emoji">🥇</div>
+                <div class="wr-hero" th:text="${me.topItem.name}">Pizza Margherita</div>
+                <p class="wr-sub">
+                    <strong class="wr-accent" th:text="${me.topItem.count} + '×'">0×</strong> this year<th:block
+                        th:if="${me.topItem.detail != null}">, mostly from
+                    <strong th:text="${me.topItem.detail}">Place</strong></th:block>
+                </p>
+                <ol class="wr-ranks text-start" th:unless="${me.runnerUpItems.empty}" start="2">
+                    <li th:each="p : ${me.runnerUpItems}">
+                        <span class="wr-rank-name" th:text="${p.name}">Dish</span>
+                        <span class="wr-rank-count" th:text="${p.count} + '×'">0×</span>
+                    </li>
+                </ol>
+            </div>
+        </section>
+
+        <section class="wr-slide wr-theme-forest" tabindex="-1" aria-label="Your year in orders">
+            <div class="wr-content">
+                <div class="wr-kicker">Your year in orders</div>
+                <ol class="wr-timeline">
+                    <li>
+                        <div class="wr-fact-label">First order</div>
+                        <div class="wr-fact-value" th:text="${#temporals.format(me.firstOrder.orderDate,'EEEE, d MMMM',en)}">Monday, 5 January</div>
+                        <div class="wr-fact-extra" th:text="${me.firstOrder.placeName}">Place</div>
+                    </li>
+                    <li th:if="${me.orderCount > 1}">
+                        <div class="wr-fact-label">Last order</div>
+                        <div class="wr-fact-value" th:text="${#temporals.format(me.lastOrder.orderDate,'EEEE, d MMMM',en)}">Friday, 19 December</div>
+                        <div class="wr-fact-extra" th:text="${me.lastOrder.placeName}">Place</div>
+                    </li>
+                </ol>
+                <div class="wr-facts">
+                    <div class="wr-fact" th:if="${me.favouriteWeekday != null and me.orderCount > 1}">
+                        <span class="wr-fact-icon">📅</span>
+                        <div><div class="wr-fact-label">Your favourite day</div>
+                            <div class="wr-fact-value"><span th:text="${me.favouriteWeekday.name}">Friday</span>
+                                <span class="wr-fact-extra" th:text="'· ' + ${me.favouriteWeekday.count} + (${me.favouriteWeekday.count == 1} ? ' order' : ' orders')">· 0 orders</span></div></div>
+                    </div>
+                    <div class="wr-fact" th:if="${me.busiestMonth != null and me.orderCount > 1}">
+                        <span class="wr-fact-icon">🗓️</span>
+                        <div><div class="wr-fact-label">Hungriest month</div>
+                            <div class="wr-fact-value"><span th:text="${me.busiestMonth.name}">March</span>
+                                <span class="wr-fact-extra" th:text="'· ' + ${me.busiestMonth.count} + (${me.busiestMonth.count == 1} ? ' order' : ' orders')">· 0 orders</span></div></div>
+                    </div>
+                    <div class="wr-fact" th:if="${me.favouriteRestaurant != null}">
+                        <span class="wr-fact-icon">🏆</span>
+                        <div><div class="wr-fact-label">Your favourite place</div>
+                            <div class="wr-fact-value"><span th:text="${me.favouriteRestaurant.name}">Place</span>
+                                <span class="wr-fact-extra" th:text="'· ' + ${me.favouriteRestaurant.count} + (${me.favouriteRestaurant.count == 1} ? ' order' : ' orders')">· 0 orders</span></div></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="wr-slide wr-theme-ocean" tabindex="-1" aria-label="Behind the scenes">
+            <div class="wr-content">
+                <div class="wr-kicker">Behind the scenes</div>
+                <div class="wr-facts wr-facts-lg">
+                    <div class="wr-fact">
+                        <span class="wr-fact-icon">💸</span>
+                        <div><div class="wr-fact-label">Biggest order</div>
+                            <div class="wr-fact-value"><span th:text="'€' + ${#numbers.formatDecimal(me.biggestOrderAmount,1,'COMMA',2,'POINT')}">€0.00</span>
+                                <span class="wr-fact-extra" th:text="'· ' + ${me.biggestOrder.placeName} + ', ' + ${#temporals.format(me.biggestOrder.orderDate,'d MMM',en)}">· Place, 1 Jan</span></div></div>
+                    </div>
+                    <div class="wr-fact" th:if="${me.tipGiven.signum() > 0}">
+                        <span class="wr-fact-icon">🙏</span>
+                        <div><div class="wr-fact-label">Your share of the tips</div>
+                            <div class="wr-fact-value" th:text="'€' + ${#numbers.formatDecimal(me.tipGiven,1,'COMMA',2,'POINT')}">€0.00</div></div>
+                    </div>
+                    <div class="wr-fact" th:if="${me.ordersOrganised > 0}">
+                        <span class="wr-fact-icon">📋</span>
+                        <div><div class="wr-fact-label">Orders you organised</div>
+                            <div class="wr-fact-value" th:text="${me.ordersOrganised}">0</div></div>
+                    </div>
+                    <div class="wr-fact" th:if="${me.paidUpfrontCount > 0}">
+                        <span class="wr-fact-icon">💳</span>
+                        <div><div class="wr-fact-label">You advanced the money</div>
+                            <div class="wr-fact-value"><span th:text="${me.paidUpfrontCount} + (${me.paidUpfrontCount == 1} ? ' time' : ' times')">0 times</span>
+                                <span class="wr-fact-extra" th:text="'· €' + ${#numbers.formatDecimal(me.paidUpfrontAmount,1,'COMMA',2,'POINT')}">· €0.00</span></div></div>
+                    </div>
+                </div>
+                <p th:if="${me.ordersOrganised == 0 and me.paidUpfrontCount == 0}" class="wr-note">
+                    Next year, why not organise an order yourself? 😉
+                </p>
+            </div>
+        </section>
+    </th:block>
+
+    <!-- ── Summary card ──────────────────────────────────────────────────── -->
+    <section class="wr-slide wr-theme-night" tabindex="-1" aria-label="Summary">
+        <div class="wr-content">
+            <div class="wr-summary">
+                <div class="wr-summary-head">
+                    <img src="/images/logo.png" alt="" class="wr-summary-logo"/>
+                    <div>
+                        <div class="wr-kicker mb-0">Wrapped <span th:text="${wrapped.year}">2026</span></div>
+                        <div class="wr-summary-name" th:text="${user.name}">Name</div>
+                    </div>
+                </div>
+
+                <div class="wr-summary-grid" th:unless="${me.empty}">
+                    <div><div class="wr-tile-label">Spent</div>
+                        <div class="wr-summary-value" th:text="'€' + ${#numbers.formatDecimal(me.spent,1,'COMMA',2,'POINT')}">€0</div></div>
+                    <div><div class="wr-tile-label">Orders</div>
+                        <div class="wr-summary-value" th:text="${me.orderCount}">0</div></div>
+                    <div th:if="${me.topItem != null}" class="wr-span-2"><div class="wr-tile-label">Top dish</div>
+                        <div class="wr-summary-value" th:text="${me.topItem.name} + ' · ' + ${me.topItem.count} + '×'">Dish · 0×</div></div>
+                    <div th:if="${me.favouriteRestaurant != null}" class="wr-span-2"><div class="wr-tile-label">Favourite place</div>
+                        <div class="wr-summary-value" th:text="${me.favouriteRestaurant.name}">Place</div></div>
+                </div>
+
+                <div class="wr-summary-locations" th:unless="${all.empty}">
+                    <div th:each="loc : ${wrapped.activeLocations}" class="wr-summary-location">
+                        <div class="wr-tile-label" th:text="'📍 ' + ${loc.name}">📍 Frankfurt</div>
+                        <div class="wr-summary-small">
+                            <span th:text="${loc.orderCount} + (${loc.orderCount == 1} ? ' order' : ' orders')">0 orders</span> ·
+                            <span th:text="'€' + ${#numbers.formatDecimal(loc.totalPaid,1,'COMMA',2,'POINT')}">€0</span>
+                            <th:block th:if="${loc.topProduct != null}"> · <span th:text="${loc.topProduct.name}">Dish</span></th:block>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="wr-actions">
+                <button type="button" class="wr-btn" data-wr-restart hidden>↺ Watch again</button>
+                <a th:href="@{/orders/dashboard}" class="wr-btn wr-btn-solid">Dashboard →</a>
+            </div>
+            <div class="wr-years" th:if="${years.size() > 1}">
+                Other years:
+                <th:block th:each="y : ${years}" th:if="${y != wrapped.year}">
+                    <a th:href="@{/wrapped(year=${y})}" th:text="${y}">2025</a>
+                </th:block>
+            </div>
+            <p class="wr-fine">
+                Closed and archived orders of <span th:text="${wrapped.year}">2026</span>.
+                Amounts include tip and cost shares, paid or not.
+            </p>
+        </div>
+    </section>
+
+    <nav class="wr-nav" aria-label="Slides" hidden>
+        <button type="button" class="wr-nav-btn" data-wr-prev aria-label="Previous slide">&lsaquo;</button>
+        <span class="wr-counter" aria-live="polite"></span>
+        <button type="button" class="wr-nav-btn" data-wr-next aria-label="Next slide">&rsaquo;</button>
+    </nav>
+</main>
+
+<script th:src="@{/js/wrapped.js}"></script>
+</body>
+</html>

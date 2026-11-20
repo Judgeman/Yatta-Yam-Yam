@@ -1,6 +1,6 @@
 # Yatta-Yam-Yam – Technical Documentation
 
-**Version:** 1.11.0  
+**Version:** 1.12.0  
 **Date:** November 2026
 
 ---
@@ -39,6 +39,7 @@ Yatta-Yam-Yam is an internal web application for collective food ordering. Users
 - User statistics (total spend, open amounts)
 - Red badge with the open amount next to your own name in the navbar
 - Dark mode that follows the operating system setting
+- Year-end review "Wrapped" with statistics per location and per person (`/wrapped`)
 
 ---
 
@@ -232,7 +233,7 @@ After the password, each user identifies themselves by name. The identity is sto
 
 The cookie has an expiry of `Integer.MAX_VALUE` seconds (~68 years), is `HttpOnly`, and applies to path `/`.
 
-**Redirect preservation:** When someone without a name cookie opens an order or contact page (`/orders/**`, `/contacts/**`), the URL is stored in the session under `redirectAfterLogin` and restored after name entry. Together with the redirect from step 1, a shared link ends up on the right page after the password and name entry.
+**Redirect preservation:** When someone without a name cookie opens an order or contact page (`/orders/**`, `/contacts/**`) or the year-end review (`/wrapped`), the URL is stored in the session under `redirectAfterLogin` and restored after name entry. Together with the redirect from step 1, a shared link ends up on the right page after the password and name entry.
 
 ---
 
@@ -252,6 +253,12 @@ The cookie has an expiry of `Integer.MAX_VALUE` seconds (~68 years), is `HttpOnl
 | POST   | `/rename`            | Rename user, update cookie                          |
 | GET    | `/version`           | Version page (public)                               |
 | GET    | `/users`             | User statistics (logged-in users only)              |
+
+### Year-end review (`WrappedController`)
+
+| Method | Path                 | Description                                         |
+|--------|----------------------|-----------------------------------------------------|
+| GET    | `/wrapped`           | Year-end review "Wrapped", optionally `?year=2025`   |
 
 ### Orders (`OrderController`, prefix `/orders`)
 
@@ -401,6 +408,49 @@ The overview (`/`, `AppUserService.getStatsForUser`) and the `/users` page (`get
 - **Total spent** (`/users` only): sum of the paid participations, each own items + `getPerPersonCharge` (tip share or cost share)
 - **Open payments / Amount due:** from `getOpenDebts`, so the same figures as the badge in the navbar
 
+### Year-end review "Wrapped"
+
+`GET /wrapped` shows a year-end review in story format (like Spotify Wrapped): slides to tap through with the year's figures, first for everyone and per location, then for the logged-in user. `?year=2025` shows another year; without the parameter (or with an invalid year) it is the past year in January and the current year otherwise. While the year is still running, the first slide says "so far".
+
+**What counts** (`WrappedService`): orders dated in the chosen year with status CLOSED or ARCHIVED (their amounts are final) and at least one participant according to `OrderService.isParticipant`. Open and ordered orders only count once they are closed; orders without a location only count on the "together" slide.
+
+**Per location (Kassel, Frankfurt) and overall:**
+
+| Figure | Calculation |
+|--------|-------------|
+| Orders | number of counted orders |
+| Dishes | sum of all item quantities (cost splits have no items) |
+| Paid in total | item sum + tip of item orders, plus `splitTotal` of cost splits |
+| Tip in total | sum of `tipAmount` of item orders |
+| Ø tip per order | tip in total ÷ number of item orders (including those without a tip), plus its share of the item value in percent |
+| People | number of distinct participants |
+| Most popular dishes | top 3 by quantity. Items with the same name (ignoring case) are added up across menu lists; shown with the restaurant the dish came from most often |
+| Favourite place, busiest weekday | by number of orders (`placeName` or `orderDate`) |
+| Biggest feast | the order with the most participants |
+
+If at least two locations have orders, one slide compares them directly (orders, dishes, paid in total, Ø tip, people); the highest value gets a crown.
+
+**Personal** (logged-in user):
+
+| Figure | Calculation |
+|--------|-------------|
+| Spent | per participation own items + `getPerPersonCharge` (tip share or cost share), paid or not |
+| Orders, Ø per order, dishes, cost splits | from the user's own participations |
+| Top dishes | top 3 by quantity, grouped as above |
+| First / last order | date and restaurant |
+| Favourite day, hungriest month, favourite place | by number of own orders |
+| Biggest order | the user's highest amount on one order |
+| Tip share | sum of the user's tip shares |
+| Organised | counted orders the user created |
+| Advanced the money | counted orders the user is the payee of (`paidByName`, else the creator – as for open payments), with the total amount |
+| Ranking | place by number of orders among everyone who ordered that year (same number = same place); only shown in the top three or the top half |
+
+On a tie, the entry that came up first in the year wins. The location where the user ordered most often comes first. Anyone who took part in no order that year gets a short note instead of the personal slides.
+
+**Season:** In December and January the dashboard and the overview (`/`) show a banner linking to `/wrapped`. For this, `WrappedBannerAdvice` (`@ControllerAdvice`) adds `wrappedYear` to every model, `null` outside the season. The page itself is always reachable, e.g. to try it out. The last slide links to other years with orders.
+
+**Rendering:** `wrapped.html` renders each slide as a `<section class="wr-slide">`. `static/js/wrapped.js` turns them into a story: tapping on the right, arrow right, space or swiping left moves on; the left third, arrow left or swiping right goes back. Bars at the top show the progress, the slide number is kept in the URL hash (reloading stays on the slide), and big numbers count up when they appear (not with `prefers-reduced-motion`). Without JavaScript the slides are shown one below the other. Styles: `static/css/wrapped.css`.
+
 ---
 
 ## 9. Configuration
@@ -459,7 +509,7 @@ Application available at: `http://localhost:38443`
 
 ```bash
 mvn package
-java -DYATTA_YAM_YAM_PASSWORD=yourPassword -jar target/yatta-yam-yam-1.11.0.jar
+java -DYATTA_YAM_YAM_PASSWORD=yourPassword -jar target/yatta-yam-yam-1.12.0.jar
 ```
 
 ---
@@ -476,11 +526,13 @@ Yatta-Yam-Yam/
     │   │   ├── DatabaseMigration.java        # Database migration logic
     │   │   ├── OpenDebtInterceptor.java      # The user's open amounts for the navbar badge
     │   │   ├── SecurityConfig.java           # Spring Security configuration
-    │   │   └── WebConfig.java                # Web configuration (e.g. static resources)
+    │   │   ├── WebConfig.java                # Web configuration (e.g. static resources)
+    │   │   └── WrappedBannerAdvice.java      # wrappedYear in December/January for the Wrapped banner
     │   ├── controller/
     │   │   ├── ContactController.java        # Contact book: list, create, edit, delete
     │   │   ├── LoginController.java          # Cookie login, user flow, /users, /version
-    │   │   └── OrderController.java          # Orders, selections, payments, item management
+    │   │   ├── OrderController.java          # Orders, selections, payments, item management
+    │   │   └── WrappedController.java        # Year-end review /wrapped
     │   ├── model/
     │   │   ├── AppUser.java                  # User entity
     │   │   ├── Contact.java                  # Contact (name, location, address, phone numbers, image)
@@ -500,19 +552,22 @@ Yatta-Yam-Yam/
     │   └── service/
     │       ├── AppUserService.java           # Create/rename users, statistics
     │       ├── ContactService.java           # Save contacts (incl. image upload), delete
-    │       └── OrderService.java             # Order logic, cost calculation, payments
+    │       ├── OrderService.java             # Order logic, cost calculation, payments
+    │       └── WrappedService.java           # Figures for the year-end review
     └── resources/
         ├── application.properties
         ├── static/
         │   ├── css/
         │   │   ├── dashboard.css
         │   │   ├── style.css                 # Base styles + colour tokens (--yy-*) for light/dark
-        │   │   └── symbolics.css             # Easter egg: Symbolics mode (inert unless enabled)
+        │   │   ├── symbolics.css             # Easter egg: Symbolics mode (inert unless enabled)
+        │   │   └── wrapped.css               # Slides of the year-end review
         │   ├── images/
         │   │   ├── favicon.svg
         │   │   └── logo.png
         │   └── js/
-        │       └── theme.js                  # Light/dark from the OS setting, Symbolics easter egg
+        │       ├── theme.js                  # Light/dark from the OS setting, Symbolics easter egg
+        │       └── wrapped.js                # Story navigation of the year-end review
         └── templates/                        # Thymeleaf HTML templates
             ├── index.html                    # Name input
             ├── confirm.html                  # Confirm existing user
@@ -531,6 +586,7 @@ Yatta-Yam-Yam/
             ├── itemlists.html                # Hidden page: all menu lists + visibility toggle
             ├── users.html                    # User statistics
             ├── version.html                  # Version info
+            ├── wrapped.html                  # Year-end review "Wrapped" (story slides)
             └── fragments/
                 ├── open-debt-badge.html      # Red badge with the open amount next to the name
                 └── theme.html                # <head> include: theme.js + symbolics.css
@@ -550,6 +606,7 @@ The app follows the light/dark setting of the operating system; there is no togg
 - Include `<th:block th:replace="~{fragments/theme :: head}"></th:block>` as the last element of `<head>`.
 - No hard-coded colours: use the `--yy-*` tokens or Bootstrap variables (`--bs-body-bg`, `--bs-border-color`, `--bs-secondary-color`, …).
 - Avoid `bg-light` and `text-bg-light`, which stay light in dark mode; use `bg-body-tertiary` and `text-body-emphasis`. Centred single-card pages use `<body class="page-muted">`.
+- Exception: the slides of `/wrapped` (`wrapped.css`, variables `--wr-*`) deliberately keep their own vivid colours in light and dark mode (white text on a saturated gradient); only the page around them follows the theme.
 
 ### Easter egg: Symbolics mode
 
