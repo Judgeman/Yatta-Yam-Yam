@@ -87,7 +87,7 @@
                                     <div class="form-check form-switch mb-0">
                                         <input class="form-check-input" type="checkbox" role="switch" id="calcUnpaidToggle"/>
                                         <label class="form-check-label small" for="calcUnpaidToggle"
-                                               title="People who haven't paid yet for a closed order. Their payment type isn't known yet, so the payment type filter doesn't apply to them; the link filters match the order's links.">Include amounts not paid yet</label>
+                                               title="People who haven't paid yet for a closed order. Their payment type isn't known yet, so the payment type filter doesn't apply to them; the link filters match the order's links. Amounts owed to you are listed under &quot;Subtract what others owe me&quot; instead.">Include amounts not paid yet</label>
                                     </div>
                                 </div>
                                 <div class="calc-filter" id="calcFilterArchive">
@@ -129,6 +129,21 @@
                         <div id="calcDebtsEmpty" class="text-muted small mt-2 d-none">No open debts match these filters.</div>
                     </div>
 
+                    <!-- What others still owe me, optionally subtracted (the mirror image of my debts) -->
+                    <div id="calcOwedSection" class="calc-section d-none">
+                        <div class="form-check form-switch mb-1">
+                            <input class="form-check-input" type="checkbox" role="switch" id="calcOwedToggle"/>
+                            <label class="form-check-label fw-semibold" for="calcOwedToggle">Subtract what others owe me</label>
+                        </div>
+                        <div class="form-text mt-0">
+                            What others still owe you from closed orders is subtracted from the total
+                            <span id="calcOwedPayeeHint" class="d-none">(only amounts owed by the selected "Paid by" people)</span>.
+                            Don't forget to mark them as paid in the orders afterwards.
+                        </div>
+                        <ul id="calcOwedList" class="calc-rows calc-rows-flat mt-2 d-none"></ul>
+                        <div id="calcOwedEmpty" class="text-muted small mt-2 d-none">Nothing owed to you matches these filters.</div>
+                    </div>
+
                     <!-- Free amount: the "calculator" part -->
                     <div class="calc-section">
                         <label for="calcAdjust" class="form-label fw-semibold mb-1">Adjustment (±)</label>
@@ -156,6 +171,10 @@
                     <div class="calc-summary-line d-none" id="calcDebtsLine">
                         <span>My debts <span class="text-muted" id="calcDebtCount"></span></span>
                         <span id="calcDebtsTotal">€0.00</span>
+                    </div>
+                    <div class="calc-summary-line d-none" id="calcOwedLine">
+                        <span>Owed to me <span class="text-muted" id="calcOwedCount"></span></span>
+                        <span id="calcOwedTotal">€0.00</span>
                     </div>
                     <div class="calc-summary-line d-none" id="calcAdjustLine">
                         <span>Adjustment</span>

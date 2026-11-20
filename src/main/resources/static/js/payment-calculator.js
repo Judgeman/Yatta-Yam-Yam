@@ -6,8 +6,9 @@
  * Archived orders are hidden unless "Include archived orders" is switched on; amounts
  * people still owe for closed orders can be added with "Include amounts not paid yet".
  * Orders or single payments can be unticked, the viewer's own open debts added (to pay
- * them along with the rest) and a free adjustment entered. Everything is added up in cents in the
- * browser; nothing is saved on the server. The filters (and the debts switch) are
+ * them along with the rest), what others still owe the viewer subtracted, and a free
+ * adjustment entered. Everything is added up in cents in the
+ * browser; nothing is saved on the server. The filters (and the debt switches) are
  * remembered per browser in localStorage, unticked payments only while the page is open.
  *
  * Opens via the "Calculator" button, the shortcut Alt+C (⌥C on a Mac) or the link
@@ -38,14 +39,18 @@
 
     var payments = [];
     var debts = [];
+    var owed = [];          // what others still owe the viewer
     var loaded = false;
     var loading = false;
     var filters = emptyFilters();
     var debtsOn = false;
+    var owedOn = false;
     var excluded = {};      // payment id → true while unticked
     var excludedDebts = {}; // order id → true while unticked
+    var excludedOwed = {};  // participation id → true while unticked
     var orderViews = [];    // rendered orders: {head, checkbox, amountEl, rows: [{payment, row, checkbox}]}
     var debtViews = [];     // rendered debts: {debt, row, checkbox}
+    var owedViews = [];     // rendered amounts owed to the viewer: {item, row, checkbox}
 
     function byId(id) {
         return document.getElementById(id);
@@ -111,7 +116,7 @@
         return (name || '').trim().toLowerCase();
     }
 
-    // ── Settings (filters + debts switch), kept per browser ──
+    // ── Settings (filters + debt switches), kept per browser ──
 
     // Archived orders are left out unless "Include archived orders" is switched on
     function emptyFilters() {
@@ -134,13 +139,14 @@
             filters.archived = saved.archived === true;
             filters.unpaid = saved.unpaid === true;
             debtsOn = saved.debts === true;
+            owedOn = saved.owed === true;
         } catch (e) {
             // Blocked storage or broken entry: start without filters
         }
     }
 
     function saveSettings() {
-        var data = {from: filters.from, to: filters.to, archived: filters.archived, unpaid: filters.unpaid, debts: debtsOn};
+        var data = {from: filters.from, to: filters.to, archived: filters.archived, unpaid: filters.unpaid, debts: debtsOn, owed: owedOn};
         FACETS.forEach(function (facet) {
             data[facet] = Object.keys(filters[facet]);
         });
@@ -214,13 +220,18 @@
         return inDateRange(p.orderDate);
     }
 
+    // Amounts owed to the viewer: "Paid by" picks the person who owes it
+    function owedMatches(o) {
+        return (!hasAny(filters.payee) || filters.payee[o.debtorKey] === true) && inDateRange(o.orderDate);
+    }
+
     function debtMatches(d) {
         return (!hasAny(filters.payee) || filters.payee[d.payeeKey] === true) && inDateRange(d.orderDate);
     }
 
     // ── Filter chips ──
 
-    function payeeOptions(pool) {
+    function payeeOptions(pool, withOwed) {
         var seen = {};
         var options = [];
         function add(name) {
@@ -232,6 +243,9 @@
         }
         pool.forEach(function (p) { add(p.paidBy); });
         debts.forEach(function (d) { add(d.payee); });
+        if (withOwed) {
+            owed.forEach(function (o) { add(o.debtor); });
+        }
         return options.sort(function (a, b) {
             return a.label.localeCompare(b.label, undefined, {sensitivity: 'base'});
         });
@@ -308,9 +322,9 @@
         }
     }
 
-    function facetOptions(pool) {
+    function facetOptions(pool, withOwed) {
         return {
-            payee: payeeOptions(pool),
+            payee: payeeOptions(pool, withOwed),
             type: typeOptions(),
             paypal: linkOptions('PAYPAL', pool),
             wero: linkOptions('WERO', pool)
@@ -319,13 +333,13 @@
 
     function renderFilters() {
         // Remembered chips are only forgotten when they no longer exist at all ...
-        var all = facetOptions(payments);
+        var all = facetOptions(payments, true);
         FACETS.forEach(function (facet) { prune(facet, all[facet]); });
         saveSettings();
 
         // ... but only chips from the shown payments are offered (plus any still selected),
         // so archived orders and unpaid amounts don't add chips while they are hidden
-        var shown = facetOptions(payments.filter(inPool));
+        var shown = facetOptions(payments.filter(inPool), owedOn);
         var facets = {};
         FACETS.forEach(function (facet) {
             var offered = {};
@@ -485,6 +499,7 @@
             + (hiddenArchived ? ' · ' + hiddenArchived + ' from archived orders hidden' : '');
 
         renderDebts();
+        renderOwed();
         update();
     }
 
@@ -525,6 +540,45 @@
 
         list.classList.toggle('d-none', !debtsOn || !visible.length);
         byId('calcDebtsEmpty').classList.toggle('d-none', !debtsOn || visible.length > 0);
+    }
+
+    // ── What others still owe me ──
+
+    function renderOwed() {
+        byId('calcOwedSection').classList.toggle('d-none', !owed.length);
+        byId('calcOwedToggle').checked = owedOn;
+        byId('calcOwedPayeeHint').classList.toggle('d-none', !hasAny(filters.payee));
+
+        var visible = owed.filter(owedMatches);
+        var list = byId('calcOwedList');
+        list.textContent = '';
+        owedViews = [];
+        visible.forEach(function (o) {
+            var id = 'calc-owed-' + o.id;
+            var cb = el('input', {type: 'checkbox', className: 'form-check-input calc-check', id: id});
+            var row = el('li', {className: 'calc-row'}, [
+                cb,
+                el('label', {className: 'calc-row-label', htmlFor: id}, [
+                    el('span', {className: 'calc-name'}, [o.place]),
+                    el('span', {className: 'calc-method'}, [formatDate(o.orderDate) + ' · from ' + o.debtor])
+                ]),
+                openLink(o.orderId, o.place),
+                el('span', {className: 'calc-amount'}, [money(-o.amountCents)])
+            ]);
+            cb.addEventListener('change', function () {
+                if (cb.checked) {
+                    delete excludedOwed[o.id];
+                } else {
+                    excludedOwed[o.id] = true;
+                }
+                update();
+            });
+            list.appendChild(row);
+            owedViews.push({item: o, row: row, checkbox: cb});
+        });
+
+        list.classList.toggle('d-none', !owedOn || !visible.length);
+        byId('calcOwedEmpty').classList.toggle('d-none', !owedOn || visible.length > 0);
     }
 
     // ── Totals ──
@@ -577,9 +631,22 @@
             }
         });
 
+        var owedCount = 0;
+        var owedTotal = 0;
+        owedViews.forEach(function (view) {
+            var on = !excludedOwed[view.item.id];
+            view.checkbox.checked = on;
+            view.row.classList.toggle('calc-off', !on);
+            if (owedOn && on) {
+                owedCount++;
+                owedTotal += view.item.amountCents;
+            }
+        });
+
         var adjustment = adjustmentCents();
-        // The viewer's own debts are added: they are paid along with the rest
-        var total = paymentsTotal + unpaidTotal + debtsTotal + adjustment;
+        // The viewer's own debts are added (paid along with the rest),
+        // what others owe the viewer is subtracted
+        var total = paymentsTotal + unpaidTotal + debtsTotal - owedTotal + adjustment;
 
         byId('calcPaymentCount').textContent = '(' + count + ')';
         byId('calcPaymentsTotal').textContent = money(paymentsTotal);
@@ -589,6 +656,9 @@
         byId('calcDebtsLine').classList.toggle('d-none', !debtsOn);
         byId('calcDebtCount').textContent = '(' + debtCount + ')';
         byId('calcDebtsTotal').textContent = money(debtsTotal, true);
+        byId('calcOwedLine').classList.toggle('d-none', !owedOn);
+        byId('calcOwedCount').textContent = '(' + owedCount + ')';
+        byId('calcOwedTotal').textContent = money(-owedTotal);
         byId('calcAdjustLine').classList.toggle('d-none', adjustment === 0);
         byId('calcAdjustTotal').textContent = money(adjustment, true);
         byId('calcTotal').textContent = money(total);
@@ -609,6 +679,11 @@
         p.linkKey = p.typeKey === 'PAYPAL' ? (p.paypalLink || '')
             : (p.typeKey === 'WERO' ? (p.weroLink || '') : '');
         return p;
+    }
+
+    function prepareOwed(o) {
+        o.debtorKey = personKey(o.debtor);
+        return o;
     }
 
     function prepareDebt(d) {
@@ -638,6 +713,7 @@
             .then(function (data) {
                 payments = (data.payments || []).map(preparePayment);
                 debts = (data.debts || []).map(prepareDebt);
+                owed = (data.owedToMe || []).map(prepareOwed);
                 loaded = true;
                 renderFilters();
                 renderList();
@@ -704,6 +780,13 @@
         filters.archived = byId('calcArchivedToggle').checked;
         saveSettings();
         renderFilters();
+        renderList();
+    });
+
+    byId('calcOwedToggle').addEventListener('change', function () {
+        owedOn = byId('calcOwedToggle').checked;
+        saveSettings();
+        renderFilters(); // the people who owe the viewer become "Paid by" chips
         renderList();
     });
 

@@ -13,8 +13,8 @@ import java.util.*;
 
 /**
  * Data for the payment calculator on the dashboard: every payment made for an
- * order (PayPal, Wero or cash), what others still owe for closed orders, and the
- * viewer's own open debts. The dialog filters and adds these up in the browser;
+ * order (PayPal, Wero or cash), what others still owe for closed orders, the
+ * viewer's own open debts and what others owe the viewer. The dialog filters and adds these up in the browser;
  * nothing here changes any data.
  */
 @Service
@@ -32,8 +32,8 @@ public class PaymentCalculatorService {
     /**
      * All paid participations (marked as paid by the participant or confirmed by the
      * creator) of orders in any status, plus the unpaid ones of closed orders, newest
-     * order first; and what the viewer still owes (same figures as the red badge in
-     * the navbar).
+     * order first; what the viewer still owes (same figures as the red badge in the
+     * navbar); and what others still owe the viewer.
      */
     public CalculatorData getData(AppUser viewer) {
         Map<Long, BigDecimal> perPersonCharge = new HashMap<>();
@@ -45,15 +45,27 @@ public class PaymentCalculatorService {
         }
 
         // Not paid yet: same rules as the open debts (closed orders only, nobody owes
-        // themselves). The viewer's own open amounts are left out here; they are the
-        // "my debts" below and would otherwise count twice.
+        // themselves). Two kinds are kept apart so nothing counts twice:
+        // - the viewer's own open amounts are left out; they are the "my debts" below
+        // - amounts owed to the viewer (the viewer is the payee) go to "owed to me",
+        //   which the dialog subtracts; everything else is a "not paid yet" row
+        List<OwedToMe> owedToMe = new ArrayList<>();
         for (UserOrderSelection sel : selectionRepo.findByOrder_StatusAndPaidFalseAndMarkedPaidByOwnerFalse(
                 FoodOrder.OrderStatus.CLOSED)) {
             if (!orderService.isParticipant(sel)) continue;
             if (sel.getUser().getId().equals(viewer.getId())) continue;
-            if (OrderService.getPayee(sel.getOrder()).equalsIgnoreCase(sel.getUser().getName())) continue;
-            payments.add(new Payment(sel, amountFor(sel, perPersonCharge), true));
+            String payee = OrderService.getPayee(sel.getOrder());
+            if (payee.equalsIgnoreCase(sel.getUser().getName())) continue;
+            BigDecimal amount = amountFor(sel, perPersonCharge);
+            if (payee.equalsIgnoreCase(viewer.getName())) {
+                owedToMe.add(new OwedToMe(sel, amount));
+            } else {
+                payments.add(new Payment(sel, amount, true));
+            }
         }
+        owedToMe.sort(Comparator.comparing(OwedToMe::getOrderDate).reversed()
+                .thenComparing(Comparator.comparing(OwedToMe::getOrderId).reversed())
+                .thenComparing(OwedToMe::getDebtor, String.CASE_INSENSITIVE_ORDER));
         payments.sort(Comparator.comparing(Payment::getOrderDate).reversed()
                 .thenComparing(Comparator.comparing(Payment::getOrderId).reversed())
                 .thenComparing(Payment::getParticipant, String.CASE_INSENSITIVE_ORDER));
@@ -63,7 +75,7 @@ public class PaymentCalculatorService {
             debts.add(new Debt(debt));
         }
 
-        return new CalculatorData(payments, debts);
+        return new CalculatorData(payments, debts, owedToMe);
     }
 
     /** Own items + tip share or cost share; the per-person charge is computed once per order. */
@@ -84,14 +96,17 @@ public class PaymentCalculatorService {
     public static class CalculatorData {
         private final List<Payment> payments;
         private final List<Debt> debts;
+        private final List<OwedToMe> owedToMe;
 
-        public CalculatorData(List<Payment> payments, List<Debt> debts) {
+        public CalculatorData(List<Payment> payments, List<Debt> debts, List<OwedToMe> owedToMe) {
             this.payments = payments;
             this.debts = debts;
+            this.owedToMe = owedToMe;
         }
 
         public List<Payment> getPayments() { return payments; }
         public List<Debt> getDebts() { return debts; }
+        public List<OwedToMe> getOwedToMe() { return owedToMe; }
     }
 
     /** One participant's payment for one order, or the amount still open ({@link #isOpen()}). */
@@ -167,6 +182,32 @@ public class PaymentCalculatorService {
         public String getPlace() { return place; }
         public String getOrderDate() { return orderDate; }
         public String getPayee() { return payee; }
+        public long getAmountCents() { return amountCents; }
+    }
+
+    /** Something another participant still owes the viewer for a closed order. */
+    public static class OwedToMe {
+        private final Long id;
+        private final Long orderId;
+        private final String place;
+        private final String orderDate;
+        private final String debtor;
+        private final long amountCents;
+
+        OwedToMe(UserOrderSelection sel, BigDecimal amount) {
+            this.id = sel.getId();
+            this.orderId = sel.getOrder().getId();
+            this.place = sel.getOrder().getPlaceName();
+            this.orderDate = sel.getOrder().getOrderDate().toString();
+            this.debtor = sel.getUser().getName();
+            this.amountCents = toCents(amount);
+        }
+
+        public Long getId() { return id; }
+        public Long getOrderId() { return orderId; }
+        public String getPlace() { return place; }
+        public String getOrderDate() { return orderDate; }
+        public String getDebtor() { return debtor; }
         public long getAmountCents() { return amountCents; }
     }
 }
