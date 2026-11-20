@@ -264,3 +264,209 @@
     background: var(--yy-badge-ordered-bg);
     color: var(--yy-badge-ordered-fg);
 }
+
+/* ── Payment calculator (fragments/payment-calculator.html) ── */
+.calc-intro {
+    background: var(--yy-surface-muted);
+    border: 1px solid var(--yy-border-soft);
+    border-radius: 12px;
+    padding: 10px 12px;
+    color: var(--bs-secondary-color);
+}
+
+.calc-filters {
+    border: 1px solid var(--yy-border-soft);
+    border-radius: 12px;
+    padding: 12px;
+}
+
+.calc-filter-toggle {
+    --bs-btn-hover-color: inherit;
+}
+
+.calc-chevron {
+    display: inline-block;
+    font-size: 12px;
+    transition: transform 0.2s;
+}
+
+.calc-filter-toggle[aria-expanded="false"] .calc-chevron {
+    transform: rotate(-90deg);
+}
+
+.calc-count {
+    background: var(--yy-accent);
+    color: #fff;
+}
+
+.calc-filter {
+    display: flex;
+    align-items: baseline;
+    gap: 6px 12px;
+    margin-bottom: 8px;
+}
+
+.calc-filter-label {
+    flex: 0 0 96px;
+    font-size: 13px;
+    color: var(--bs-secondary-color);
+}
+
+.calc-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    flex: 1;
+    min-width: 0;
+}
+
+/* Toggle chips: .btn-check + label.btn; the active colours follow the app accent
+   (Symbolics mode overrides these variables with its own neon colours) */
+.calc-chip {
+    --bs-btn-active-bg: var(--yy-accent);
+    --bs-btn-active-border-color: var(--yy-accent);
+    --bs-btn-active-color: #fff;
+    border-radius: 999px;
+    font-size: 13px;
+    padding: 2px 12px;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.calc-date {
+    width: auto;
+}
+
+.calc-order {
+    background: var(--yy-surface);
+    border: 1px solid var(--yy-border-soft);
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+}
+
+.calc-order-head,
+.calc-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.calc-order-title {
+    flex: 1;
+    min-width: 0;
+    cursor: pointer;
+    overflow-wrap: anywhere;
+}
+
+.calc-meta {
+    display: block;
+    font-size: 12px;
+    color: var(--bs-secondary-color);
+}
+
+.calc-check {
+    flex-shrink: 0;
+    margin-top: 0.2em;
+}
+
+.calc-open {
+    color: var(--bs-secondary-color);
+    flex-shrink: 0;
+}
+
+.calc-amount {
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    margin-left: auto;
+}
+
+.calc-rows {
+    list-style: none;
+    margin: 6px 0 0;
+    padding: 0 0 0 26px;
+}
+
+.calc-rows-flat {
+    padding-left: 0;
+}
+
+.calc-row {
+    padding: 5px 0;
+    border-top: 1px solid var(--yy-divider);
+    font-size: 14px;
+}
+
+.calc-row-label {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 10px;
+    cursor: pointer;
+    overflow-wrap: anywhere;
+}
+
+.calc-method {
+    font-size: 12px;
+    color: var(--bs-secondary-color);
+}
+
+/* Unticked: faded and struck through, the checkbox itself stays clear */
+.calc-off .calc-order-title,
+.calc-off .calc-row-label,
+.calc-off .calc-amount {
+    opacity: 0.45;
+}
+
+.calc-off .calc-amount {
+    text-decoration: line-through;
+}
+
+.calc-section {
+    border-top: 1px solid var(--yy-divider);
+    margin-top: 16px;
+    padding-top: 12px;
+}
+
+.calc-adjust {
+    max-width: 220px;
+}
+
+.calc-footer {
+    display: block;
+}
+
+.calc-summary-line,
+.calc-summary-total {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-variant-numeric: tabular-nums;
+}
+
+.calc-summary-line {
+    font-size: 14px;
+}
+
+.calc-summary-total {
+    font-size: 1.25rem;
+    font-weight: 700;
+    border-top: 1px solid var(--bs-border-color);
+    margin-top: 4px;
+    padding-top: 4px;
+}
+
+@media (max-width: 575.98px) {
+    .calc-filter {
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .calc-filter-label {
+        flex-basis: auto;
+    }
+}

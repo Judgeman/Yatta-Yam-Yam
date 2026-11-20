@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Payment calculator: a dialog on the dashboard that lists every payment made for
+     an order (PayPal, Wero, cash), filters it and adds it up. Opened by the
+     "Calculator" button, the shortcut Alt+C (⌥C on a Mac) or the link
+     /orders/dashboard?calculator. Data comes from /orders/payment-calculator/data when
+     the dialog opens; js/payment-calculator.js does the rest. Nothing is saved. -->
+<div th:fragment="modal" class="modal fade" id="paymentCalculatorModal" tabindex="-1"
+     aria-labelledby="paymentCalculatorTitle" aria-hidden="true"
+     th:attr="data-url=@{/orders/payment-calculator/data},data-order-url=@{/orders/}">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable modal-fullscreen-sm-down">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="paymentCalculatorTitle">
+                    <i class="bi bi-calculator"></i> Payment calculator
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="calc-intro small mb-3">
+                    <i class="bi bi-info-circle"></i>
+                    Filter and add up payments from orders, e.g. to see how much money was paid to you
+                    via PayPal, Wero or cash and still needs to be passed on.
+                    Untick orders or single payments to leave them out — nothing in the orders is changed.
+                </div>
+
+                <div id="calcLoading" class="text-center text-muted py-4">
+                    <span class="spinner-border spinner-border-sm" aria-hidden="true"></span> Loading payments…
+                </div>
+                <div id="calcError" class="alert alert-danger d-none" role="alert">
+                    Could not load the payments. Please reload the page and try again.
+                </div>
+
+                <div id="calcContent" class="d-none">
+
+                    <!-- Filters: chips are filled in by the script; no chip selected = no restriction.
+                         The block starts collapsed on phones (see the script). -->
+                    <div class="calc-filters mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <button type="button" id="calcFilterToggle"
+                                    class="btn btn-link p-0 fw-semibold text-reset text-decoration-none calc-filter-toggle"
+                                    data-bs-toggle="collapse" data-bs-target="#calcFilterBody"
+                                    aria-expanded="true" aria-controls="calcFilterBody">
+                                <i class="bi bi-funnel"></i> Filter
+                                <span id="calcFilterCount" class="badge rounded-pill calc-count d-none"></span>
+                                <i class="bi bi-chevron-down calc-chevron" aria-hidden="true"></i>
+                            </button>
+                            <button type="button" id="calcResetFilters" class="btn btn-link btn-sm p-0 text-primary">Reset filters</button>
+                        </div>
+
+                        <div class="collapse show" id="calcFilterBody">
+                            <div class="pt-2">
+                                <div class="calc-filter">
+                                    <div class="calc-filter-label" title="Who advanced the money — or the creator, if nobody is set">Paid by</div>
+                                    <div class="calc-chips" id="calcFacetPayee"></div>
+                                </div>
+                                <div class="calc-filter">
+                                    <div class="calc-filter-label">Payment type</div>
+                                    <div class="calc-chips" id="calcFacetType"></div>
+                                </div>
+                                <div class="calc-filter" id="calcFilterPaypal">
+                                    <div class="calc-filter-label">PayPal link</div>
+                                    <div class="calc-chips" id="calcFacetPaypal"></div>
+                                </div>
+                                <div class="calc-filter" id="calcFilterWero">
+                                    <div class="calc-filter-label">Wero link</div>
+                                    <div class="calc-chips" id="calcFacetWero"></div>
+                                </div>
+                                <div class="form-text mt-0 mb-2" id="calcLinkHint">
+                                    With a link selected, only payments made through a selected link are shown.
+                                </div>
+                                <div class="calc-filter">
+                                    <div class="calc-filter-label">Order date</div>
+                                    <div class="d-flex flex-wrap align-items-center gap-2">
+                                        <label class="visually-hidden" for="calcDateFrom">From</label>
+                                        <input type="date" id="calcDateFrom" class="form-control form-control-sm calc-date"/>
+                                        <span class="text-muted small">to</span>
+                                        <label class="visually-hidden" for="calcDateTo">To</label>
+                                        <input type="date" id="calcDateTo" class="form-control form-control-sm calc-date"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payments, grouped by order -->
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                        <span class="small text-muted" id="calcMatchInfo"></span>
+                        <div class="d-flex gap-2">
+                            <button type="button" id="calcSelectAll" class="btn btn-outline-secondary btn-sm">Select all</button>
+                            <button type="button" id="calcSelectNone" class="btn btn-outline-secondary btn-sm">Select none</button>
+                        </div>
+                    </div>
+                    <div id="calcOrders"></div>
+                    <div id="calcEmpty" class="text-center text-muted small py-4 d-none">
+                        No payments match these filters.
+                    </div>
+
+                    <!-- Own open debts, optionally subtracted -->
+                    <div id="calcDebtsSection" class="calc-section d-none">
+                        <div class="form-check form-switch mb-1">
+                            <input class="form-check-input" type="checkbox" role="switch" id="calcDebtsToggle"/>
+                            <label class="form-check-label fw-semibold" for="calcDebtsToggle">Offset my open debts</label>
+                        </div>
+                        <div class="form-text mt-0">
+                            What you still owe from closed orders is subtracted from the total
+                            <span id="calcDebtsPayeeHint" class="d-none">(only debts to the selected "Paid by" people)</span>.
+                            Don't forget to mark them as paid in the orders afterwards.
+                        </div>
+                        <ul id="calcDebtList" class="calc-rows calc-rows-flat mt-2 d-none"></ul>
+                        <div id="calcDebtsEmpty" class="text-muted small mt-2 d-none">No open debts match these filters.</div>
+                    </div>
+
+                    <!-- Free amount: the "calculator" part -->
+                    <div class="calc-section">
+                        <label for="calcAdjust" class="form-label fw-semibold mb-1">Adjustment (±)</label>
+                        <div class="input-group input-group-sm calc-adjust">
+                            <span class="input-group-text">€</span>
+                            <input type="number" step="0.01" inputmode="decimal" id="calcAdjust"
+                                   class="form-control" placeholder="e.g. -20.00"/>
+                        </div>
+                        <div class="form-text">For example, cash you already handed over (negative) or an extra amount.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Result, always visible below the scrolling list -->
+            <div class="modal-footer calc-footer">
+                <div class="calc-summary w-100">
+                    <div class="calc-summary-line">
+                        <span>Payments <span class="text-muted" id="calcPaymentCount"></span></span>
+                        <span id="calcPaymentsTotal">€0.00</span>
+                    </div>
+                    <div class="calc-summary-line d-none" id="calcDebtsLine">
+                        <span>My debts <span class="text-muted" id="calcDebtCount"></span></span>
+                        <span id="calcDebtsTotal">€0.00</span>
+                    </div>
+                    <div class="calc-summary-line d-none" id="calcAdjustLine">
+                        <span>Adjustment</span>
+                        <span id="calcAdjustTotal">€0.00</span>
+                    </div>
+                    <div class="calc-summary-total">
+                        <span>Total</span>
+                        <span id="calcTotal">€0.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

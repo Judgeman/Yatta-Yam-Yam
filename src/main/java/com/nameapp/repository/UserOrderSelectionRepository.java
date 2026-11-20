@@ -12,4 +12,6 @@ public interface UserOrderSelectionRepository extends JpaRepository<UserOrderSel
     List<UserOrderSelection> findByOrder(FoodOrder order);
     List<UserOrderSelection> findByUser(AppUser user);
     List<UserOrderSelection> findByUserAndOrder_Status(AppUser user, FoodOrder.OrderStatus status);
+    // Paid by the participant or confirmed by the creator (payment calculator)
+    List<UserOrderSelection> findByPaidTrueOrMarkedPaidByOwnerTrue();
 }
