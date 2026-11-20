@@ -253,6 +253,7 @@ The cookie has an expiry of `Integer.MAX_VALUE` seconds (~68 years), is `HttpOnl
 | POST   | `/rename`            | Rename user, update cookie                          |
 | GET    | `/version`           | Version page (public)                               |
 | GET    | `/users`             | User statistics (logged-in users only)              |
+| GET    | `/themes`            | All looks with preview links (hidden page, not linked anywhere; logged-in users only) |
 
 ### Orders (`OrderController`, prefix `/orders`)
 
@@ -512,6 +513,7 @@ Yatta-Yam-Yam/
         │   │   ├── garlic.css                # Garlic look (inert outside its two days)
         │   │   ├── halloween.css             # Halloween look (inert outside the season)
         │   │   ├── muertos.css               # Día de los Muertos look (inert outside the season)
+        │   │   ├── pasta.css                 # Pasta look (link-only, no season)
         │   │   ├── pelmeni.css               # Pelmeni look (link-only, no season)
         │   │   ├── pizza.css                 # Pizza look (inert outside Pizza week)
         │   │   ├── style.css                 # Base styles + colour tokens (--yy-*) for light/dark
@@ -526,6 +528,7 @@ Yatta-Yam-Yam/
         │       ├── garlic.js                 # Garlic visitors: garlic bulb, bat, vampire
         │       ├── halloween.js              # Halloween visitors: witch, skeleton, ghost, spider, cat
         │       ├── muertos.js                # Día de los Muertos visitors: monarchs, Catrina, guitar skeleton
+        │       ├── pasta.js                  # Pasta visitors: farfalle, meatball, pasta parade
         │       ├── pelmeni.js                # Pelmeni visitors: spoon surfer, dumpling parade, fork
         │       ├── pizza.js                  # Pizza visitors: flying pizza, pizza slice, pizzaiolo
         │       ├── theme-info.js             # (i) button in the menu bar with notes on the current look
@@ -547,6 +550,7 @@ Yatta-Yam-Yam/
             ├── contacts.html                 # Contact book (list with location filter)
             ├── contact-edit.html             # Create / edit contact
             ├── itemlists.html                # Hidden page: all menu lists + visibility toggle
+            ├── themes.html                   # Hidden page: all looks with preview links
             ├── users.html                    # User statistics
             ├── version.html                  # Version info
             └── fragments/
@@ -585,9 +589,15 @@ At six times of the year the app dresses up by itself. `theme.js` checks the bro
 
 **Christmas** – from the Monday after Totensonntag, 0:00, up to and including 26 December (off again from 27 December, 0:00). Totensonntag (the Sunday of the Dead) is the last Sunday before the first Sunday of Advent, so always between 20 and 26 November (2026: starts on 23 November). Fir-green menu bar with twinkling fairy lights (along the top edge on pages without a menu bar), red buttons and avatars, Santa hats on every avatar, gently falling snow behind the content, a 🎄 next to the app name; palettes "snowy day" / "winter night". Styles: `static/css/christmas.css`.
 
-**Link-only: Pelmeni** – no season, only via `?theme=pelmeni`, to be shared on purpose on particular days. Like every preview it lasts in this browser tab until it is closed, and the date never switches it on. Gzhel-blue menu bar with a white lace border, beetroot buttons, every avatar turned into a blue-and-white plate of pelmeni (the initial on a dollop of smetana), pelmeni, dill and peppercorns drifting down behind the content, a pastry board with flour, dough circles, a rolling pin and a bowl of pelmeni along the bottom edge (46 px of room at the bottom), a 🥟 next to the app name; palettes "flour-dusted kitchen" / "Siberian night". Styles: `static/css/pelmeni.css`. Further link-only looks go into `LINK_ONLY` in `theme.js`.
+**Link-only** – looks without a season, to be shared on purpose on particular days (list `LINK_ONLY` in `theme.js`). Like every preview they last in this browser tab until it is closed, and the date never switches them on. Their (i) modal only shows title, announcement and tip (`when: null`, `previewNote: false` in `theme-info.js`).
 
-- **Preview via link:** append `?theme=pizza`, `?theme=easter`, `?theme=garlic`, `?theme=halloween`, `?theme=muertos` or `?theme=christmas` (and `?theme=pelmeni`) to any page URL (e.g. `/orders/dashboard?theme=pizza`, or `&theme=pizza`). The parameter survives both login steps and is then removed from the address bar. The preview only applies to this browser tab until it is closed (`sessionStorage`, `yy-theme-preview` = the look's name), so a forgotten preview does not linger past the occasion. `?theme=default` ends it earlier.
+**Pelmeni** ("Triple-T (Teig-Taschen-Tag)", `?theme=pelmeni`): Gzhel-blue menu bar with a white lace border, beetroot buttons, every avatar turned into a blue-and-white plate of pelmeni (the initial on a dollop of smetana), pelmeni, dill and peppercorns drifting down behind the content, a pastry board with flour, dough circles, a rolling pin and a bowl of pelmeni along the bottom edge (46 px of room at the bottom), a 🥟 next to the app name; palettes "flour-dusted kitchen" / "Siberian night". Styles: `static/css/pelmeni.css`.
+
+**Pasta** ("Pasta Day", `?theme=pasta`): Amalfi-teal menu bar with tagliatelle drying on a wooden pole, tomato-red buttons, every avatar turned into a plate of spaghetti (the initial on a burrata), farfalle, penne, fusilli, shells, basil and parmesan drifting down, a blue-and-white striped tablecloth with a pot of spaghetti, a colander, a jar of penne, parmesan and a plate along the bottom edge (46 px of room at the bottom), a 🍝 next to the app name; palettes "lemon kitchen" / "trattoria night". Styles: `static/css/pasta.css`.
+
+**Overview `/themes`:** a hidden page (not linked anywhere, login required) lists every look as a card: seasonal looks in the order they come next, with their rule, the current or next window (computed from `theme.js`), the number of visitors and the call word; then the link-only looks, Symbolics and the standard look. Each card has a button that opens the dashboard with `?theme=…` in a new tab, and the link to copy. The cards are built in the browser from `window.yyTheme` (`theme.js`), `window.yyThemeInfo` (`theme-info.js`) and `yyVisitors.castOf()` (`visitors.js`), so a new look shows up there by itself.
+
+- **Preview via link:** append `?theme=pizza`, `?theme=easter`, `?theme=garlic`, `?theme=halloween`, `?theme=muertos` or `?theme=christmas` (and the link-only `?theme=pelmeni`, `?theme=pasta`) to any page URL (e.g. `/orders/dashboard?theme=pizza`, or `&theme=pizza`). The parameter survives both login steps and is then removed from the address bar. The preview only applies to this browser tab until it is closed (`sessionStorage`, `yy-theme-preview` = the look's name), so a forgotten preview does not linger past the occasion. `?theme=default` ends it earlier.
 - **Info button:** while a special look is on (the Symbolics mode included), an (i) button sits at the start of the right-hand group in the menu bar. It opens a Bootstrap modal with the occasion in a few sentences, when the look is shown, a hint at the visitors with their call word and – for a preview – how it ends. `static/js/theme-info.js` adds the button to every page with a menu bar (form pages whose bar only shows the app name get a group of their own on the right) and shows, hides or updates it as soon as `data-yy-theme` changes. The texts live in `INFO` in the same file; pages without a menu bar (login, name entry, welcome page, release notes) have no button.
 - **Note in Symbolics mode:** Symbolics hides the seasonal looks. So that its users notice them anyway, an "Incoming message" window appears at the bottom right of every page (above the command line) while Symbolics is on and the date calls for a seasonal look – naming the occasion, with a "Switch to the standard look" button. It switches Symbolics off in place (no reload, form input is kept; without JavaScript the link goes to `?theme=default`), and the seasonal look shows; typing `symbolics` brings the mode back. "Not now" (×) hides the note for the rest of that occasion (`localStorage`, `yy-season-hint-dismissed` = e.g. `christmas:2026`, with the month for garlic, which comes twice a year); the next occasion brings it back. The Symbolics info modal offers the same way back. Built in `theme-info.js` (using `window.yyTheme` from `theme.js`), styled in `symbolics.css`.
 - **Precedence:** preview in this tab › Symbolics mode switched on › the day's look (single food days before multi-week holidays) › normal look. Anyone using Symbolics keeps it during the season; switching it off (typing `symbolics` or `?theme=default`) returns to the day's look. There is no switch to opt out of a look.
@@ -607,6 +617,7 @@ During a look a visitor crosses the screen every 1–5 minutes (at random), neve
 | Día de los Muertos (`muertos.js`) | a swarm of monarch butterflies | a Catrina dances; a skeleton with a marigold crown plays the guitar | – | a skeleton in an embroidered shirt, or the Catrina | `calavera` |
 | Christmas (`christmas.js`) | Santa in his sleigh with two reindeer | Santa or a reindeer dances | – | Santa or a reindeer | `hohoho` |
 | Pelmeni, link-only (`pelmeni.js`) | a pelmen surfing on a wooden spoon | a parade of gyoza, ravioli and pelmen; a pelmen with dill hair dances | a fork with a speared pelmen | a pelmen with a dollop of smetana | `pelmeni` |
+| Pasta, link-only (`pasta.js`) | a swarm of farfalle | a meatball with spaghetti hair dances; a parade of penne, fusilli and a shell | a meatball on a strand of spaghetti | a meatball | `pasta` |
 
 - Schedule, motions and call words are handled by `static/js/visitors.js`; the looks' scripts (`static/js/*.js` from the table) only draw the figures and register them with `yyVisitors.add(...)` (all load with `defer`, `visitors.js` first).
 - The call word is typed outside a form field; it calls a visitor at once, but only during the matching look.

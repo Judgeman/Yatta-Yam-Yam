@@ -253,6 +253,7 @@ Der Cookie hat eine Ablaufzeit von `Integer.MAX_VALUE` Sekunden (~68 Jahre), ist
 | POST    | `/rename`          | Nutzernamen ändern, Cookie aktualisieren           |
 | GET     | `/version`         | Versionsseite (öffentlich)                         |
 | GET     | `/users`           | Nutzerstatistiken (nur für eingeloggte Nutzer)     |
+| GET     | `/themes`          | Alle Looks mit Vorschau-Links (versteckte Seite, nirgends verlinkt; nur für eingeloggte Nutzer) |
 
 ### Bestellungen (`OrderController`, Präfix `/orders`)
 
@@ -512,6 +513,7 @@ Yatta-Yam-Yam/
         │   │   ├── garlic.css                # Knoblauch-Look (ohne Wirkung außerhalb der zwei Tage)
         │   │   ├── halloween.css             # Halloween-Look (ohne Wirkung außerhalb der Saison)
         │   │   ├── muertos.css               # Día-de-los-Muertos-Look (ohne Wirkung außerhalb der Saison)
+        │   │   ├── pasta.css                 # Pasta-Look (nur per Link, ohne Saison)
         │   │   ├── pelmeni.css               # Pelmeni-Look (nur per Link, ohne Saison)
         │   │   ├── pizza.css                 # Pizza-Look (ohne Wirkung außerhalb der Pizza-Woche)
         │   │   ├── style.css                 # Basis-Styles + Farb-Tokens (--yy-*) für hell/dunkel
@@ -526,6 +528,7 @@ Yatta-Yam-Yam/
         │       ├── garlic.js                 # Knoblauch-Besucher: Knolle, Fledermaus, Vampir
         │       ├── halloween.js              # Halloween-Besucher: Hexe, Skelett, Gespenst, Spinne, Katze
         │       ├── muertos.js                # Día-de-los-Muertos-Besucher: Monarchfalter, Catrina, Skelett mit Gitarre
+        │       ├── pasta.js                  # Pasta-Besucher: Farfalle, Fleischbällchen, Nudel-Parade
         │       ├── pelmeni.js                # Pelmeni-Besucher: Löffel-Surfer, Teigtaschen-Parade, Gabel
         │       ├── pizza.js                  # Pizza-Besucher: fliegende Pizza, Pizzastück, Pizzabäcker
         │       ├── theme-info.js             # (i)-Knopf in der Menüleiste mit Infos zum aktiven Look
@@ -547,6 +550,7 @@ Yatta-Yam-Yam/
             ├── contacts.html                 # Kontaktbuch (Liste mit Standortfilter)
             ├── contact-edit.html             # Kontakt anlegen / bearbeiten
             ├── itemlists.html                # Versteckte Seite: alle Menülisten + Sichtbarkeitsschalter
+            ├── themes.html                   # Versteckte Seite: alle Looks mit Vorschau-Links
             ├── users.html                    # Nutzerstatistiken
             ├── version.html                  # Versionsinfo
             └── fragments/
@@ -585,9 +589,15 @@ Zu sechs Zeiten im Jahr zieht sich die App von selbst um. `theme.js` prüft daf�
 
 **Weihnachten** – vom Montag nach Totensonntag, 0:00 Uhr, bis einschließlich 26. Dezember (ab dem 27. Dezember, 0:00 Uhr, wieder aus). Totensonntag ist der letzte Sonntag vor dem 1. Advent, also immer zwischen dem 20. und 26. November (2026: Start am 23. November). Tannengrüne Menüleiste mit funkelnder Lichterkette (auf Seiten ohne Menüleiste am oberen Rand), rote Buttons und Avatare, Nikolausmützen auf allen Avataren, leise fallender Schnee hinter den Inhalten, ein 🎄 neben dem App-Namen; Paletten „verschneiter Tag“ / „Winternacht“. Styles: `static/css/christmas.css`.
 
-**Nur per Link: Pelmeni** – ohne Saison, nur über `?theme=pelmeni`, zum gezielten Verteilen an bestimmten Tagen. Er gilt wie jede Vorschau nur in diesem Browser-Tab, bis er geschlossen wird, und das Datum schaltet ihn nie ein. Gzhel-blaue Menüleiste mit weißer Spitzenborte, rote-Bete-farbene Buttons, jeder Avatar wird zum blau-weißen Teller mit Pelmeni (die Initiale liegt auf einem Klecks Smetana), herabfallende Pelmeni, Dill und Pfefferkörner hinter den Inhalten, ein Nudelbrett mit Mehl, Teigkreisen, Nudelholz und einer Schüssel Pelmeni am unteren Rand (46 px Abstand unten), ein 🥟 neben dem App-Namen; Paletten „Mehlküche“ / „Sibirische Nacht“. Styles: `static/css/pelmeni.css`. Weitere reine Link-Looks kommen in `LINK_ONLY` in `theme.js`.
+**Nur per Link** – Looks ohne Saison, zum gezielten Verteilen an bestimmten Tagen (Liste `LINK_ONLY` in `theme.js`). Sie gelten wie jede Vorschau nur in diesem Browser-Tab, bis er geschlossen wird, und das Datum schaltet sie nie ein. Ihr (i)-Fenster zeigt nur Titel, Ankündigung und Tipp (`when: null`, `previewNote: false` in `theme-info.js`).
 
-- **Vorschau per Link:** `?theme=pizza`, `?theme=easter`, `?theme=garlic`, `?theme=halloween`, `?theme=muertos` bzw. `?theme=christmas` (und `?theme=pelmeni`) an die URL einer beliebigen Seite hängen (z. B. `/orders/dashboard?theme=pizza`, bzw. `&theme=pizza`). Der Parameter übersteht beide Login-Schritte und wird danach aus der Adressleiste entfernt. Die Vorschau gilt nur für diesen Browser-Tab, bis er geschlossen wird (`sessionStorage`, `yy-theme-preview` = Name des Looks) – eine vergessene Vorschau bleibt also nicht über den Anlass hinaus hängen. `?theme=default` beendet sie vorher.
+**Pelmeni** („Triple-T (Teig-Taschen-Tag)“, `?theme=pelmeni`): Gzhel-blaue Menüleiste mit weißer Spitzenborte, rote-Bete-farbene Buttons, jeder Avatar wird zum blau-weißen Teller mit Pelmeni (die Initiale liegt auf einem Klecks Smetana), herabfallende Pelmeni, Dill und Pfefferkörner hinter den Inhalten, ein Nudelbrett mit Mehl, Teigkreisen, Nudelholz und einer Schüssel Pelmeni am unteren Rand (46 px Abstand unten), ein 🥟 neben dem App-Namen; Paletten „Mehlküche“ / „Sibirische Nacht“. Styles: `static/css/pelmeni.css`.
+
+**Pasta** („Pasta Day“, `?theme=pasta`): Menüleiste in Amalfi-Petrol mit Tagliatelle, die an einer Holzstange trocknen, tomatenrote Buttons, jeder Avatar wird zum Teller Spaghetti (die Initiale liegt auf einer Burrata), herabfallende Farfalle, Penne, Fusilli, Muschelnudeln, Basilikum und Parmesan, eine blau-weiß gestreifte Tischdecke mit Spaghettitopf, Sieb, einem Glas Penne, Parmesan und einem Teller am unteren Rand (46 px Abstand unten), ein 🍝 neben dem App-Namen; Paletten „Zitronenküche“ / „Trattoria-Nacht“. Styles: `static/css/pasta.css`.
+
+**Übersicht `/themes`:** Eine versteckte Seite (nirgends verlinkt, nur nach Login) listet alle Looks als Karten: Saison-Looks in der Reihenfolge, in der sie als Nächstes kommen, mit Regel, aktuellem bzw. nächstem Zeitraum (aus `theme.js` berechnet), Zahl der Besucher und Rufwort; danach die Link-Looks, Symbolics und der Standard-Look. Jede Karte hat einen Knopf, der das Dashboard mit `?theme=…` in einem neuen Tab öffnet, und den Link zum Kopieren. Die Karten entstehen im Browser aus `window.yyTheme` (`theme.js`), `window.yyThemeInfo` (`theme-info.js`) und `yyVisitors.castOf()` (`visitors.js`) – ein neuer Look erscheint dort also von selbst.
+
+- **Vorschau per Link:** `?theme=pizza`, `?theme=easter`, `?theme=garlic`, `?theme=halloween`, `?theme=muertos` bzw. `?theme=christmas` (und die Link-Looks `?theme=pelmeni`, `?theme=pasta`) an die URL einer beliebigen Seite hängen (z. B. `/orders/dashboard?theme=pizza`, bzw. `&theme=pizza`). Der Parameter übersteht beide Login-Schritte und wird danach aus der Adressleiste entfernt. Die Vorschau gilt nur für diesen Browser-Tab, bis er geschlossen wird (`sessionStorage`, `yy-theme-preview` = Name des Looks) – eine vergessene Vorschau bleibt also nicht über den Anlass hinaus hängen. `?theme=default` beendet sie vorher.
 - **Info-Knopf:** Solange ein besonderer Look aktiv ist (auch der Symbolics-Modus), steht in der Menüleiste ganz vorne in der rechten Gruppe ein (i)-Knopf. Er öffnet ein Bootstrap-Modal mit dem Anlass in ein paar Sätzen, dem Zeitraum, einem Hinweis auf die Besucher samt Rufwort und – bei einer Vorschau – dem Hinweis, wie sie endet. `static/js/theme-info.js` setzt den Knopf per Skript in jede Seite mit Menüleiste (Formularseiten, deren Leiste nur den App-Namen zeigt, bekommen rechts eine eigene Gruppe) und blendet ihn ein, aus oder um, sobald sich `data-yy-theme` ändert. Die Texte stehen in `INFO` in derselben Datei; Seiten ohne Menüleiste (Login, Namenseingabe, Startseite, Release Notes) haben keinen Knopf.
 - **Hinweis im Symbolics-Modus:** Symbolics verdeckt die Saison-Looks. Damit auch diese Nutzer sie mitbekommen, erscheint auf jeder Seite unten rechts (über der Kommandozeile) ein Fenster „Incoming message“, solange Symbolics an ist und das Datum einen Saison-Look vorsieht – mit dem Anlass und dem Knopf „Switch to the standard look“. Der schaltet Symbolics an Ort und Stelle ab (ohne Neuladen, Eingaben bleiben erhalten; ohne JavaScript führt der Link auf `?theme=default`), danach ist der Saison-Look zu sehen; `symbolics` tippen bringt den Modus zurück. „Not now“ (×) blendet den Hinweis für den Rest dieses Anlasses aus (`localStorage`, `yy-season-hint-dismissed` = z. B. `christmas:2026`, bei Knoblauch mit Monat, weil er zweimal im Jahr kommt); beim nächsten Anlass erscheint er wieder. Derselbe Weg zurück steht im (i)-Fenster des Symbolics-Modus. Umgesetzt in `theme-info.js` (über `window.yyTheme` aus `theme.js`), Styles in `symbolics.css`.
 - **Vorrang:** Vorschau in diesem Tab › eingeschalteter Symbolics-Modus › Look des Tages (einzelne Aktionstage vor mehrwöchigen Festen) › normaler Look. Wer Symbolics an hat, behält es also auch in der Saison; Ausschalten (`symbolics` tippen oder `?theme=default`) führt zum Look des Tages zurück. Einen Schalter, um einen Look abzuwählen, gibt es nicht.
@@ -607,6 +617,7 @@ Während eines Looks kommt alle 1–5 Minuten (zufällig) ein Besucher über den
 | Día de los Muertos (`muertos.js`) | Schwarm Monarchfalter | Catrina tanzt; Skelett mit Blumenkranz spielt Gitarre | – | Skelett im bestickten Hemd oder die Catrina | `calavera` |
 | Weihnachten (`christmas.js`) | Weihnachtsmann im Schlitten mit zwei Rentieren | Weihnachtsmann oder Rentier tanzt | – | Weihnachtsmann oder Rentier | `hohoho` |
 | Pelmeni, nur per Link (`pelmeni.js`) | Pelmen surft auf einem Holzlöffel | Parade aus Gyoza, Ravioli und Pelmen; Pelmen mit Dillfrisur tanzt | Gabel mit aufgespießtem Pelmen | Pelmen mit Smetana-Häubchen | `pelmeni` |
+| Pasta, nur per Link (`pasta.js`) | Schwarm Farfalle | Fleischbällchen mit Spaghetti-Haaren tanzt; Parade aus Penne, Fusilli und Muschelnudel | Fleischbällchen an einem Spaghetti | Fleischbällchen | `pasta` |
 
 - Zeitplan, Bewegungen und Rufwort steuert `static/js/visitors.js`; die Skripte der Looks (`static/js/*.js` aus der Tabelle) zeichnen nur die Figuren und melden sie mit `yyVisitors.add(...)` an (alle laden mit `defer`, `visitors.js` zuerst).
 - Das Rufwort tippt man außerhalb eines Formularfelds; es ruft sofort einen Besucher, aber nur während des passenden Looks.

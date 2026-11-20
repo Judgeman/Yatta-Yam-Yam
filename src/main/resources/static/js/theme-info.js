@@ -90,6 +90,14 @@
             text: 'Today is Triple-T (\u201CTeig-Taschen-Tag\u201D) \u2013 get ready to be surprised!',
             tip: 'Pelmeni and their dumpling friends drop by now and then. Type \u201Cpelmeni\u201D to call them.'
         },
+        pasta: {
+            emoji: '\uD83C\uDF5D',
+            title: 'Pasta Day',
+            when: null,                 // like Triple-T: just the surprise
+            previewNote: false,
+            text: 'Today is Pasta Day \u2013 get ready to be surprised!',
+            tip: 'Pasta in all shapes drops by now and then. Type \u201Cpasta\u201D to call it.'
+        },
         symbolics: {
             emoji: '🖥️',
             title: 'Symbolics mode',
@@ -330,6 +338,9 @@
         }
         window.bootstrap.Modal.getOrCreateInstance(el).show();
     }
+
+    // For the /themes page: names, emojis and texts of every look
+    window.yyThemeInfo = INFO;
 
     if (window.MutationObserver) {
         new MutationObserver(sync).observe(root, { attributes: true, attributeFilter: ['data-yy-theme'] });

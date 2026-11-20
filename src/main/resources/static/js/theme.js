@@ -44,6 +44,11 @@
  *      beetroot buttons, plate-with-smetana avatars, falling pelmeni and dill, a pastry
  *      board along the bottom edge. Visitors: pelmeni and their dumpling friends
  *      (js/pelmeni.js). Styles: css/pelmeni.css.
+ *    - Pasta (?theme=pasta): Amalfi-teal menu bar with tagliatelle drying on a pole,
+ *      tomato buttons, plate-of-spaghetti avatars, falling pasta shapes, a striped
+ *      tablecloth along the bottom edge. Visitors: farfalle, a meatball, a pasta parade
+ *      (js/pasta.js). Styles: css/pasta.css.
+ *    The hidden page /themes lists every look with a preview link.
  *    The preview lasts until the browser tab is closed (sessionStorage),
  *    ?theme=default ends it.
  *
@@ -72,8 +77,9 @@
     var GARLIC = 'garlic';
     var PIZZA = 'pizza';
     var PELMENI = 'pelmeni';
+    var PASTA = 'pasta';
     var SEASONS = [XMAS, EASTER, HALLOWEEN, MUERTOS, GARLIC, PIZZA];
-    var LINK_ONLY = [PELMENI];                    // no season: only ever shown as a preview
+    var LINK_ONLY = [PELMENI, PASTA];             // no season: only ever shown as a preview
     var PREVIEWABLE = SEASONS.concat(LINK_ONLY);
     var URL_PARAM = 'theme';
     var URL_OFF = 'default';
@@ -438,12 +444,19 @@
         syncChrome();
     }
 
-    // For theme-info.js: which seasonal look the date calls for (whatever is shown right
-    // now), and switching Symbolics off in place, like typing "symbolics" or ?theme=default
+    // For theme-info.js and the /themes page: which seasonal look the date calls for
+    // (whatever is shown right now), and switching Symbolics off in place, like typing
+    // "symbolics" or ?theme=default
     window.yyTheme = {
         season: function () {
             return seasonOf(new Date());
         },
+        // For the /themes page: the seasonal look of any date, and the lists of looks
+        seasonOn: function (date) {
+            return seasonOf(date);
+        },
+        seasons: SEASONS.slice(),
+        linkOnly: LINK_ONLY.slice(),
         useStandard: function () {
             setSymbolics(false, true);
         }
