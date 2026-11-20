@@ -97,6 +97,7 @@
     border-radius: 12px;
     padding: 12px;
     display: flex;
+    flex-wrap: wrap;            /* lets .item-actions drop to a second row */
     align-items: center;
     gap: 10px;
     transition: border-color 0.2s, box-shadow 0.2s;
@@ -204,9 +205,19 @@
 .item-image-nav-prev { left: 12px; }
 .item-image-nav-next { right: 12px; }
 
+/* The name keeps at least ~100px; below that the actions wrap to their own row
+   and the name gets the full card width (mostly for the owner's extra buttons) */
 .item-info {
-    flex: 1;
+    flex: 1 1 100px;
     min-width: 0;
+}
+
+.item-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;                  /* same spacing as when they were direct card children */
+    flex-shrink: 0;
+    margin-left: auto;
 }
 
 .item-info .fw-semibold {
