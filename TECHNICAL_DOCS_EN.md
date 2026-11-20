@@ -1,6 +1,6 @@
 # Yatta-Yam-Yam – Technical Documentation
 
-**Version:** 1.11.0  
+**Version:** 1.12.0  
 **Date:** November 2026
 
 ---
@@ -30,6 +30,7 @@ Yatta-Yam-Yam is an internal web application for collective food ordering. Users
 - Shared access password for the app, then name-based sign-in without a personal password (cookie)
 - Order management with a status lifecycle
 - Reusable menu lists with a visibility toggle (hidden lists are excluded from new orders)
+- Click an item image in an order to view it large (modal with name and price; browse with arrows, arrow keys or swiping)
 - Location filter (Kassel / Frankfurt)
 - Per-person tip distribution
 - "Cost split" order type: one person buys everything and the total is split equally among everyone who joins
@@ -459,7 +460,7 @@ Application available at: `http://localhost:38443`
 
 ```bash
 mvn package
-java -DYATTA_YAM_YAM_PASSWORD=yourPassword -jar target/yatta-yam-yam-1.11.0.jar
+java -DYATTA_YAM_YAM_PASSWORD=yourPassword -jar target/yatta-yam-yam-1.12.0.jar
 ```
 
 ---
