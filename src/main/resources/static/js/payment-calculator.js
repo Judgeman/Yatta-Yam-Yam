@@ -3,9 +3,10 @@
  *
  * Lists every payment made for an order (PayPal, Wero or cash) grouped by order and
  * lets people filter it by "Paid by", payment type, PayPal / Wero link and order date.
- * Archived orders are hidden unless "Include archived orders" is switched on.
- * Orders or single payments can be unticked, the viewer's own open debts can be
- * subtracted and a free adjustment added. Everything is added up in cents in the
+ * Archived orders are hidden unless "Include archived orders" is switched on; amounts
+ * people still owe for closed orders can be added with "Include amounts not paid yet".
+ * Orders or single payments can be unticked, the viewer's own open debts added (to pay
+ * them along with the rest) and a free adjustment entered. Everything is added up in cents in the
  * browser; nothing is saved on the server. The filters (and the debts switch) are
  * remembered per browser in localStorage, unticked payments only while the page is open.
  *
@@ -114,7 +115,7 @@
 
     // Archived orders are left out unless "Include archived orders" is switched on
     function emptyFilters() {
-        return {payee: {}, type: {}, paypal: {}, wero: {}, from: '', to: '', archived: false};
+        return {payee: {}, type: {}, paypal: {}, wero: {}, from: '', to: '', archived: false, unpaid: false};
     }
 
     function loadSettings() {
@@ -131,6 +132,7 @@
             filters.from = typeof saved.from === 'string' ? saved.from : '';
             filters.to = typeof saved.to === 'string' ? saved.to : '';
             filters.archived = saved.archived === true;
+            filters.unpaid = saved.unpaid === true;
             debtsOn = saved.debts === true;
         } catch (e) {
             // Blocked storage or broken entry: start without filters
@@ -138,7 +140,7 @@
     }
 
     function saveSettings() {
-        var data = {from: filters.from, to: filters.to, archived: filters.archived, debts: debtsOn};
+        var data = {from: filters.from, to: filters.to, archived: filters.archived, unpaid: filters.unpaid, debts: debtsOn};
         FACETS.forEach(function (facet) {
             data[facet] = Object.keys(filters[facet]);
         });
@@ -167,8 +169,17 @@
         return filters.archived || !isArchived(p);
     }
 
+    // Amounts not paid yet only count while "Include amounts not paid yet" is on
+    function unpaidOk(p) {
+        return filters.unpaid || !p.open;
+    }
+
+    function inPool(p) {
+        return archiveOk(p) && unpaidOk(p);
+    }
+
     function matches(p) {
-        return archiveOk(p) && matchesFilters(p);
+        return inPool(p) && matchesFilters(p);
     }
 
     // All filters except the archive switch. No chip selected in a group = no restriction.
@@ -177,6 +188,18 @@
     function matchesFilters(p) {
         if (hasAny(filters.payee) && !filters.payee[p.payeeKey]) {
             return false;
+        }
+        if (p.open) {
+            // Not paid yet, so the payment type is unknown: the type filter doesn't apply,
+            // and the link filters match the order's PayPal or Wero link
+            if (hasAny(filters.paypal) || hasAny(filters.wero)) {
+                var viaOrderLink = (p.paypalLink && filters.paypal[p.paypalLink] === true)
+                    || (p.weroLink && filters.wero[p.weroLink] === true);
+                if (!viaOrderLink) {
+                    return false;
+                }
+            }
+            return inDateRange(p.orderDate);
         }
         if (hasAny(filters.type) && !filters.type[p.typeKey]) {
             return false;
@@ -226,10 +249,13 @@
         var seen = {};
         var options = [];
         pool.forEach(function (p) {
-            if (p.typeKey === type && !seen[p.linkKey]) {
-                seen[p.linkKey] = true;
-                options.push(p.linkKey
-                    ? {key: p.linkKey, label: shortLink(p.linkKey), title: p.linkKey}
+            // Paid: the link the payment went through; not paid yet: the order's link
+            var key = p.open ? ((type === 'PAYPAL' ? p.paypalLink : p.weroLink) || null)
+                : (p.typeKey === type ? p.linkKey : null);
+            if (key !== null && !seen[key]) {
+                seen[key] = true;
+                options.push(key
+                    ? {key: key, label: shortLink(key), title: key}
                     : {key: '', label: 'No link', title: 'Paid via ' + typeInfo(type).label + ' on an order without a link'});
             }
         });
@@ -297,9 +323,9 @@
         FACETS.forEach(function (facet) { prune(facet, all[facet]); });
         saveSettings();
 
-        // ... but only chips from the shown orders are offered (plus any still selected),
-        // so archived orders don't add chips while they are hidden
-        var shown = facetOptions(payments.filter(archiveOk));
+        // ... but only chips from the shown payments are offered (plus any still selected),
+        // so archived orders and unpaid amounts don't add chips while they are hidden
+        var shown = facetOptions(payments.filter(inPool));
         var facets = {};
         FACETS.forEach(function (facet) {
             var offered = {};
@@ -322,7 +348,9 @@
         byId('calcDateFrom').value = filters.from;
         byId('calcDateTo').value = filters.to;
 
-        // Archive switch only when there are archived orders with payments
+        // Switches only when there is something to switch on
+        byId('calcUnpaidToggle').checked = filters.unpaid;
+        byId('calcFilterUnpaid').classList.toggle('d-none', !filters.unpaid && !payments.some(function (p) { return p.open; }));
         byId('calcArchivedToggle').checked = filters.archived;
         byId('calcFilterArchive').classList.toggle('d-none', !filters.archived && !payments.some(isArchived));
     }
@@ -346,6 +374,18 @@
             title: 'Open order in a new tab',
             'aria-label': 'Open order ' + place + ' in a new tab'
         }, [el('i', {className: 'bi bi-box-arrow-up-right'})]);
+    }
+
+    // "PayPal", "Wero", "Cash" — or "Not paid yet" for amounts still owed
+    function methodLabel(p) {
+        if (p.open) {
+            return el('span', {className: 'calc-method calc-unpaid', title: 'Not paid yet: still owes this amount'},
+                [el('i', {className: 'bi bi-hourglass-split me-1'}), 'Not paid yet']);
+        }
+        var type = typeInfo(p.typeKey);
+        var via = 'Paid via ' + type.label + (p.typeKey !== 'CASH' && p.linkKey ? ' to ' + shortLink(p.linkKey) : '');
+        return el('span', {className: 'calc-method', title: via},
+            [el('i', {className: 'bi ' + type.icon + ' me-1'}), type.label]);
     }
 
     function renderOrder(group) {
@@ -375,15 +415,12 @@
         var list = el('ul', {className: 'calc-rows'});
         group.forEach(function (p) {
             var rowId = 'calc-payment-' + p.id;
-            var type = typeInfo(p.typeKey);
-            var via = 'Paid via ' + type.label + (p.typeKey !== 'CASH' && p.linkKey ? ' to ' + shortLink(p.linkKey) : '');
             var cb = el('input', {type: 'checkbox', className: 'form-check-input calc-check', id: rowId});
-            var row = el('li', {className: 'calc-row'}, [
+            var row = el('li', {className: 'calc-row' + (p.open ? ' calc-row-unpaid' : '')}, [
                 cb,
                 el('label', {className: 'calc-row-label', htmlFor: rowId}, [
                     el('span', {className: 'calc-name'}, [p.participant]),
-                    el('span', {className: 'calc-method', title: via},
-                        [el('i', {className: 'bi ' + type.icon + ' me-1'}), type.label])
+                    methodLabel(p)
                 ]),
                 el('span', {className: 'calc-amount'}, [money(p.amountCents)])
             ]);
@@ -407,7 +444,7 @@
 
     // Number of active filters, shown next to "Filter" (useful while the block is collapsed)
     function renderFilterCount() {
-        var count = (filters.from ? 1 : 0) + (filters.to ? 1 : 0) + (filters.archived ? 1 : 0);
+        var count = (filters.from ? 1 : 0) + (filters.to ? 1 : 0) + (filters.archived ? 1 : 0) + (filters.unpaid ? 1 : 0);
         FACETS.forEach(function (facet) { count += Object.keys(filters[facet]).length; });
         var badge = byId('calcFilterCount');
         badge.textContent = count;
@@ -441,7 +478,10 @@
         byId('calcSelectNone').disabled = !groups.length;
         var hiddenArchived = filters.archived ? 0
             : payments.filter(function (p) { return isArchived(p) && matchesFilters(p); }).length;
-        byId('calcMatchInfo').textContent = plural(visible.length, 'payment') + ' in ' + plural(groups.length, 'order')
+        var unpaidCount = visible.filter(function (p) { return p.open; }).length;
+        byId('calcMatchInfo').textContent = plural(visible.length - unpaidCount, 'payment')
+            + (unpaidCount ? ' + ' + unpaidCount + ' not paid yet' : '')
+            + ' in ' + plural(groups.length, 'order')
             + (hiddenArchived ? ' · ' + hiddenArchived + ' from archived orders hidden' : '');
 
         renderDebts();
@@ -469,7 +509,7 @@
                     el('span', {className: 'calc-method'}, [formatDate(d.orderDate) + ' · to ' + d.payee])
                 ]),
                 openLink(d.orderId, d.place),
-                el('span', {className: 'calc-amount'}, [money(-d.amountCents)])
+                el('span', {className: 'calc-amount'}, [money(d.amountCents, true)])
             ]);
             cb.addEventListener('change', function () {
                 if (cb.checked) {
@@ -497,6 +537,8 @@
     function update() {
         var count = 0;
         var paymentsTotal = 0;
+        var unpaidCount = 0;
+        var unpaidTotal = 0;
         orderViews.forEach(function (view) {
             var included = 0;
             var sum = 0;
@@ -504,17 +546,23 @@
                 var on = !excluded[r.payment.id];
                 r.checkbox.checked = on;
                 r.row.classList.toggle('calc-off', !on);
-                if (on) {
-                    included++;
-                    sum += r.payment.amountCents;
+                if (!on) {
+                    return;
+                }
+                included++;
+                sum += r.payment.amountCents;
+                if (r.payment.open) {
+                    unpaidCount++;
+                    unpaidTotal += r.payment.amountCents;
+                } else {
+                    count++;
+                    paymentsTotal += r.payment.amountCents;
                 }
             });
             view.checkbox.checked = included === view.rows.length;
             view.checkbox.indeterminate = included > 0 && included < view.rows.length;
             view.head.classList.toggle('calc-off', included === 0);
             view.amountEl.textContent = money(sum);
-            count += included;
-            paymentsTotal += sum;
         });
 
         var debtCount = 0;
@@ -530,13 +578,17 @@
         });
 
         var adjustment = adjustmentCents();
-        var total = paymentsTotal - debtsTotal + adjustment;
+        // The viewer's own debts are added: they are paid along with the rest
+        var total = paymentsTotal + unpaidTotal + debtsTotal + adjustment;
 
         byId('calcPaymentCount').textContent = '(' + count + ')';
         byId('calcPaymentsTotal').textContent = money(paymentsTotal);
+        byId('calcUnpaidLine').classList.toggle('d-none', !filters.unpaid);
+        byId('calcUnpaidCount').textContent = '(' + unpaidCount + ')';
+        byId('calcUnpaidTotal').textContent = money(unpaidTotal);
         byId('calcDebtsLine').classList.toggle('d-none', !debtsOn);
         byId('calcDebtCount').textContent = '(' + debtCount + ')';
-        byId('calcDebtsTotal').textContent = money(-debtsTotal);
+        byId('calcDebtsTotal').textContent = money(debtsTotal, true);
         byId('calcAdjustLine').classList.toggle('d-none', adjustment === 0);
         byId('calcAdjustTotal').textContent = money(adjustment, true);
         byId('calcTotal').textContent = money(total);
@@ -553,7 +605,7 @@
 
     function preparePayment(p) {
         p.payeeKey = personKey(p.paidBy);
-        p.typeKey = p.method || UNKNOWN_TYPE.key;
+        p.typeKey = p.open ? 'OPEN' : (p.method || UNKNOWN_TYPE.key);
         p.linkKey = p.typeKey === 'PAYPAL' ? (p.paypalLink || '')
             : (p.typeKey === 'WERO' ? (p.weroLink || '') : '');
         return p;
@@ -639,6 +691,13 @@
             view.rows.forEach(function (r) { setExcluded(r.payment, true); });
         });
         update();
+    });
+
+    byId('calcUnpaidToggle').addEventListener('change', function () {
+        filters.unpaid = byId('calcUnpaidToggle').checked;
+        saveSettings();
+        renderFilters();
+        renderList();
     });
 
     byId('calcArchivedToggle').addEventListener('change', function () {
