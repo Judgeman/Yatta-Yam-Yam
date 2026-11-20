@@ -270,6 +270,7 @@ Der Cookie hat eine Ablaufzeit von `Integer.MAX_VALUE` Sekunden (~68 Jahre), ist
 |---------|---------------------------------------------|-------------------------------------------|
 | GET     | `/orders/dashboard`                         | Dashboard mit offenen Bestellungen        |
 | GET     | `/orders/archive`                           | Archiv abgeschlossener Bestellungen       |
+| GET     | `/orders/payment-calculator/data`           | JSON für den Zahlungsrechner: alle Zahlungen + eigene offene Beträge |
 | GET     | `/orders/create`                            | Formular: Neue Bestellung                 |
 | POST    | `/orders/create`                            | Bestellung anlegen                        |
 | GET     | `/orders/{id}`                              | Bestelldetail anzeigen                    |
@@ -403,6 +404,24 @@ Gezählt wird jede Teilnahme (`isParticipant`, also auch Cost splits), die
 - nicht dem Empfänger selbst gehört. Empfänger ist der Bezahler (`paidByName`, ohne Beachtung der Groß-/Kleinschreibung), ohne eingetragenen Bezahler der Ersteller.
 
 Betrag je Bestellung = eigene Artikel + Trinkgeldanteil bzw. Kostenanteil (`OrderService.getOpenDebts`). Die Kacheln „Open payments“ und „Amount due“ auf der Übersicht und die gleichnamigen Spalten unter `/users` nutzen dieselbe Berechnung. Der `OpenDebtInterceptor` legt `openDebts` und `openDebtTotal` in das Model jeder Seite, die einen `user` enthält. Das Badge selbst ist das Fragment `fragments/open-debt-badge.html`.
+
+### Zahlungsrechner (Dashboard)
+
+Der Knopf „Calculator“ neben „New Order“ öffnet ein Pop-up, das Zahlungen aus Bestellungen auflistet und zusammenrechnet – etwa wenn jemand Geld per PayPal über eine andere Person einsammelt und diese den Betrag bar weitergibt. Alternativ öffnen es das Tastenkürzel **Alt+C** (Mac: **⌥C**) auf dem Dashboard und der Link `/orders/dashboard?calculator` (der Parameter übersteht beide Login-Schritte und wird danach aus der Adressleiste entfernt). Ein kurzer Hinweis oben im Pop-up erklärt den Zweck. Der Rechner ändert keine Daten und steht allen Nutzern zur Verfügung.
+
+- **Zahlungen:** jede Teilnahme (`isParticipant`), die selbst als bezahlt markiert oder vom Ersteller bestätigt ist, in Bestellungen jedes Status. Archivierte Bestellungen sind standardmäßig ausgeblendet (siehe Filter *Archive*). Betrag = eigene Artikel + Trinkgeld- bzw. Kostenanteil (`getPerPersonCharge`). Gruppiert nach Bestellung (neueste zuerst) mit Ort, Datum, Ersteller und – falls abweichend – Bezahler; jede Zeile zeigt Teilnehmer, Zahlungsart und Betrag.
+- **Filter** (Mehrfachauswahl; keine Auswahl = keine Einschränkung; verschiedene Filter gelten zusammen):
+  - *Paid by:* Empfänger des Geldes (`OrderService.getPayee`: `paidByName`, sonst der Ersteller; ohne Beachtung der Groß-/Kleinschreibung)
+  - *Payment type:* PayPal, Wero, Cash (bei alten Datensätzen ohne Zahlungsart zusätzlich „Not specified“)
+  - *PayPal link / Wero link:* die Links der Bestellungen. Ist mindestens ein Link gewählt, zählen nur Zahlungen, die über einen gewählten Link liefen – PayPal-Zahlungen über den PayPal-Link der Bestellung, Wero-Zahlungen über den Wero-Link. Barzahlungen fallen dann heraus.
+  - *Order date:* von/bis
+  - *Archive:* Schalter „Include archived orders“, standardmäßig aus. Solange er aus ist, nennt die Liste die Zahl der ausgeblendeten Zahlungen aus archivierten Bestellungen, und Filter-Chips, die nur aus archivierten Bestellungen stammen, werden nicht angeboten.
+- **Abwählen:** Ganze Bestellungen (Checkbox im Kopf, halb gesetzt bei teilweiser Auswahl) oder einzelne Zahlungen lassen sich abwählen; die Summe aktualisiert sich sofort. „Select all“/„Select none“ betreffen die gerade sichtbaren Zahlungen.
+- **Eigene Schulden verrechnen** (optional, Schalter „Offset my open debts“): die offenen Beträge aus `getOpenDebts` (dieselben wie im roten Badge), einzeln abwählbar; bei gesetztem „Paid by“-Filter nur die an diese Empfänger. Sie werden von der Summe abgezogen.
+- **Adjustment (±):** freier Betrag, z. B. bereits bar übergebenes Geld (negativ).
+- **Ergebnis:** Payments − My debts ± Adjustment = Total (negativ in Rot), fest am unteren Rand des Pop-ups.
+
+Technik: Das Pop-up ist das Fragment `fragments/payment-calculator.html`, die Logik steckt in `static/js/payment-calculator.js`. Bei jedem Öffnen lädt es `GET /orders/payment-calculator/data` (`PaymentCalculatorService`; Beträge in Cent, damit der Browser ohne Rundungsfehler rechnet); gefiltert und summiert wird im Browser. Filter und Schuldenschalter merkt sich der Browser in `localStorage` (`yy-payment-calculator`), abgewählte Zahlungen nur, solange die Seite offen ist. Auf dem Handy ist der Filterbereich anfangs eingeklappt; ein Badge zeigt die Zahl aktiver Filter.
 
 ### Nutzerstatistiken
 
@@ -565,6 +584,7 @@ Yatta-Yam-Yam/
     │       ├── AppUserService.java           # Nutzer anlegen, umbenennen, Statistiken
     │       ├── ContactService.java           # Kontakte speichern (inkl. Bild-Upload), löschen
     │       ├── OrderService.java             # Bestelllogik, Kostenberechnung, Zahlungen
+    │       ├── PaymentCalculatorService.java # Daten für den Zahlungsrechner (nur lesend)
     │       └── WrappedService.java           # Zahlen für den Jahresrückblick
     └── resources/
         ├── application.properties
@@ -598,6 +618,7 @@ Yatta-Yam-Yam/
         │       ├── mario.js                  # Mario-Besucher: Pixel-Koch, Brokkoli, Vogel mit Pizza, Ziegelblock
         │       ├── muertos.js                # Día-de-los-Muertos-Besucher: Monarchfalter, Catrina, Skelett mit Gitarre
         │       ├── pasta.js                  # Pasta-Besucher: Farfalle, Fleischbällchen, Nudel-Parade
+        │       ├── payment-calculator.js     # Zahlungsrechner auf dem Dashboard: Filter, Abwahl, Summen
         │       ├── pelmeni.js                # Pelmeni-Besucher: Löffel-Surfer, Teigtaschen-Parade, Gabel
         │       ├── pokemon.js                # Pokémon-Besucher: erfundene Pixel-Essensmonster, Grillhähnchen, Spielmodul
         │       ├── pizza.js                  # Pizza-Besucher: fliegende Pizza, Pizzastück, Pizzabäcker
@@ -629,6 +650,7 @@ Yatta-Yam-Yam/
             ├── wrapped-years.html            # Wrapped: Übersicht aller vergangenen Jahre
             └── fragments/
                 ├── open-debt-badge.html      # Rotes Badge mit offenem Betrag neben dem Namen
+                ├── payment-calculator.html   # Pop-up „Payment calculator“ auf dem Dashboard
                 └── theme.html                # Einbindung im <head>: Theme-Skripte und -Styles, im Januar der Wrapped-Hinweis
 ```
 

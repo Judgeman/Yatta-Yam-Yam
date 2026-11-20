@@ -270,6 +270,7 @@ The cookie has an expiry of `Integer.MAX_VALUE` seconds (~68 years), is `HttpOnl
 |--------|------------------------------|--------------------------------------------------|
 | GET    | `/orders/dashboard`          | Dashboard with open orders                       |
 | GET    | `/orders/archive`            | Archive of closed orders                         |
+| GET    | `/orders/payment-calculator/data` | JSON for the payment calculator: all payments + own open amounts |
 | GET    | `/orders/create`             | Form: create new order                           |
 | POST   | `/orders/create`             | Create order                                     |
 | GET    | `/orders/{id}`               | View order detail                                |
@@ -403,6 +404,24 @@ Every participation (`isParticipant`, so cost splits too) counts if it
 - doesn't belong to the payee themselves. The payee is the payer (`paidByName`, case-insensitive), or the creator if no payer is set.
 
 Amount per order = own items + tip share or cost share (`OrderService.getOpenDebts`). The "Open payments" and "Amount due" tiles on the overview and the columns of the same name on `/users` use the same calculation. `OpenDebtInterceptor` puts `openDebts` and `openDebtTotal` into the model of every page that contains a `user`. The badge itself is the fragment `fragments/open-debt-badge.html`.
+
+### Payment calculator (dashboard)
+
+The "Calculator" button next to "New Order" opens a dialog that lists payments from orders and adds them up — for example when someone collects money via another person's PayPal and that person passes the amount on in cash. It also opens with the shortcut **Alt+C** (Mac: **⌥C**) on the dashboard and via the link `/orders/dashboard?calculator` (the parameter survives both login steps and is then removed from the address bar). A short note at the top of the dialog explains what it is for. The calculator changes no data and is available to every user.
+
+- **Payments:** every participation (`isParticipant`) that is marked as paid by the participant or confirmed by the creator, in orders of any status. Archived orders are hidden by default (see the *Archive* filter). Amount = own items + tip share or cost share (`getPerPersonCharge`). Grouped by order (newest first) with place, date, creator and — if different — payer; each row shows participant, payment type and amount.
+- **Filters** (multiple choice; nothing selected = no restriction; different filters apply together):
+  - *Paid by:* who receives the money (`OrderService.getPayee`: `paidByName`, otherwise the creator; case-insensitive)
+  - *Payment type:* PayPal, Wero, Cash (plus "Not specified" for old rows without a payment type)
+  - *PayPal link / Wero link:* the orders' links. With at least one link selected, only payments made through a selected link count — PayPal payments through the order's PayPal link, Wero payments through its Wero link. Cash payments drop out then.
+  - *Order date:* from/to
+  - *Archive:* switch "Include archived orders", off by default. While it is off, the list states how many payments from archived orders are hidden, and filter chips that only come from archived orders are not offered.
+- **Unticking:** whole orders (checkbox in the header, half-ticked for a partial selection) or single payments can be left out; the total updates right away. "Select all"/"Select none" apply to the payments currently shown.
+- **Offset own debts** (optional, switch "Offset my open debts"): the open amounts from `getOpenDebts` (the same as in the red badge), each can be unticked; with a "Paid by" filter set, only debts to those people. They are subtracted from the total.
+- **Adjustment (±):** a free amount, e.g. cash already handed over (negative).
+- **Result:** Payments − My debts ± Adjustment = Total (red if negative), pinned to the bottom of the dialog.
+
+Technical: the dialog is the fragment `fragments/payment-calculator.html`, the logic lives in `static/js/payment-calculator.js`. Every time it opens it loads `GET /orders/payment-calculator/data` (`PaymentCalculatorService`; amounts in cents so the browser adds them up without rounding errors); filtering and adding up happen in the browser. The browser remembers the filters and the debts switch in `localStorage` (`yy-payment-calculator`), unticked payments only while the page is open. On phones the filter block starts collapsed; a badge shows the number of active filters.
 
 ### User statistics
 
@@ -565,6 +584,7 @@ Yatta-Yam-Yam/
     │       ├── AppUserService.java           # Create/rename users, statistics
     │       ├── ContactService.java           # Save contacts (incl. image upload), delete
     │       ├── OrderService.java             # Order logic, cost calculation, payments
+    │       ├── PaymentCalculatorService.java # Data for the payment calculator (read-only)
     │       └── WrappedService.java           # Figures for the year-end review
     └── resources/
         ├── application.properties
@@ -598,6 +618,7 @@ Yatta-Yam-Yam/
         │       ├── mario.js                  # Mario visitors: pixel chef, broccoli, bird with pizza, brick block
         │       ├── muertos.js                # Día de los Muertos visitors: monarchs, Catrina, guitar skeleton
         │       ├── pasta.js                  # Pasta visitors: farfalle, meatball, pasta parade
+        │       ├── payment-calculator.js     # Payment calculator on the dashboard: filters, unticking, totals
         │       ├── pelmeni.js                # Pelmeni visitors: spoon surfer, dumpling parade, fork
         │       ├── pokemon.js                # Pokémon visitors: made-up pixel lunch monsters, roast chicken, cartridge
         │       ├── pizza.js                  # Pizza visitors: flying pizza, pizza slice, pizzaiolo
@@ -629,6 +650,7 @@ Yatta-Yam-Yam/
             ├── wrapped-years.html            # Wrapped: overview of all past years
             └── fragments/
                 ├── open-debt-badge.html      # Red badge with the open amount next to the name
+                ├── payment-calculator.html   # "Payment calculator" dialog on the dashboard
                 └── theme.html                # <head> include: theme scripts and styles, in January the Wrapped hint
 ```
 

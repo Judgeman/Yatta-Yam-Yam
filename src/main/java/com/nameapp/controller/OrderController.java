@@ -4,8 +4,12 @@ import com.nameapp.model.*;
 import com.nameapp.service.AppUserService;
 import com.nameapp.service.ContactService;
 import com.nameapp.service.OrderService;
+import com.nameapp.service.PaymentCalculatorService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.CacheControl;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -22,12 +26,14 @@ public class OrderController {
     private final OrderService orderService;
     private final AppUserService userService;
     private final ContactService contactService;
+    private final PaymentCalculatorService paymentCalculatorService;
 
     public OrderController(OrderService orderService, AppUserService userService,
-                           ContactService contactService) {
+                           ContactService contactService, PaymentCalculatorService paymentCalculatorService) {
         this.orderService = orderService;
         this.userService = userService;
         this.contactService = contactService;
+        this.paymentCalculatorService = paymentCalculatorService;
     }
 
     // ── Helper: redirect to home, preserving the intended URL in session ────────
@@ -146,6 +152,18 @@ public class OrderController {
         model.addAttribute("locations", FoodOrder.Location.values());
         model.addAttribute("selectedLocation", location);
         return "dashboard";
+    }
+
+    // ── Payment calculator (dialog on the dashboard, loads its data when opened) ──
+
+    @GetMapping("/payment-calculator/data")
+    @ResponseBody
+    public ResponseEntity<PaymentCalculatorService.CalculatorData> paymentCalculatorData(HttpServletRequest request) {
+        Optional<AppUser> user = currentUser(request);
+        if (user.isEmpty()) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.noStore())
+                .body(paymentCalculatorService.getData(user.get()));
     }
 
     // ── Archive ───────────────────────────────────────────────────────────────
