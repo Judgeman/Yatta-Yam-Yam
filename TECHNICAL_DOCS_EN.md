@@ -456,6 +456,8 @@ On a tie, the entry that came up first in the year wins. The location where the 
 
 **Hint in January:** Throughout January, every page with a logged-in user (the overview `/` and all subpages, but not `/wrapped` itself and not the public `/version`) shows a small hint "🎁 Your 2026 Wrapped" at the bottom right, linking straight to the past year's story (`/wrapped?year=2026`). For this, `WrappedHintAdvice` (`@ControllerAdvice`) adds `wrappedYear` (the past year) to every model if that year has orders; outside January or without orders it is `null`. The fragment `fragments/theme.html` then renders the hint as a `<template>` in `<head>`, and `static/js/wrapped-hint.js` places it in `<body>`. The × shrinks it to the gift icon; the browser remembers that per year in `localStorage` (`yy-wrapped-hint-min`). Outside January, `/wrapped` stays reachable but is not linked anywhere.
 
+**Preview for testing:** `/wrapped?preview=on` makes the Wrapped rules act, for the user's own browser session, as if it were already 1 January of next year (`WrappedPreview`). The running year then shows up in the overview and as a story (with the orders so far, marked "Preview · orders so far"), and the January hint appears on every page. The overview shows a preview notice with "End preview" (`/wrapped?preview=off`); otherwise the preview ends with the session. Other users are not affected. The parameter survives the name entry.
+
 **Release notes:** There the feature is deliberately only mentioned as "A secret statistics feature", without details.
 
 **Rendering:** `wrapped.html` renders each slide as a `<section class="wr-slide">`. `static/js/wrapped.js` turns them into a story: tapping on the right, arrow right, space or swiping left moves on; the left third, arrow left or swiping right goes back. Bars at the top show the progress, the slide number is kept in the URL hash (reloading stays on the slide), and big numbers count up when they appear (not with `prefers-reduced-motion`). Without JavaScript the slides are shown one below the other. Styles: `static/css/wrapped.css`.
@@ -536,7 +538,8 @@ Yatta-Yam-Yam/
     │   │   ├── OpenDebtInterceptor.java      # The user's open amounts for the navbar badge
     │   │   ├── SecurityConfig.java           # Spring Security configuration
     │   │   ├── WebConfig.java                # Web configuration (e.g. static resources)
-    │   │   └── WrappedHintAdvice.java        # wrappedYear in January for the Wrapped hint
+    │   │   ├── WrappedHintAdvice.java        # wrappedYear in January for the Wrapped hint
+    │   │   └── WrappedPreview.java           # Wrapped preview for testing (?preview=on, per session)
     │   ├── controller/
     │   │   ├── ContactController.java        # Contact book: list, create, edit, delete
     │   │   ├── LoginController.java          # Cookie login, user flow, /users, /version

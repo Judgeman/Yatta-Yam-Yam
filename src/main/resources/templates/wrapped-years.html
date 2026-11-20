@@ -23,6 +23,13 @@
         <p class="wr-overview-lead">Your years in food. Pick a year to watch its story.</p>
     </header>
 
+    <!-- Test preview (WrappedPreview): this session acts as if it were already January -->
+    <div th:if="${preview}" class="wr-preview-note">
+        <strong>Preview</strong> &ndash; as if it were already January:
+        <span th:text="${realYear}">2026</span> shows the orders so far, and the hint appears on every page.
+        <a th:href="@{/wrapped(preview='off')}">End preview</a>
+    </div>
+
     <a th:each="s, iter : ${summaries}" th:href="@{/wrapped(year=${s.year})}" class="wr-year-card"
        th:classappend="${ {'wr-theme-indigo','wr-theme-sunset','wr-theme-ocean','wr-theme-berry','wr-theme-forest','wr-theme-night'}[iter.index % 6] }"
        th:aria-label="'Watch Wrapped ' + ${s.year}">

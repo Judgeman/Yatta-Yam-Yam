@@ -233,6 +233,16 @@
     letter-spacing: -0.04em;
     color: var(--wr-accent);
 }
+/* Test preview of the running year (WrappedPreview) */
+.wr-pill {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 3px 12px;
+    border-radius: 999px;
+    background: var(--wr-glass-strong);
+    font-size: 13px;
+    font-weight: 600;
+}
 .wr-lead {
     font-size: 1.15rem;
     line-height: 1.45;
@@ -631,4 +641,20 @@
 }
 .wr-year-card.is-empty:hover {
     transform: none;
+}
+
+/* Notice on the overview while the test preview is on */
+.wr-preview-note {
+    margin: 0 0 16px;
+    padding: 10px 14px;
+    border-radius: 14px;
+    background: var(--yy-warn-bg);
+    border: 1px solid var(--yy-warn-border);
+    color: var(--bs-body-color);
+    font-size: 14px;
+}
+.wr-preview-note a {
+    color: var(--yy-accent-text);
+    font-weight: 700;
+    white-space: nowrap;
 }

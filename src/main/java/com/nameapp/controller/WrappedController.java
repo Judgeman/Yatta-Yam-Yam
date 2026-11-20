@@ -1,5 +1,6 @@
 package com.nameapp.controller;
 
+import com.nameapp.config.WrappedPreview;
 import com.nameapp.model.AppUser;
 import com.nameapp.service.AppUserService;
 import com.nameapp.service.WrappedService;
@@ -21,6 +22,7 @@ import java.util.Optional;
  * Year-end review. /wrapped lists all past years with orders; /wrapped?year=2025
  * plays that year's story. Only completed years are offered (Wrapped 2026 from
  * 1 January 2027 on); the running, a future or an invalid year leads back to the list.
+ * /wrapped?preview=on|off switches the test preview for this session (WrappedPreview).
  */
 @Controller
 public class WrappedController {
@@ -37,12 +39,22 @@ public class WrappedController {
 
     @GetMapping("/wrapped")
     public String wrapped(@RequestParam(name = "year", required = false) String yearParam,
+                          @RequestParam(name = "preview", required = false) String previewParam,
                           HttpServletRequest request, Model model) {
         Optional<AppUser> user = currentUser(request);
         if (user.isEmpty()) return redirectToHome(request);
 
-        LocalDate today = LocalDate.now();
+        if (previewParam != null) {
+            WrappedPreview.set(request, "on".equalsIgnoreCase(previewParam.trim()));
+            return "redirect:/wrapped";
+        }
+
+        LocalDate today = WrappedPreview.today(request);
+        boolean preview = WrappedPreview.isOn(request);
         model.addAttribute("user", user.get());
+        // Preview: the running year is shown as if it were over (orders so far)
+        model.addAttribute("preview", preview);
+        model.addAttribute("realYear", LocalDate.now().getYear());
         // No January hint on the Wrapped pages themselves (see fragments/theme.html)
         model.addAttribute("hideWrappedHint", true);
 

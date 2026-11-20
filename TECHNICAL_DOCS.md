@@ -456,6 +456,8 @@ Bei Gleichstand gewinnt der Eintrag, der im Jahr zuerst vorkam. Der Standort, an
 
 **Hinweis im Januar:** Den ganzen Januar über zeigt jede Seite mit angemeldetem Nutzer (Übersicht `/` und alle Unterseiten, nicht `/wrapped` selbst und nicht die öffentliche `/version`) unten rechts einen kleinen Hinweis „🎁 Your 2026 Wrapped“ mit Link direkt auf die Story des Vorjahres (`/wrapped?year=2026`). Dafür legt `WrappedHintAdvice` (`@ControllerAdvice`) `wrappedYear` (das Vorjahr) in jedes Model, sofern dieses Jahr Bestellungen hat; außerhalb des Januars oder ohne Bestellungen ist es `null`. Das Fragment `fragments/theme.html` rendert den Hinweis dann als `<template>` im `<head>`, `static/js/wrapped-hint.js` setzt ihn in den `<body>`. Das × verkleinert ihn auf das Geschenk-Symbol; das merkt sich der Browser pro Jahr in `localStorage` (`yy-wrapped-hint-min`). Außerhalb des Januars ist `/wrapped` weiter erreichbar, wird aber nirgends verlinkt.
 
+**Vorschau zum Testen:** `/wrapped?preview=on` lässt die Wrapped-Regeln für die eigene Browser-Sitzung so tun, als wäre schon der 1. Januar des nächsten Jahres (`WrappedPreview`). Das laufende Jahr erscheint dann in der Übersicht und als Story (mit den Bestellungen bis heute, gekennzeichnet mit „Preview · orders so far“), und der Januar-Hinweis erscheint auf allen Seiten. Die Übersicht zeigt einen Vorschau-Hinweis mit „End preview“ (`/wrapped?preview=off`); sonst endet die Vorschau mit der Sitzung. Andere Nutzer sind nicht betroffen. Der Parameter übersteht die Namenseingabe.
+
 **Release Notes:** Dort ist das Feature bewusst nur als „A secret statistics feature“ ohne Details erwähnt.
 
 **Darstellung:** `wrapped.html` rendert jede Folie als `<section class="wr-slide">`. `static/js/wrapped.js` macht daraus eine Story: rechts tippen, Pfeil rechts, Leertaste oder nach links wischen geht weiter; das linke Drittel, Pfeil links oder nach rechts wischen geht zurück. Oben zeigen Balken den Fortschritt, die Foliennummer steht im URL-Hash (Neuladen bleibt auf der Folie), große Zahlen zählen beim Erscheinen hoch (nicht bei `prefers-reduced-motion`). Ohne JavaScript stehen die Folien untereinander. Styles: `static/css/wrapped.css`.
@@ -536,7 +538,8 @@ Yatta-Yam-Yam/
     │   │   ├── OpenDebtInterceptor.java      # Offene Beträge des Nutzers für das Badge in der Menüleiste
     │   │   ├── SecurityConfig.java           # Spring Security Konfiguration
     │   │   ├── WebConfig.java                # Web-Konfiguration (z. B. statische Ressourcen)
-    │   │   └── WrappedHintAdvice.java        # wrappedYear im Januar für den Wrapped-Hinweis
+    │   │   ├── WrappedHintAdvice.java        # wrappedYear im Januar für den Wrapped-Hinweis
+    │   │   └── WrappedPreview.java           # Wrapped-Vorschau zum Testen (?preview=on, pro Sitzung)
     │   ├── controller/
     │   │   ├── ContactController.java        # Kontaktbuch: Liste, Anlegen, Bearbeiten, Löschen
     │   │   ├── LoginController.java          # Cookie-Login, Nutzer-Flow, /users, /version

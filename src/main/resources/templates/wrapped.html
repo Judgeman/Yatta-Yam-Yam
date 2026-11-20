@@ -26,6 +26,7 @@
         <div class="wr-content wr-center">
             <div class="wr-kicker">Yatta-Yam-Yam Wrapped</div>
             <div class="wr-year" th:text="${wrapped.year}">2026</div>
+            <div th:if="${preview and wrapped.year >= realYear}" class="wr-pill">Preview &middot; orders so far</div>
             <p class="wr-lead">
                 A year of ordering together. Let's see what everyone ate &mdash;
                 and what you did, <strong th:text="${user.name}">Name</strong>.

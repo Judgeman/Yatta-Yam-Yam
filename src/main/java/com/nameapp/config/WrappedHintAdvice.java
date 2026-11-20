@@ -1,6 +1,7 @@
 package com.nameapp.config;
 
 import com.nameapp.service.WrappedService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
@@ -11,6 +12,7 @@ import java.time.LocalDate;
  * orders. fragments/theme.html then adds a small hint at the bottom right of every
  * page with a logged-in user, linking to that year's review. Otherwise the attribute
  * is null and there is no hint; /wrapped itself stays reachable for past years.
+ * In preview mode (see WrappedPreview) it acts as if it were already January.
  */
 @ControllerAdvice
 public class WrappedHintAdvice {
@@ -22,8 +24,8 @@ public class WrappedHintAdvice {
     }
 
     @ModelAttribute("wrappedYear")
-    public Integer wrappedYear() {
-        LocalDate today = LocalDate.now();
+    public Integer wrappedYear(HttpServletRequest request) {
+        LocalDate today = WrappedPreview.today(request);
         if (!WrappedService.isSeason(today)) return null;
         int year = WrappedService.defaultYear(today);
         return wrappedService.hasOrders(year) ? year : null;
