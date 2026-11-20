@@ -11,12 +11,12 @@
     <link rel="stylesheet" th:href="@{/css/symbolics.css}"/>
     <script th:src="@{/js/theme.js}"></script>
     <!-- January only (wrappedYear from WrappedHintAdvice), for logged-in users, not on
-         /wrapped itself: a small hint at the bottom right linking to the year-end review.
-         A <template> is allowed in <head>; wrapped-hint.js places it in <body>. -->
-    <th:block th:if="${wrappedYear != null and user != null and wrapped == null}">
+         the Wrapped pages themselves: a small hint at the bottom right linking to the
+         past year's review. A <template> is allowed in <head>; wrapped-hint.js places it in <body>. -->
+    <th:block th:if="${wrappedYear != null and user != null and hideWrappedHint == null}">
         <template id="yy-wrapped-hint">
             <div class="wrapped-hint" th:data-year="${wrappedYear}">
-                <a th:href="@{/wrapped}" class="wrapped-hint-link"
+                <a th:href="@{/wrapped(year=${wrappedYear})}" class="wrapped-hint-link"
                    th:title="'Your ' + ${wrappedYear} + ' Wrapped'">
                     <span class="wrapped-hint-icon" aria-hidden="true">🎁</span>
                     <span class="wrapped-hint-text" th:text="'Your ' + ${wrappedYear} + ' Wrapped'">Your Wrapped</span>

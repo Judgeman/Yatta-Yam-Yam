@@ -42,7 +42,7 @@ public class WrappedService {
     // A year's review is only offered once the year is over: Wrapped 2026 from
     // 1 January 2027 on. The running year is never shown.
 
-    /** Year shown by default: the past year. */
+    /** The past year: the one the January hint links to. */
     public static int defaultYear(LocalDate today) {
         return today.getYear() - 1;
     }
@@ -57,6 +57,12 @@ public class WrappedService {
         return today.getMonthValue() == 1;
     }
 
+    /** Whether the year has at least one closed or archived order. */
+    public boolean hasOrders(int year) {
+        return orderRepo.existsByOrderDateBetweenAndStatusIn(
+                LocalDate.of(year, 1, 1), LocalDate.of(year, 12, 31), COMPLETED);
+    }
+
     /** Past years with at least one closed or archived order, newest first. */
     public List<Integer> getYearsWithOrders(LocalDate today) {
         return orderRepo.findOrderDatesByStatusIn(COMPLETED).stream()
@@ -65,6 +71,17 @@ public class WrappedService {
                 .distinct()
                 .sorted(Comparator.reverseOrder())
                 .collect(Collectors.toList());
+    }
+
+    /** One card per past year with orders for the overview on /wrapped, newest first. */
+    public List<YearSummary> getYearSummaries(AppUser user, LocalDate today) {
+        List<YearSummary> summaries = new ArrayList<>();
+        for (int year : getYearsWithOrders(today)) {
+            Wrapped wrapped = build(year, user);
+            if (wrapped.overall.isEmpty()) continue;
+            summaries.add(new YearSummary(year, wrapped.overall, wrapped.me));
+        }
+        return summaries;
     }
 
     // ── Building the review ───────────────────────────────────────────────────
@@ -338,7 +355,24 @@ public class WrappedService {
         }
     }
 
-    // ── Results (read by wrapped.html) ────────────────────────────────────────
+    // ── Results (read by wrapped.html and wrapped-years.html) ─────────────────
+
+    /** Key figures of one year for its card on the overview. */
+    public static class YearSummary {
+        private final int year;
+        private final GroupStats overall;
+        private final PersonalStats me;
+
+        YearSummary(int year, GroupStats overall, PersonalStats me) {
+            this.year = year;
+            this.overall = overall;
+            this.me = me;
+        }
+
+        public int getYear() { return year; }
+        public GroupStats getOverall() { return overall; }
+        public PersonalStats getMe() { return me; }
+    }
 
     public static class Wrapped {
         private final int year;

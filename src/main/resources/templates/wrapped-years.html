@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <link rel="icon" type="image/svg+xml" href="/images/favicon.svg"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+    <title>Wrapped – Yatta-Yam-Yam</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link rel="stylesheet" th:href="@{/css/wrapped.css}"/>
+    <th:block th:replace="~{fragments/theme :: head}"></th:block>
+</head>
+<body class="wr-body">
+
+<!-- All past years with orders (WrappedService.getYearSummaries); each card plays
+     that year's story on /wrapped?year=… -->
+<main class="wr-overview">
+    <a th:href="@{/orders/dashboard}" class="wr-overview-close" aria-label="Close and go to the dashboard">&times;</a>
+
+    <header class="wr-overview-head">
+        <div class="wr-overview-kicker">Yatta-Yam-Yam</div>
+        <h1 class="wr-overview-title">Wrapped</h1>
+        <p class="wr-overview-lead">Your years in food. Pick a year to watch its story.</p>
+    </header>
+
+    <a th:each="s, iter : ${summaries}" th:href="@{/wrapped(year=${s.year})}" class="wr-year-card"
+       th:classappend="${ {'wr-theme-indigo','wr-theme-sunset','wr-theme-ocean','wr-theme-berry','wr-theme-forest','wr-theme-night'}[iter.index % 6] }"
+       th:aria-label="'Watch Wrapped ' + ${s.year}">
+        <span class="wr-year-card-play" aria-hidden="true">▶</span>
+        <div class="wr-year-card-year" th:text="${s.year}">2025</div>
+        <div class="wr-year-card-facts">
+            <span th:text="${#numbers.formatInteger(s.overall.orderCount,1,'COMMA')} + (${s.overall.orderCount == 1} ? ' order' : ' orders')">0 orders</span>
+            · <span th:text="'€' + ${#numbers.formatDecimal(s.overall.totalPaid,1,'COMMA',2,'POINT')}">€0.00</span>
+        </div>
+        <div class="wr-year-card-line" th:if="${s.overall.topProduct != null}"
+             th:text="'#1 dish: ' + ${s.overall.topProduct.name}">#1 dish: Dish</div>
+        <div class="wr-year-card-line" th:if="${!s.me.empty}"
+             th:text="'You: ' + ${s.me.orderCount} + (${s.me.orderCount == 1} ? ' order' : ' orders') + ' · €' + ${#numbers.formatDecimal(s.me.spent,1,'COMMA',2,'POINT')}">You: 0 orders · €0.00</div>
+        <div class="wr-year-card-line" th:if="${s.me.empty}">You didn't order that year</div>
+    </a>
+
+    <!-- No completed year yet -->
+    <div th:if="${summaries.empty}" class="wr-year-card wr-theme-night is-empty">
+        <div class="wr-year-card-year" th:text="${nextYear}">2026</div>
+        <div class="wr-year-card-facts">Coming on 1 January <span th:text="${nextYear + 1}">2027</span></div>
+        <div class="wr-year-card-line">Once the year is over, its story will be waiting here.</div>
+    </div>
+</main>
+
+</body>
+</html>

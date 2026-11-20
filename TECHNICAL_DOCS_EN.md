@@ -258,7 +258,8 @@ The cookie has an expiry of `Integer.MAX_VALUE` seconds (~68 years), is `HttpOnl
 
 | Method | Path                 | Description                                         |
 |--------|----------------------|-----------------------------------------------------|
-| GET    | `/wrapped`           | Year-end review "Wrapped", optionally `?year=2025`   |
+| GET    | `/wrapped`           | Overview of all past years with orders              |
+| GET    | `/wrapped?year=2025` | That year's "Wrapped" story                         |
 
 ### Orders (`OrderController`, prefix `/orders`)
 
@@ -410,7 +411,10 @@ The overview (`/`, `AppUserService.getStatsForUser`) and the `/users` page (`get
 
 ### Year-end review "Wrapped"
 
-`GET /wrapped` shows a year-end review in story format (like Spotify Wrapped): slides to tap through with the year's figures, first for everyone and per location, then for the logged-in user. Only completed years are offered: Wrapped 2026 is available from 1 January 2027 on (`WrappedService.isAvailable`). Without a parameter the page shows the past year, `?year=2024` an earlier one; the running year, a future or an invalid year falls back to the past year.
+A year-end review in story format (like Spotify Wrapped): slides to tap through with one year's figures, first for everyone and per location, then for the logged-in user. Only completed years are offered: Wrapped 2026 is available from 1 January 2027 on (`WrappedService.isAvailable`).
+
+- `GET /wrapped` (`wrapped-years.html`) lists all past years with orders as cards, newest first, each with orders, paid in total, most popular dish and the user's own orders and spending (`WrappedService.getYearSummaries`). A click plays that year's story. While there is no completed year with orders yet, one card announces the running year for 1 January. The × leads to the dashboard.
+- `GET /wrapped?year=2025` (`wrapped.html`) plays that year's story. The running, a future, an invalid or a missing year leads back to the overview. The × and the last slide ("All years") lead to the overview as well.
 
 **What counts** (`WrappedService`): orders dated in the chosen year with status CLOSED or ARCHIVED (their amounts are final) and at least one participant according to `OrderService.isParticipant`. Open and ordered orders only count once they are closed; orders without a location only count on the "together" slide.
 
@@ -447,7 +451,7 @@ If at least two locations have orders, one slide compares them directly (orders,
 
 On a tie, the entry that came up first in the year wins. The location where the user ordered most often comes first. Anyone who took part in no order that year gets a short note instead of the personal slides.
 
-**Hint in January:** Throughout January, every page with a logged-in user (the overview `/` and all subpages, but not `/wrapped` itself and not the public `/version`) shows a small hint "🎁 Your 2026 Wrapped" at the bottom right, linking to `/wrapped`. For this, `WrappedHintAdvice` (`@ControllerAdvice`) adds `wrappedYear` (the past year) to every model, `null` outside January. The fragment `fragments/theme.html` then renders the hint as a `<template>` in `<head>`, and `static/js/wrapped-hint.js` places it in `<body>`. The × shrinks it to the gift icon; the browser remembers that per year in `localStorage` (`yy-wrapped-hint-min`). Outside January, `/wrapped` stays reachable for completed years but is not linked anywhere. The last slide links to other completed years with orders.
+**Hint in January:** Throughout January, every page with a logged-in user (the overview `/` and all subpages, but not `/wrapped` itself and not the public `/version`) shows a small hint "🎁 Your 2026 Wrapped" at the bottom right, linking straight to the past year's story (`/wrapped?year=2026`). For this, `WrappedHintAdvice` (`@ControllerAdvice`) adds `wrappedYear` (the past year) to every model if that year has orders; outside January or without orders it is `null`. The fragment `fragments/theme.html` then renders the hint as a `<template>` in `<head>`, and `static/js/wrapped-hint.js` places it in `<body>`. The × shrinks it to the gift icon; the browser remembers that per year in `localStorage` (`yy-wrapped-hint-min`). Outside January, `/wrapped` stays reachable but is not linked anywhere.
 
 **Release notes:** There the feature is deliberately only mentioned as "A secret statistics feature", without details.
 
@@ -589,7 +593,8 @@ Yatta-Yam-Yam/
             ├── itemlists.html                # Hidden page: all menu lists + visibility toggle
             ├── users.html                    # User statistics
             ├── version.html                  # Version info
-            ├── wrapped.html                  # Year-end review "Wrapped" (story slides)
+            ├── wrapped.html                  # Year-end review "Wrapped" (story slides of one year)
+            ├── wrapped-years.html            # Wrapped: overview of all past years
             └── fragments/
                 ├── open-debt-badge.html      # Red badge with the open amount next to the name
                 └── theme.html                # <head> include: theme.js + symbolics.css, in January the Wrapped hint

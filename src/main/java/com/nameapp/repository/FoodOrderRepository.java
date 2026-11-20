@@ -22,6 +22,10 @@ public interface FoodOrderRepository extends JpaRepository<FoodOrder, Long> {
     List<FoodOrder> findByOrderDateBetweenAndStatusInOrderByOrderDateAscIdAsc(
             LocalDate from, LocalDate to, Collection<FoodOrder.OrderStatus> statuses);
 
+    // Wrapped: whether a year has orders in the given states (for the January hint)
+    boolean existsByOrderDateBetweenAndStatusIn(
+            LocalDate from, LocalDate to, Collection<FoodOrder.OrderStatus> statuses);
+
     // Wrapped: dates of all orders in the given states (to list the years with data)
     @Query("select distinct o.orderDate from FoodOrder o where o.status in :statuses")
     List<LocalDate> findOrderDatesByStatusIn(@Param("statuses") Collection<FoodOrder.OrderStatus> statuses);

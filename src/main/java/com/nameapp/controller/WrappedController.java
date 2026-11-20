@@ -18,9 +18,9 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * Year-end review: /wrapped shows the past year, /wrapped?year=2024 an earlier one.
- * The running year is never shown (Wrapped 2026 only from 1 January 2027 on); such
- * a year, or an invalid one, falls back to the past year.
+ * Year-end review. /wrapped lists all past years with orders; /wrapped?year=2025
+ * plays that year's story. Only completed years are offered (Wrapped 2026 from
+ * 1 January 2027 on); the running, a future or an invalid year leads back to the list.
  */
 @Controller
 public class WrappedController {
@@ -36,19 +36,33 @@ public class WrappedController {
     }
 
     @GetMapping("/wrapped")
-    public String wrapped(@RequestParam(required = false) Integer year,
+    public String wrapped(@RequestParam(name = "year", required = false) String yearParam,
                           HttpServletRequest request, Model model) {
         Optional<AppUser> user = currentUser(request);
         if (user.isEmpty()) return redirectToHome(request);
 
         LocalDate today = LocalDate.now();
-        int shownYear = year != null && year >= FIRST_YEAR && WrappedService.isAvailable(year, today)
-                ? year
-                : WrappedService.defaultYear(today);
-
         model.addAttribute("user", user.get());
-        model.addAttribute("wrapped", wrappedService.build(shownYear, user.get()));
-        model.addAttribute("years", wrappedService.getYearsWithOrders(today));
+        // No January hint on the Wrapped pages themselves (see fragments/theme.html)
+        model.addAttribute("hideWrappedHint", true);
+
+        if (yearParam == null || yearParam.isBlank()) {
+            model.addAttribute("summaries", wrappedService.getYearSummaries(user.get(), today));
+            // Shown while there is no past year yet: the running year comes next
+            model.addAttribute("nextYear", today.getYear());
+            return "wrapped-years";
+        }
+        int year;
+        try {
+            year = Integer.parseInt(yearParam.trim());
+        } catch (NumberFormatException e) {
+            return "redirect:/wrapped";
+        }
+        if (year < FIRST_YEAR || !WrappedService.isAvailable(year, today)) {
+            return "redirect:/wrapped";
+        }
+
+        model.addAttribute("wrapped", wrappedService.build(year, user.get()));
         // The UI is English: weekday and month names in dates, too
         model.addAttribute("en", Locale.ENGLISH);
         return "wrapped";

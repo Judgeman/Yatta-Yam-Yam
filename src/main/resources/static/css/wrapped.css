@@ -519,19 +519,116 @@
 .wr-btn-solid:hover { background: rgba(255, 255, 255, 0.88); color: #312e81; }
 .wr-btn[hidden] { display: none; }
 
-.wr-years {
-    margin-top: 10px;
-    font-size: 14px;
-    color: var(--wr-text-soft);
-}
-.wr-years a {
-    color: var(--wr-text);
-    font-weight: 700;
-    margin-left: 6px;
-}
 .wr-fine {
     margin: 8px 0 0;
     font-size: 12px;
     line-height: 1.4;
     color: rgba(255, 255, 255, 0.65);
+}
+
+/* ── Overview of all past years (/wrapped, wrapped-years.html) ──
+   The page itself follows the light/dark theme; each year is a card in a slide theme. */
+.wr-overview {
+    position: relative;
+    max-width: 440px;
+    margin: 0 auto;
+    padding: 28px 16px 40px;
+}
+.wr-overview-head {
+    padding: 0 52px 20px 4px;
+}
+.wr-overview-kicker {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--bs-secondary-color);
+}
+.wr-overview-title {
+    font-size: 2.6rem;
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    color: var(--yy-accent-text);
+    margin: 4px 0 8px;
+}
+.wr-overview-lead {
+    color: var(--bs-secondary-color);
+    margin: 0;
+}
+.wr-overview-close {
+    position: absolute;
+    top: 24px;
+    right: 16px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--yy-surface-muted);
+    border: 1px solid var(--yy-border-soft);
+    color: var(--bs-body-color);
+    font-size: 24px;
+    line-height: 1;
+    text-decoration: none;
+}
+.wr-overview-close:hover { color: var(--bs-body-color); background: var(--yy-border-soft); }
+
+.wr-year-card {
+    position: relative;
+    display: block;
+    margin-bottom: 14px;
+    padding: 22px 22px 20px;
+    border-radius: 24px;
+    background: var(--wr-rings), var(--wr-bg);
+    color: var(--wr-text);
+    text-decoration: none;
+    box-shadow: 0 12px 30px rgba(17, 12, 46, 0.25);
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.wr-year-card:hover,
+.wr-year-card:focus-visible {
+    color: var(--wr-text);
+    transform: translateY(-2px);
+    box-shadow: 0 16px 36px rgba(17, 12, 46, 0.32);
+}
+.wr-year-card-year {
+    font-size: 3.6rem;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: var(--wr-accent);
+}
+.wr-year-card-facts {
+    margin-top: 12px;
+    font-weight: 700;
+}
+.wr-year-card-line {
+    margin-top: 2px;
+    font-size: 14px;
+    color: var(--wr-text-soft);
+    overflow-wrap: anywhere;
+}
+.wr-year-card-play {
+    position: absolute;
+    top: 22px;
+    right: 22px;
+    width: 46px;
+    height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #fff;
+    color: #312e81;
+    font-size: 18px;
+    padding-left: 3px;
+}
+.wr-year-card.is-empty {
+    cursor: default;
+}
+.wr-year-card.is-empty:hover {
+    transform: none;
 }

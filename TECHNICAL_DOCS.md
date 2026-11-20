@@ -258,7 +258,8 @@ Der Cookie hat eine Ablaufzeit von `Integer.MAX_VALUE` Sekunden (~68 Jahre), ist
 
 | Methode | Pfad               | Beschreibung                                      |
 |---------|--------------------|---------------------------------------------------|
-| GET     | `/wrapped`         | Jahresrückblick „Wrapped“, optional `?year=2025`   |
+| GET     | `/wrapped`         | Übersicht aller vergangenen Jahre mit Bestellungen |
+| GET     | `/wrapped?year=2025` | Story „Wrapped“ dieses Jahres                    |
 
 ### Bestellungen (`OrderController`, Präfix `/orders`)
 
@@ -410,7 +411,10 @@ Die Übersicht (`/`, `AppUserService.getStatsForUser`) und die Seite `/users` (`
 
 ### Jahresrückblick „Wrapped“
 
-`GET /wrapped` zeigt einen Jahresrückblick im Story-Format (wie Spotify Wrapped): Folien zum Durchtippen mit den Zahlen des Jahres, erst für alle und pro Standort, dann für den angemeldeten Nutzer. Angeboten werden nur abgeschlossene Jahre: Wrapped 2026 gibt es ab dem 01.01.2027 (`WrappedService.isAvailable`). Ohne Parameter zeigt die Seite das Vorjahr, `?year=2024` ein früheres Jahr; das laufende, ein zukünftiges oder ein ungültiges Jahr fällt auf das Vorjahr zurück.
+Ein Jahresrückblick im Story-Format (wie Spotify Wrapped): Folien zum Durchtippen mit den Zahlen eines Jahres, erst für alle und pro Standort, dann für den angemeldeten Nutzer. Angeboten werden nur abgeschlossene Jahre: Wrapped 2026 gibt es ab dem 01.01.2027 (`WrappedService.isAvailable`).
+
+- `GET /wrapped` (`wrapped-years.html`) listet alle vergangenen Jahre mit Bestellungen als Karten, neuestes zuerst, je mit Bestellungen, insgesamt gezahlt, beliebtestem Gericht und den eigenen Bestellungen und Ausgaben (`WrappedService.getYearSummaries`). Ein Klick startet die Story des Jahres. Gibt es noch kein abgeschlossenes Jahr mit Bestellungen, kündigt eine Karte das laufende Jahr für den 1. Januar an. Das × führt zum Dashboard.
+- `GET /wrapped?year=2025` (`wrapped.html`) spielt die Story dieses Jahres. Das laufende, ein zukünftiges, ein ungültiges oder kein Jahr führt zurück zur Übersicht. Das × und die letzte Folie („All years“) führen ebenfalls zur Übersicht.
 
 **Was zählt** (`WrappedService`): Bestellungen mit Datum im gewählten Jahr im Status CLOSED oder ARCHIVED (die Beträge stehen fest) und mit mindestens einem Teilnehmer nach `OrderService.isParticipant`. Offene und bestellte Bestellungen zählen erst nach dem Schließen; Bestellungen ohne Standort zählen nur in der Gesamtfolie.
 
@@ -447,7 +451,7 @@ Haben mindestens zwei Standorte Bestellungen, vergleicht eine Folie sie direkt (
 
 Bei Gleichstand gewinnt der Eintrag, der im Jahr zuerst vorkam. Der Standort, an dem der Nutzer am häufigsten bestellt hat, kommt zuerst. Wer im Jahr an keiner Bestellung teilgenommen hat, sieht statt der persönlichen Folien eine Hinweisfolie.
 
-**Hinweis im Januar:** Den ganzen Januar über zeigt jede Seite mit angemeldetem Nutzer (Übersicht `/` und alle Unterseiten, nicht `/wrapped` selbst und nicht die öffentliche `/version`) unten rechts einen kleinen Hinweis „🎁 Your 2026 Wrapped“ mit Link auf `/wrapped`. Dafür legt `WrappedHintAdvice` (`@ControllerAdvice`) `wrappedYear` (das Vorjahr) in jedes Model, außerhalb des Januars `null`. Das Fragment `fragments/theme.html` rendert den Hinweis dann als `<template>` im `<head>`, `static/js/wrapped-hint.js` setzt ihn in den `<body>`. Das × verkleinert ihn auf das Geschenk-Symbol; das merkt sich der Browser pro Jahr in `localStorage` (`yy-wrapped-hint-min`). Außerhalb des Januars ist `/wrapped` weiter für abgeschlossene Jahre erreichbar, wird aber nirgends verlinkt. Die letzte Folie verlinkt auf weitere abgeschlossene Jahre mit Bestellungen.
+**Hinweis im Januar:** Den ganzen Januar über zeigt jede Seite mit angemeldetem Nutzer (Übersicht `/` und alle Unterseiten, nicht `/wrapped` selbst und nicht die öffentliche `/version`) unten rechts einen kleinen Hinweis „🎁 Your 2026 Wrapped“ mit Link direkt auf die Story des Vorjahres (`/wrapped?year=2026`). Dafür legt `WrappedHintAdvice` (`@ControllerAdvice`) `wrappedYear` (das Vorjahr) in jedes Model, sofern dieses Jahr Bestellungen hat; außerhalb des Januars oder ohne Bestellungen ist es `null`. Das Fragment `fragments/theme.html` rendert den Hinweis dann als `<template>` im `<head>`, `static/js/wrapped-hint.js` setzt ihn in den `<body>`. Das × verkleinert ihn auf das Geschenk-Symbol; das merkt sich der Browser pro Jahr in `localStorage` (`yy-wrapped-hint-min`). Außerhalb des Januars ist `/wrapped` weiter erreichbar, wird aber nirgends verlinkt.
 
 **Release Notes:** Dort ist das Feature bewusst nur als „A secret statistics feature“ ohne Details erwähnt.
 
@@ -589,7 +593,8 @@ Yatta-Yam-Yam/
             ├── itemlists.html                # Versteckte Seite: alle Menülisten + Sichtbarkeitsschalter
             ├── users.html                    # Nutzerstatistiken
             ├── version.html                  # Versionsinfo
-            ├── wrapped.html                  # Jahresrückblick „Wrapped“ (Story-Folien)
+            ├── wrapped.html                  # Jahresrückblick „Wrapped“ (Story-Folien eines Jahres)
+            ├── wrapped-years.html            # Wrapped: Übersicht aller vergangenen Jahre
             └── fragments/
                 ├── open-debt-badge.html      # Rotes Badge mit offenem Betrag neben dem Namen
                 └── theme.html                # Einbindung im <head>: theme.js + symbolics.css, im Januar der Wrapped-Hinweis

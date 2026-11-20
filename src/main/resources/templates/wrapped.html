@@ -19,7 +19,7 @@
       th:with="me=${wrapped.me}, all=${wrapped.overall}">
 
     <div class="wr-progress" aria-hidden="true" hidden></div>
-    <a th:href="@{/orders/dashboard}" class="wr-close" aria-label="Close and go to the dashboard">&times;</a>
+    <a th:href="@{/wrapped}" class="wr-close" aria-label="Close and show all years">&times;</a>
 
     <!-- ── Intro ─────────────────────────────────────────────────────────── -->
     <section class="wr-slide wr-theme-indigo" tabindex="-1" aria-label="Intro">
@@ -358,13 +358,7 @@
 
             <div class="wr-actions">
                 <button type="button" class="wr-btn" data-wr-restart hidden>↺ Watch again</button>
-                <a th:href="@{/orders/dashboard}" class="wr-btn wr-btn-solid">Dashboard →</a>
-            </div>
-            <div class="wr-years" th:if="${years.size() > 1}">
-                Other years:
-                <th:block th:each="y : ${years}" th:if="${y != wrapped.year}">
-                    <a th:href="@{/wrapped(year=${y})}" th:text="${y}">2025</a>
-                </th:block>
+                <a th:href="@{/wrapped}" class="wr-btn wr-btn-solid">All years →</a>
             </div>
             <p class="wr-fine">
                 Closed and archived orders of <span th:text="${wrapped.year}">2026</span>.
