@@ -53,6 +53,11 @@
  *      sun avatars, falling dollar bills, an ocean drive skyline along the bottom edge.
  *      Visitors: a car chase, a helicopter, a speedboat, a flamingo in shades, a bag of
  *      cash (js/gta.js). Styles: css/gta.css.
+ *    - Pokémon homage (?theme=pokemon, "A Wild Lunch Appeared!"): a nod to the 151 and
+ *      the Red, Blue and Yellow editions as our own pixel art, no creatures from the
+ *      games. Handheld-screen greens, cartridges on a link cable, tall grass along the
+ *      bottom edge. Visitors: made-up pixel lunch monsters (js/pokemon.js).
+ *      Styles: css/pokemon.css.
  *    The hidden page /themes lists every look with a preview link.
  *    The preview lasts until the browser tab is closed (sessionStorage),
  *    ?theme=default ends it.
@@ -84,8 +89,9 @@
     var PELMENI = 'pelmeni';
     var PASTA = 'pasta';
     var GTA = 'gta';
+    var POKEMON = 'pokemon';
     var SEASONS = [XMAS, EASTER, HALLOWEEN, MUERTOS, GARLIC, PIZZA];
-    var LINK_ONLY = [PELMENI, PASTA, GTA];        // no season: only ever shown as a preview
+    var LINK_ONLY = [PELMENI, PASTA, GTA, POKEMON]; // no season: only ever shown as a preview
     var PREVIEWABLE = SEASONS.concat(LINK_ONLY);
     var URL_PARAM = 'theme';
     var URL_OFF = 'default';

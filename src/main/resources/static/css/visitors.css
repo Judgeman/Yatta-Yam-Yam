@@ -1,6 +1,6 @@
 /*
  * Seasonal visitors (built and moved by visitors.js, drawn by christmas.js,
- * easter.js, halloween.js, muertos.js, garlic.js, pizza.js, pelmeni.js, pasta.js and gta.js): the stage, the actors
+ * easter.js, halloween.js, muertos.js, garlic.js, pizza.js, pelmeni.js, pasta.js, gta.js and pokemon.js): the stage, the actors
  * and the animations of their arms, legs, ears and wings. The stage only shows while
  * a seasonal look is on.
  */
@@ -17,7 +17,8 @@ html[data-yy-theme="garlic"] .yy-visitors,
 html[data-yy-theme="pizza"] .yy-visitors,
 html[data-yy-theme="pelmeni"] .yy-visitors,
 html[data-yy-theme="pasta"] .yy-visitors,
-html[data-yy-theme="gta"] .yy-visitors {
+html[data-yy-theme="gta"] .yy-visitors,
+html[data-yy-theme="pokemon"] .yy-visitors {
     display: block;
     position: fixed;
     inset: 0;

@@ -112,6 +112,18 @@
             tip: 'A car chase, a helicopter and a flamingo in shades drop by now and then. Type \u201Cvicecity\u201D '
                 + 'to call them.'
         },
+        pokemon: {
+            emoji: '\uD83C\uDFAE',
+            title: 'A Wild Lunch Appeared!',
+            when: null,                 // link-only, like Triple-T: no dates, no preview note
+            previewNote: false,
+            text: 'Some of us grew up in the nineties with a grey brick in our hands, a green screen without a '
+                + 'backlight and one goal: all 151 Pok\u00E9mon. Red, Blue or Yellow \u2013 the choice split every '
+                + 'schoolyard. We traded through a link cable under the desk, walked through tall grass for hours and '
+                + 'read under the blanket until the batteries gave up. Today we press Start one more time \u2013 and '
+                + 'whoever places their order first gets to name the rival.',
+            tip: 'Wild lunch monsters jump out of the tall grass now and then. Type \u201Cpokemon\u201D to call one.'
+        },
         symbolics: {
             emoji: '🖥️',
             title: 'Symbolics mode',
