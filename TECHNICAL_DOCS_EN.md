@@ -211,6 +211,7 @@ Access works in two steps: first a shared access password unlocks the app (Sprin
 Spring Security protects all routes. Only these are publicly accessible (without the password):
 - `/css/**`, `/js/**`, `/images/**`, `/uploads/**`
 - `/version`
+- `/error` (error page, see below)
 
 Every other request – including the name entry on `/` and the H2 console – redirects visitors who have not entered the password to `/login`. There they enter the shared access password; the username `yatta` is a hidden field in the form. The account is configured in `application.properties`:
 ```
@@ -218,7 +219,9 @@ spring.security.user.name=yatta
 spring.security.user.password=${YATTA_YAM_YAM_PASSWORD}
 ```
 
-After a successful login, Spring Security redirects to the originally requested URL, otherwise to `/`.
+After a successful login, Spring Security redirects to the originally requested URL, otherwise to `/`. Only page visits are remembered for this: GET requests whose `Accept` header contains `text/html` (a bare `*/*` does not count), and no XHR requests (`SecurityConfig.pageVisitRequestCache()`). Before, any GET request counted, so a request the browser makes in the background (`/apple-touch-icon.png`, `/robots.txt`, Chrome's `/.well-known/appspecific/com.chrome.devtools.json`, a missing file under `/css/**`) replaced the page actually wanted, and the login ended on a 404 page.
+
+**Error page:** `templates/error.html` replaces Spring Boot's "Whitelabel Error Page". `BasicErrorController` renders it with `status`, `error`, `path` and `timestamp`; depending on the status it shows a matching text (404, 401/403, other 4xx, 5xx), a button to the dashboard, "Try again" for server errors and "Back" when the previous page was one of ours. `/error` is public so that an error before the password is entered is not itself remembered as the target after the login.
 
 Remember-Me is always on (hidden field `remember-me=true`) with a token validity of one year, so each browser only needs the password once a year. The UI has no logout button; "Switch Account" only clears the name cookie from step 2, not the password login.
 
@@ -636,6 +639,7 @@ Yatta-Yam-Yam/
             ├── confirm-new.html              # Confirm new account
             ├── welcome.html                  # Welcome screen after login (with list of open payments)
             ├── login.html                    # Spring Security login
+            ├── error.html                    # Error page (404, 500, …) instead of the Whitelabel page
             ├── dashboard.html                # Open orders overview
             ├── archive.html                  # Archive
             ├── order-create.html             # Create new order
