@@ -1,6 +1,6 @@
 # Yatta-Yam-Yam – Technische Dokumentation
 
-**Version:** 1.12.0  
+**Version:** 1.12.1  
 **Stand:** November 2026
 
 ---
