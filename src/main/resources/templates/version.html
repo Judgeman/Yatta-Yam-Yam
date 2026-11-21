@@ -83,6 +83,13 @@
             <li class="list-group-item d-flex gap-2 align-items-start px-0">
                 <i class="bi bi-wrench-adjustable text-primary mt-1"></i>
                 <div>
+                    <strong>Fix: No more error page after entering the password</strong><br/>
+                    <span class="text-muted small">Sometimes unlocking the app ended on a bare "Whitelabel Error Page" instead of the page you wanted, because something the browser loaded in the background (like a home-screen icon) was taken as the page to return to. Now only real page visits count. And if a page really can't be found, you now see a proper error page with a way back to the dashboard.</span>
+                </div>
+            </li>
+            <li class="list-group-item d-flex gap-2 align-items-start px-0">
+                <i class="bi bi-wrench-adjustable text-primary mt-1"></i>
+                <div>
                     <strong>Fix: Item names readable for the order creator</strong><br/>
                     <span class="text-muted small">With the edit and delete buttons next to each item, there was hardly any room left for the name, so it was shown one letter per line (or not at all on some screens). When space is tight, the quantity and buttons now move to a row of their own below the name.</span>
                 </div>
