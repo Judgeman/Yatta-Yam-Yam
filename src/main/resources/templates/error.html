@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<!-- Error page for every failed request (replaces Spring Boot's "Whitelabel Error Page").
+     BasicErrorController renders it with status, error, path and timestamp in the model.
+     /error is public (SecurityConfig), so it also works before the access password. -->
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:with="kind=${status == 404 ? 'notfound'
+                    : (status == 401 or status == 403 ? 'forbidden'
+                    : (status != null and status >= 400 and status < 500 ? 'request' : 'server'))},
+               code=${status != null and status < 600 ? status : null}">
+<head>
+    <meta charset="UTF-8"/>
+    <link rel="icon" type="image/svg+xml" href="/images/favicon.svg"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title th:text="${kind == 'notfound' ? 'Page not found'
+                    : (kind == 'forbidden' ? 'No access'
+                    : (kind == 'request' ? 'That didn''t work' : 'Something went wrong'))} + ' – Yatta-Yam-Yam'">Error – Yatta-Yam-Yam</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+
+    <style>
+        .error-code {
+            font-size: 4.5rem;
+            font-weight: 800;
+            line-height: 1;
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, var(--yy-accent), var(--yy-accent-2));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .error-details {
+            background: var(--yy-surface-muted);
+            border: 1px solid var(--yy-border-soft);
+            border-radius: 0.75rem;
+            padding: 8px 12px;
+            font-size: 12px;
+            color: var(--yy-faint-text);
+            word-break: break-all;
+        }
+        .error-details code {
+            color: inherit;
+        }
+        .version-footer {
+            text-align: right;
+            font-size: 11px;
+            color: var(--yy-faint-text);
+            padding: 16px 0 0;
+            margin-top: 16px;
+        }
+    </style>
+    <th:block th:replace="~{fragments/theme :: head}"></th:block>
+</head>
+<body class="page-muted d-flex align-items-center justify-content-center min-vh-100 py-4 px-3">
+
+<div class="card shadow-lg p-4 p-sm-5 text-center" style="width: 100%; max-width: 440px;">
+
+    <div class="app-icon mb-1" aria-hidden="true" th:switch="${kind}">
+        <span th:case="'notfound'">🍽️</span>
+        <span th:case="'forbidden'">🔒</span>
+        <span th:case="'request'">🤔</span>
+        <span th:case="*">🥡</span>
+    </div>
+
+    <div th:if="${code != null}" class="error-code mb-2" th:text="${code}">404</div>
+
+    <th:block th:switch="${kind}">
+        <th:block th:case="'notfound'">
+            <h1 class="h4 fw-bold mb-2">Page not found</h1>
+            <p class="text-muted mb-4">There's nothing on the menu at this address. The link may be outdated, or what it pointed to has been removed.</p>
+        </th:block>
+        <th:block th:case="'forbidden'">
+            <h1 class="h4 fw-bold mb-2">No access</h1>
+            <p class="text-muted mb-4">You're not allowed to open this page.</p>
+        </th:block>
+        <th:block th:case="'request'">
+            <h1 class="h4 fw-bold mb-2">That didn't work</h1>
+            <p class="text-muted mb-4">The request couldn't be handled. Go back and try again.</p>
+        </th:block>
+        <th:block th:case="*">
+            <h1 class="h4 fw-bold mb-2">Something went wrong</h1>
+            <p class="text-muted mb-4">An unexpected error happened on our side. Try again in a moment. If it keeps happening, let the person who runs <span class="text-nowrap">Yatta-Yam-Yam</span> know.</p>
+        </th:block>
+    </th:block>
+
+    <div class="d-grid gap-2">
+        <a th:href="@{/orders/dashboard}" class="btn btn-primary btn-lg">Go to Dashboard →</a>
+        <!-- Shown by the script below only when the previous page was one of ours -->
+        <button type="button" id="error-back" class="btn btn-outline-secondary d-none">
+            <i class="bi bi-arrow-left"></i> Back
+        </button>
+        <button th:if="${kind == 'server'}" type="button" class="btn btn-outline-secondary"
+                onclick="location.reload()">
+            <i class="bi bi-arrow-clockwise"></i> Try again
+        </button>
+    </div>
+
+    <div th:if="${path != null or timestamp != null}" class="error-details mt-4">
+        <code th:if="${path != null}" th:text="${path}">/some/path</code>
+        <span th:if="${path != null and timestamp != null}"> · </span>
+        <span th:if="${timestamp != null}" th:text="${#dates.format(timestamp, 'dd MMM yyyy, HH:mm:ss')}">01 Jan 2026, 12:00:00</span>
+    </div>
+
+    <div class="version-footer"><a th:href="@{/version}" th:text="'v' + ${@environment.getProperty('spring.application.version')}">v?</a></div>
+</div>
+
+<script>
+    (function () {
+        var ref = document.referrer;
+        if (!ref || ref.indexOf(location.origin + '/') !== 0 || ref.indexOf('/login') !== -1) return;
+        var back = document.getElementById('error-back');
+        back.classList.remove('d-none');
+        back.addEventListener('click', function () { history.back(); });
+    })();
+</script>
+</body>
+</html>

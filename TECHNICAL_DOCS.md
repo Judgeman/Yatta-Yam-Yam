@@ -1,6 +1,6 @@
 # Yatta-Yam-Yam – Technische Dokumentation
 
-**Version:** 1.12.0  
+**Version:** 1.12.1  
 **Stand:** November 2026
 
 ---
@@ -211,6 +211,7 @@ Der Zugriff läuft in zwei Stufen: Zuerst schaltet ein gemeinsames Zugangspasswo
 Spring Security schützt alle Routen. Öffentlich zugänglich (ohne Passwort) sind nur:
 - `/css/**`, `/js/**`, `/images/**`, `/uploads/**`
 - `/version`
+- `/error` (Fehlerseite, siehe unten)
 
 Jeder andere Aufruf – auch die Namenseingabe auf `/` und die H2-Konsole – leitet nicht angemeldete Besucher auf `/login` um. Dort gibt man das gemeinsame Zugangspasswort ein; der Benutzername `yatta` steckt als verstecktes Feld im Formular. Das Konto wird in `application.properties` konfiguriert:
 ```
@@ -218,7 +219,9 @@ spring.security.user.name=yatta
 spring.security.user.password=${YATTA_YAM_YAM_PASSWORD}
 ```
 
-Nach erfolgreicher Eingabe leitet Spring Security auf die ursprünglich aufgerufene URL weiter, sonst auf `/`.
+Nach erfolgreicher Eingabe leitet Spring Security auf die ursprünglich aufgerufene URL weiter, sonst auf `/`. Gemerkt werden dafür nur Seitenaufrufe: GET-Anfragen, deren `Accept`-Header `text/html` enthält (ein reines `*/*` zählt nicht), und keine XHR-Anfragen (`SecurityConfig.pageVisitRequestCache()`). Vorher zählte jede GET-Anfrage, sodass eine Anfrage, die der Browser im Hintergrund stellt (`/apple-touch-icon.png`, `/robots.txt`, Chromes `/.well-known/appspecific/com.chrome.devtools.json`, eine fehlende Datei unter `/css/**`), die eigentlich gewünschte Seite überschrieb und der Login auf einer 404-Seite endete.
+
+**Fehlerseite:** `templates/error.html` ersetzt die „Whitelabel Error Page“ von Spring Boot. `BasicErrorController` rendert sie mit `status`, `error`, `path` und `timestamp`; je nach Status zeigt sie einen passenden Text (404, 401/403, sonstige 4xx, 5xx), einen Knopf zum Dashboard, „Try again“ bei Serverfehlern und „Back“, wenn die vorige Seite eine eigene war. `/error` ist öffentlich, damit ein Fehler vor der Passworteingabe nicht selbst als Ziel nach dem Login gemerkt wird.
 
 Remember-Me ist immer aktiv (verstecktes Feld `remember-me=true`) und hat eine Token-Gültigkeit von einem Jahr. Pro Browser muss das Passwort also nur einmal im Jahr eingegeben werden. Die Oberfläche hat keinen Logout-Button; „Switch Account" löscht nur den Namens-Cookie aus Stufe 2, nicht die Passwort-Anmeldung.
 
@@ -637,6 +640,7 @@ Yatta-Yam-Yam/
             ├── confirm-new.html              # Neuen Account bestätigen
             ├── welcome.html                  # Willkommensseite nach Login (mit Liste offener Zahlungen)
             ├── login.html                    # Spring Security Login
+            ├── error.html                    # Fehlerseite (404, 500, …) statt Whitelabel-Seite
             ├── dashboard.html                # Übersicht offener Bestellungen
             ├── archive.html                  # Archiv
             ├── order-create.html             # Neue Bestellung erstellen
