@@ -9,6 +9,8 @@
      season or a preview, the link-only pelmeni.css, pasta.css, gta.css and pokemon.css only in their ?theme=... preview, symbolics.css only while the hidden Symbolics mode is on (see
      theme.js). visitors.js sends the season's visitors across the screen; they are drawn
      in the seasonal scripts (which run after it, in this order) and styled in visitors.css.
+     symbolics.js builds the command line of the Symbolics mode at the bottom of the screen,
+     symbolics-apps.js adds its extra programs (GREP, TOP, NEOFETCH, VIM, ...).
      theme-info.js adds the (i) button about the current look to the menu bar. -->
 <th:block th:fragment="head">
     <meta name="color-scheme" content="light dark"/>
@@ -38,6 +40,8 @@
     <script th:src="@{/js/gta.js}" defer></script>
     <script th:src="@{/js/pokemon.js}" defer></script>
     <script th:src="@{/js/mario.js}" defer></script>
+    <script th:src="@{/js/symbolics.js}" defer></script>
+    <script th:src="@{/js/symbolics-apps.js}" defer></script>
     <script th:src="@{/js/theme-info.js}" defer></script>
     <!-- January only (wrappedYear from WrappedHintAdvice), for logged-in users, not on
          the Wrapped pages themselves: a small hint at the bottom right linking to the

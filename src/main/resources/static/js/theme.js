@@ -73,7 +73,8 @@
  *    outside a form field, or by tapping the version badge on the release notes page
  *    7 times. A link can switch it, too: append ?theme=symbolics to any page URL
  *    (?theme=default switches back). The choice is kept per browser in localStorage.
- *    Styles: css/symbolics.css.
+ *    The command line at the bottom of the screen (hover hints, typed commands with
+ *    Tab completion, a few jokes) is built by js/symbolics.js. Styles: css/symbolics.css.
  *
  * Which look applies: a preview in this tab, else Symbolics if switched on,
  * else the season's look, else the normal look. While Symbolics hides a seasonal look,
@@ -104,7 +105,6 @@
     var URL_OFF = 'default';
     var TAPS_NEEDED = 7;
     var TAP_WINDOW_MS = 1500;
-    var IDLE_TEXT = "READY FOR INPUT... (TYPE 'SYMBOLICS' TO EXIT)";
 
     var media = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
     var symbolics = readSymbolics();
@@ -314,100 +314,6 @@
         }
     }
 
-    // ── Symbolics chrome: a command line at the bottom of the screen ──
-
-    // "/orders/12/close" → "C:\YATTA-YAM-YAM\ORDERS\12\CLOSE>"
-    function prompt() {
-        var parts = window.location.pathname.split('/').filter(Boolean);
-        return ['C:', 'YATTA-YAM-YAM'].concat(parts).join('\\').toUpperCase() + '>';
-    }
-
-    function setCommand(text) {
-        var cmd = document.getElementById('yy-terminal-cmd');
-        if (cmd) {
-            cmd.textContent = text;
-        }
-    }
-
-    function label(el) {
-        var text = el.getAttribute('aria-label') || el.getAttribute('title')
-            || el.getAttribute('placeholder') || el.textContent || el.value || el.name || '';
-        text = text.replace(/\s+/g, ' ').trim();
-        return text.length > 40 ? text.substring(0, 39) + '…' : text;
-    }
-
-    // Shows the command a click on the item under the pointer would run
-    function describe(target) {
-        var el = target.closest ? target.closest('a, button, input, select, textarea, label') : null;
-        if (!el) {
-            return IDLE_TEXT;
-        }
-        var name = label(el);
-        var arg = name ? ' "' + name + '"' : '';
-        var tag = el.tagName;
-        if (tag === 'A') {
-            return 'OPEN' + arg;
-        }
-        if (tag === 'BUTTON' || (tag === 'INPUT' && /^(submit|button|reset)$/i.test(el.type))) {
-            return 'RUN' + arg;
-        }
-        if ((tag === 'INPUT' && /^(checkbox|radio)$/i.test(el.type)) || tag === 'LABEL') {
-            return 'SELECT' + arg;
-        }
-        return 'EDIT' + arg;
-    }
-
-    function onMouseOver(e) {
-        setCommand(describe(e.target));
-    }
-
-    function buildChrome() {
-        if (document.getElementById('yy-terminal') || !document.body) {
-            return;
-        }
-        var bar = document.createElement('div');
-        bar.id = 'yy-terminal';
-        bar.className = 'yy-terminal';
-        bar.setAttribute('aria-hidden', 'true');
-
-        var line = document.createElement('div');
-        line.className = 'yy-terminal-line';
-        line.appendChild(document.createTextNode(prompt() + ' '));
-        var cmd = document.createElement('span');
-        cmd.id = 'yy-terminal-cmd';
-        cmd.className = 'yy-terminal-cmd';
-        cmd.textContent = IDLE_TEXT;
-        var cursor = document.createElement('span');
-        cursor.className = 'yy-terminal-cursor';
-        line.appendChild(cmd);
-        line.appendChild(cursor);
-
-        var status = document.createElement('div');
-        status.className = 'yy-terminal-status';
-        status.textContent = 'System status: online';
-
-        bar.appendChild(line);
-        bar.appendChild(status);
-        document.body.appendChild(bar);
-        document.addEventListener('mouseover', onMouseOver);
-    }
-
-    function removeChrome() {
-        var bar = document.getElementById('yy-terminal');
-        if (bar) {
-            bar.parentNode.removeChild(bar);
-        }
-        document.removeEventListener('mouseover', onMouseOver);
-    }
-
-    function syncChrome() {
-        if (theme === SYMBOLICS) {
-            buildChrome();
-        } else {
-            removeChrome();
-        }
-    }
-
     function setSymbolics(on, persist) {
         symbolics = on;
         if (persist) {
@@ -416,11 +322,7 @@
             preview = null;
             writePreview(null);
         }
-        applyTheme();
-        syncChrome();
-        if (on) {
-            setCommand("LOADING SYMBOLICS.EXE... OK. TYPE 'SYMBOLICS' AGAIN TO EXIT");
-        }
+        applyTheme(); // symbolics.js builds or removes the command line when it sees the change
     }
 
     // ── Triggers ──
@@ -465,12 +367,6 @@
             setSymbolics(readSymbolics(), false);
         }
     });
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', syncChrome);
-    } else {
-        syncChrome();
-    }
 
     // For theme-info.js and the /themes page: which seasonal look the date calls for
     // (whatever is shown right now), and switching Symbolics off in place, like typing
