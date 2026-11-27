@@ -2,7 +2,9 @@
  * Easter egg: "Symbolics" mode, styled after symbolics.com (the first .com domain
  * ever registered): a neon retro terminal with scanlines on black, cyan frames and
  * glowing headings, green monospace text, magenta and yellow accents, window title
- * bars with three dots, and a command line at the bottom of the screen.
+ * bars with three dots, and a command line at the bottom of the screen (symbolics.js).
+ * Like on the site, things move: the main buttons blink through the neon colours, the
+ * window frames glow stronger and weaker, big headings flicker like a neon sign.
  *
  * Every rule is scoped to html[data-yy-theme="symbolics"], which theme.js sets only
  * while the mode is on (together with data-bs-theme="dark"), so this file does
@@ -430,11 +432,12 @@ html[data-yy-theme="symbolics"] .order-status-badge {
     text-transform: uppercase;
 }
 
-html[data-yy-theme="symbolics"] .badge                { color: var(--neo-cyan) !important; }
-html[data-yy-theme="symbolics"] .badge.bg-success     { color: var(--neo-green) !important; }
-html[data-yy-theme="symbolics"] .badge.bg-warning     { color: var(--neo-yellow) !important; }
-html[data-yy-theme="symbolics"] .badge.bg-danger      { color: var(--neo-magenta) !important; }
-html[data-yy-theme="symbolics"] .badge.bg-secondary   { color: var(--neo-dim) !important; }
+/* (not the debt badge in the menu bar: it blinks, see "Effects") */
+html[data-yy-theme="symbolics"] .badge:not(.open-debt-badge)            { color: var(--neo-cyan) !important; }
+html[data-yy-theme="symbolics"] .badge.bg-success                       { color: var(--neo-green) !important; }
+html[data-yy-theme="symbolics"] .badge.bg-warning                       { color: var(--neo-yellow) !important; }
+html[data-yy-theme="symbolics"] .badge.bg-danger:not(.open-debt-badge)  { color: var(--neo-magenta) !important; }
+html[data-yy-theme="symbolics"] .badge.bg-secondary                     { color: var(--neo-dim) !important; }
 
 /* ── Alerts: black panels with a coloured frame ── */
 html[data-yy-theme="symbolics"] .alert {
@@ -550,7 +553,142 @@ html[data-yy-theme="symbolics"] .version-footer a {
     color: var(--neo-dim);
 }
 
-/* ── Command line at the bottom (built by theme.js) ── */
+/* ── Effects: blinking buttons, breathing glow, flickering neon ──
+ * Like on symbolics.com: the main action buttons blink through the neon colours, the
+ * window frames glow stronger and weaker, the debt badge blinks, big headings flicker
+ * now and then like a neon sign, other buttons flicker on when pointed at. Colours
+ * change at most a few times a second over small areas (no flashing hazard), and
+ * prefers-reduced-motion stops all of it (end of the file). The glow of the frames sits
+ * on a ::after layer whose opacity animates, which needs no repainting of the page. */
+
+/* Main actions blink; the small ones inside rows ("Save", "Add Item") stay steady */
+html[data-yy-theme="symbolics"] .btn-primary:not(.btn-sm) {
+    animation: yy-neo-blink 2s steps(1, end) infinite;
+}
+
+html[data-yy-theme="symbolics"] .btn-primary:hover,
+html[data-yy-theme="symbolics"] .btn-primary:focus-visible,
+html[data-yy-theme="symbolics"] .btn-primary:disabled,
+html[data-yy-theme="symbolics"] .btn-primary.disabled {
+    animation: none;
+}
+
+@keyframes yy-neo-blink {
+    0%, 100% { background: var(--neo-magenta); box-shadow: 0 0 14px rgba(var(--neo-magenta-rgb), 0.85); }
+    25%      { background: var(--neo-cyan);    box-shadow: 0 0 14px rgba(var(--neo-cyan-rgb), 0.85); }
+    50%      { background: var(--neo-yellow);  box-shadow: 0 0 14px rgba(var(--neo-yellow-rgb), 0.85); }
+    75%      { background: var(--neo-green);   box-shadow: 0 0 14px rgba(var(--neo-green-rgb), 0.85); }
+}
+
+/* What you still owe blinks magenta and yellow */
+html[data-yy-theme="symbolics"] .navbar .open-debt-badge {
+    animation: yy-neo-badge 1.2s steps(1, end) infinite;
+}
+
+@keyframes yy-neo-badge {
+    0%, 100% {
+        color: var(--neo-magenta);
+        border-color: var(--neo-magenta);
+        box-shadow: 0 0 8px rgba(var(--neo-magenta-rgb), 0.7);
+        text-shadow: 0 0 6px rgba(var(--neo-magenta-rgb), 0.8);
+    }
+    50% {
+        color: var(--neo-yellow);
+        border-color: var(--neo-yellow);
+        box-shadow: 0 0 10px rgba(var(--neo-yellow-rgb), 0.75);
+        text-shadow: 0 0 6px rgba(var(--neo-yellow-rgb), 0.8);
+    }
+}
+
+/* Window frames breathe; neighbours in a row are out of step */
+html[data-yy-theme="symbolics"] .order-card,
+html[data-yy-theme="symbolics"] .summary-card {
+    position: relative;
+}
+
+html[data-yy-theme="symbolics"] .card::after,
+html[data-yy-theme="symbolics"] .order-card::after,
+html[data-yy-theme="symbolics"] .summary-card::after,
+html[data-yy-theme="symbolics"] .modal-content::after {
+    content: "";
+    position: absolute;
+    inset: -2px; /* over the 2px frame */
+    border-radius: inherit;
+    pointer-events: none;
+    box-shadow: 0 0 16px 2px rgba(var(--neo-cyan-rgb), 0.75), 0 0 40px 6px rgba(var(--neo-cyan-rgb), 0.25);
+    opacity: 0.15;
+    animation: yy-neo-breathe 3.2s ease-in-out infinite;
+}
+
+html[data-yy-theme="symbolics"] .row > :nth-child(3n+2) .card::after,
+html[data-yy-theme="symbolics"] .row > :nth-child(3n+2) .order-card::after {
+    animation-delay: -1.07s;
+}
+
+html[data-yy-theme="symbolics"] .row > :nth-child(3n) .card::after,
+html[data-yy-theme="symbolics"] .row > :nth-child(3n) .order-card::after {
+    animation-delay: -2.13s;
+}
+
+html[data-yy-theme="symbolics"] .order-card:hover::after {
+    box-shadow: 0 0 16px 2px rgba(var(--neo-magenta-rgb), 0.8), 0 0 40px 6px rgba(var(--neo-magenta-rgb), 0.3);
+    animation-duration: 1.1s;
+}
+
+@keyframes yy-neo-breathe {
+    0%, 100% { opacity: 0.15; }
+    50%      { opacity: 1; }
+}
+
+/* The menu bar and the command line pulse, so does a warning */
+html[data-yy-theme="symbolics"] .navbar {
+    animation: yy-neo-pulse 3.2s ease-in-out infinite;
+}
+
+@keyframes yy-neo-pulse {
+    0%, 100% { box-shadow: 0 0 6px rgba(var(--neo-cyan-rgb), 0.25); }
+    50%      { box-shadow: 0 0 24px rgba(var(--neo-cyan-rgb), 0.7); }
+}
+
+html[data-yy-theme="symbolics"] .stat-card-warning {
+    animation: yy-neo-pulse-warn 2.4s ease-in-out infinite;
+}
+
+@keyframes yy-neo-pulse-warn {
+    0%, 100% { box-shadow: 0 0 4px rgba(var(--neo-yellow-rgb), 0.2); }
+    50%      { box-shadow: 0 0 20px rgba(var(--neo-yellow-rgb), 0.65); }
+}
+
+/* Big headings flicker now and then, like a neon sign */
+html[data-yy-theme="symbolics"] h1,
+html[data-yy-theme="symbolics"] .navbar-brand {
+    animation: yy-neo-sign 9s linear infinite;
+}
+
+html[data-yy-theme="symbolics"] .navbar-brand {
+    animation-delay: -4s;
+}
+
+@keyframes yy-neo-sign {
+    0%, 92%, 93.6%, 95.2%, 100% { opacity: 1; }
+    92.8%, 94.4%                { opacity: 0.35; }
+}
+
+/* Other buttons flicker on when pointed at */
+html[data-yy-theme="symbolics"] .btn:not(.btn-primary):hover {
+    animation: yy-neo-flicker 0.45s linear;
+}
+
+@keyframes yy-neo-flicker {
+    0%   { opacity: 0.3; }
+    12%  { opacity: 1; }
+    24%  { opacity: 0.5; }
+    40%  { opacity: 1; }
+    60%  { opacity: 0.8; }
+    100% { opacity: 1; }
+}
+
+/* ── Command line at the bottom (built by symbolics.js) ── */
 .yy-terminal {
     display: none;
 }
@@ -564,36 +702,137 @@ html[data-yy-theme="symbolics"] .yy-terminal {
     right: 0;
     bottom: 0;
     z-index: 1090; /* above modals and toasts */
-    padding: 6px 16px;
+    padding: 6px 16px max(6px, env(safe-area-inset-bottom));
     font-family: var(--neo-mono);
     font-size: 13px;
+    line-height: 1.5;
     color: var(--neo-green);
     background: #000;
     border-top: 1px solid var(--neo-cyan);
-    box-shadow: 0 0 12px rgba(var(--neo-cyan-rgb), 0.35);
-    pointer-events: none;
     white-space: nowrap;
+    animation: yy-neo-pulse 3.2s ease-in-out infinite;
+}
+
+html[data-yy-theme="symbolics"] .yy-terminal.is-focused {
+    animation: none;
+    box-shadow: 0 0 24px rgba(var(--neo-cyan-rgb), 0.75);
 }
 
 html[data-yy-theme="symbolics"] .yy-terminal-line {
     flex: 1;
     min-width: 0;
+    display: flex;
+    align-items: center;
+    margin: 0;
+    cursor: text;
+}
+
+html[data-yy-theme="symbolics"] .yy-terminal-prompt {
+    flex: 0 1 auto;
+    min-width: 0;
+    margin-right: 0.6em;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-html[data-yy-theme="symbolics"] .yy-terminal-cmd {
+html[data-yy-theme="symbolics"] .yy-terminal-prompt-short {
+    display: none;
+}
+
+html[data-yy-theme="symbolics"] .yy-terminal-field {
+    position: relative;
+    flex: 1 1 10em;
+    min-width: 7em;
+    height: 1.5em;
+}
+
+html[data-yy-theme="symbolics"] .yy-terminal-input {
+    display: block;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--neo-green);
+    font: inherit;
+    letter-spacing: inherit;
+    caret-color: transparent; /* the block cursor stands in for it */
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+/* The glowing line shows the focus instead of an outline */
+html[data-yy-theme="symbolics"] .yy-terminal-input:focus,
+html[data-yy-theme="symbolics"] .yy-terminal-input:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+html[data-yy-theme="symbolics"] .yy-terminal.is-secret .yy-terminal-input {
+    color: transparent; /* like sudo: nothing of the password shows */
+}
+
+html[data-yy-theme="symbolics"] .yy-terminal.is-secret .yy-terminal-input::selection {
+    background: transparent;
+}
+
+/* What a click would run (or a hint), shown while nothing is typed */
+html[data-yy-theme="symbolics"] .yy-terminal-ghost,
+html[data-yy-theme="symbolics"] .yy-terminal-measure {
+    position: absolute;
+    top: 0;
+    left: 0;
+    white-space: pre;
+    pointer-events: none;
+}
+
+html[data-yy-theme="symbolics"] .yy-terminal-ghost {
+    right: 0.8em;
+    overflow: hidden;
+    text-overflow: ellipsis;
     color: var(--neo-yellow);
 }
 
+html[data-yy-theme="symbolics"] .yy-terminal.is-focused .yy-terminal-ghost {
+    left: 1em; /* after the cursor */
+    opacity: 0.55;
+}
+
+html[data-yy-theme="symbolics"] .yy-terminal.has-value .yy-terminal-ghost,
+html[data-yy-theme="symbolics"] .yy-terminal.is-secret .yy-terminal-ghost {
+    display: none;
+}
+
+html[data-yy-theme="symbolics"] .yy-terminal-measure {
+    visibility: hidden;
+}
+
+/* Block cursor; symbolics.js moves it to the caret and restarts the blink on every key */
 html[data-yy-theme="symbolics"] .yy-terminal-cursor {
-    display: inline-block;
+    position: absolute;
+    top: 50%;
+    left: 0;
     width: 0.6em;
     height: 1.1em;
-    margin-left: 2px;
-    vertical-align: -0.2em;
+    margin-top: -0.55em;
     background: var(--neo-green);
+    mix-blend-mode: difference; /* the letter under it shows in black */
+    pointer-events: none;
     animation: yy-blink 1s steps(1) infinite;
+}
+
+html[data-yy-theme="symbolics"] .yy-terminal-cursor.is-steady {
+    animation-name: yy-blink-again;
+}
+
+@keyframes yy-blink {
+    50% { opacity: 0; }
+}
+
+@keyframes yy-blink-again {
+    50% { opacity: 0; }
 }
 
 html[data-yy-theme="symbolics"] .yy-terminal-status {
@@ -612,20 +851,300 @@ html[data-yy-theme="symbolics"] .yy-terminal-status::after {
     box-shadow: 0 0 6px #22dd55;
 }
 
-@keyframes yy-blink {
-    50% { opacity: 0; }
+/* Output window above the line */
+html[data-yy-theme="symbolics"] .yy-terminal-panel {
+    position: absolute;
+    left: 16px;
+    bottom: calc(100% + 8px);
+    width: min(760px, calc(100% - 32px));
+    max-height: min(50vh, 440px);
+    display: flex;
+    flex-direction: column;
+    background: #000;
+    border: 2px solid var(--neo-cyan);
+    border-radius: 8px;
+    box-shadow: 0 0 18px rgba(var(--neo-cyan-rgb), 0.55);
+    white-space: normal;
+    cursor: default;
+}
+
+html[data-yy-theme="symbolics"] .yy-terminal-panel[hidden],
+html[data-yy-theme="symbolics"] .yy-terminal-suggest[hidden] {
+    display: none;
+}
+
+html[data-yy-theme="symbolics"] .yy-terminal-panel-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.75em;
+    padding: 4px 8px 4px 12px;
+    border-bottom: 1px solid rgba(var(--neo-cyan-rgb), 0.55);
+    color: var(--neo-cyan);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+html[data-yy-theme="symbolics"] .yy-terminal-panel-bar::before {
+    content: "";
+    flex: none;
+    width: 52px;
+    height: 12px;
+    background: var(--neo-dots);
+}
+
+html[data-yy-theme="symbolics"] .yy-terminal-panel-title {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 700;
+}
+
+html[data-yy-theme="symbolics"] .yy-terminal-close {
+    flex: none;
+    padding: 0 6px;
+    border: 1px solid rgba(var(--neo-cyan-rgb), 0.55);
+    border-radius: 4px;
+    background: transparent;
+    color: var(--neo-dim);
+    font: inherit;
+    font-size: 11px;
+    text-transform: uppercase;
+}
+
+html[data-yy-theme="symbolics"] .yy-terminal-close:hover {
+    color: #000;
+    background: var(--neo-cyan);
+    border-color: var(--neo-cyan);
+}
+
+html[data-yy-theme="symbolics"] .yy-terminal-out,
+html[data-yy-theme="symbolics"] .yy-terminal-suggest {
+    padding: 6px 12px;
+    overflow-y: auto;
+}
+
+html[data-yy-theme="symbolics"] .yy-terminal-out {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+html[data-yy-theme="symbolics"] .yy-terminal-out:empty {
+    display: none;
+}
+
+html[data-yy-theme="symbolics"] .yy-terminal-suggest {
+    flex: 0 0 auto;
+    border-top: 1px dashed rgba(var(--neo-cyan-rgb), 0.45);
+}
+
+html[data-yy-theme="symbolics"] .yy-terminal-out:empty + .yy-terminal-suggest {
+    border-top: 0;
+}
+
+html[data-yy-theme="symbolics"] .yy-terminal-out > div,
+html[data-yy-theme="symbolics"] .yy-terminal-suggest > div {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+html[data-yy-theme="symbolics"] .yy-term-echo { color: var(--neo-dim); }
+html[data-yy-theme="symbolics"] .yy-term-ok   { color: var(--neo-green); }
+html[data-yy-theme="symbolics"] .yy-term-info { color: var(--neo-cyan); }
+html[data-yy-theme="symbolics"] .yy-term-warn { color: var(--neo-yellow); }
+
+html[data-yy-theme="symbolics"] .yy-term-err {
+    color: var(--neo-red);
+    text-shadow: 0 0 6px rgba(var(--neo-red-rgb), 0.7);
+    animation: yy-blink 0.4s steps(1) 2;
+}
+
+/* HELP: a command and what it does */
+html[data-yy-theme="symbolics"] .yy-term-rows {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    column-gap: 3ch;
+    padding-left: 2ch;
+}
+
+html[data-yy-theme="symbolics"] .yy-term-key  { color: var(--neo-green); }
+html[data-yy-theme="symbolics"] .yy-term-desc { color: var(--neo-dim); }
+
+/* Names to pick: a click writes the command into the line */
+html[data-yy-theme="symbolics"] .yy-term-pick {
+    display: block;
+    width: 100%;
+    padding: 0 4px;
+    border: 0;
+    border-radius: 3px;
+    background: transparent;
+    color: var(--neo-cyan);
+    font: inherit;
+    letter-spacing: inherit;
+    text-align: left;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    cursor: pointer;
+}
+
+html[data-yy-theme="symbolics"] .yy-term-pick:hover {
+    color: var(--neo-magenta);
+    background: rgba(var(--neo-magenta-rgb), 0.12);
+}
+
+html[data-yy-theme="symbolics"] .yy-term-pick.is-active {
+    color: #000;
+    background: var(--neo-cyan);
+}
+
+/* January's Wrapped hint moves up above the line */
+html[data-yy-theme="symbolics"] .wrapped-hint {
+    bottom: 56px;
+}
+
+@media (pointer: coarse) {
+    html[data-yy-theme="symbolics"] .yy-terminal {
+        font-size: 16px; /* phones zoom into smaller fields */
+    }
+}
+
+@media (max-width: 767.98px) {
+    html[data-yy-theme="symbolics"] .yy-terminal-prompt-full {
+        display: none;
+    }
+
+    html[data-yy-theme="symbolics"] .yy-terminal-prompt-short {
+        display: inline;
+    }
+
+    html[data-yy-theme="symbolics"] .yy-terminal-panel {
+        left: 8px;
+        width: calc(100% - 16px);
+    }
 }
 
 @media (max-width: 576px) {
     html[data-yy-theme="symbolics"] .yy-terminal-status {
         display: none;
     }
+
+    html[data-yy-theme="symbolics"] .yy-term-rows {
+        grid-template-columns: 1fr;
+        padding-left: 0;
+    }
+
+    html[data-yy-theme="symbolics"] .yy-term-desc {
+        padding-left: 2ch;
+    }
 }
 
-@media (prefers-reduced-motion: reduce) {
-    html[data-yy-theme="symbolics"] .yy-terminal-cursor {
-        animation: none;
-    }
+/* ── Surprises from the command line (symbolics.js sets a class on <html> for a while) ── */
+
+/* SUDO without the right password: red alert, the page shakes */
+html[data-yy-theme="symbolics"].yy-fx-alarm .yy-terminal {
+    border-top-color: var(--neo-red);
+    box-shadow: 0 0 20px rgba(var(--neo-red-rgb), 0.75);
+    animation: none;
+}
+
+html[data-yy-theme="symbolics"].yy-fx-alarm .yy-terminal::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1; /* above the line's background, below its text */
+    pointer-events: none;
+    background: radial-gradient(ellipse at center, transparent 45%, rgba(var(--neo-red-rgb), 0.5) 100%);
+    animation: yy-neo-alarm 1s ease-in-out 4;
+}
+
+html[data-yy-theme="symbolics"].yy-fx-alarm .yy-terminal-status {
+    color: var(--neo-red);
+    text-shadow: 0 0 6px rgba(var(--neo-red-rgb), 0.8);
+}
+
+html[data-yy-theme="symbolics"].yy-fx-alarm .yy-terminal-status::after {
+    background: var(--neo-red);
+    box-shadow: 0 0 8px var(--neo-red);
+    animation: yy-blink 0.5s steps(1) infinite;
+}
+
+html[data-yy-theme="symbolics"].yy-fx-alarm body > :not(.yy-terminal):not(.yy-season-hint) {
+    animation: yy-neo-shake 0.6s ease-in-out;
+}
+
+@keyframes yy-neo-alarm {
+    0%, 100% { opacity: 0; }
+    50%      { opacity: 1; }
+}
+
+@keyframes yy-neo-shake {
+    0%, 100% { transform: none; }
+    15%      { transform: translateX(-8px) rotate(-0.4deg); }
+    30%      { transform: translateX(7px) rotate(0.3deg); }
+    45%      { transform: translateX(-5px); }
+    60%      { transform: translateX(4px); }
+    75%      { transform: translateX(-2px); }
+}
+
+/* SUDO RM: the screen glitches */
+html[data-yy-theme="symbolics"].yy-fx-glitch body > :not(.yy-terminal) {
+    animation: yy-neo-glitch 1.2s steps(1, end);
+}
+
+@keyframes yy-neo-glitch {
+    0%   { transform: translate(-6px, 2px) skewX(6deg); filter: hue-rotate(90deg); }
+    20%  { transform: translate(5px, -3px) skewX(-8deg); filter: hue-rotate(200deg) saturate(2); clip-path: inset(8% 0 30% 0); }
+    40%  { transform: translate(-3px, 0); filter: hue-rotate(300deg); clip-path: inset(35% 0 4% 0); }
+    60%  { transform: translate(8px, 1px) skewX(3deg); filter: hue-rotate(140deg) contrast(1.5); clip-path: none; }
+    80%  { transform: translate(-2px, -1px); filter: hue-rotate(40deg); }
+    100% { transform: none; filter: none; }
+}
+
+/* SUDO MAKE ME A SANDWICH: sandwiches rise */
+html[data-yy-theme="symbolics"] .yy-terminal-fly {
+    position: fixed;
+    bottom: 48px;
+    font-size: 34px;
+    line-height: 1;
+    pointer-events: none;
+    animation: yy-neo-fly 2.8s ease-out both;
+}
+
+@keyframes yy-neo-fly {
+    0%   { opacity: 0; transform: translateY(0) rotate(0deg); }
+    12%  { opacity: 1; }
+    80%  { opacity: 1; }
+    100% { opacity: 0; transform: translateY(-65vh) rotate(30deg); }
+}
+
+/* Switching Symbolics on: the screen powers up like an old CRT */
+html[data-yy-theme="symbolics"] .yy-terminal-crt {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background: #000;
+    animation: yy-neo-crt-fade 0.9s ease-in both;
+}
+
+html[data-yy-theme="symbolics"] .yy-terminal-crt::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(var(--neo-cyan-rgb), 0.8);
+    animation: yy-neo-crt-beam 0.9s ease-out both;
+}
+
+@keyframes yy-neo-crt-fade {
+    0%, 40% { opacity: 1; }
+    100%    { opacity: 0; }
+}
+
+@keyframes yy-neo-crt-beam {
+    0%   { transform: scale(0.02, 0.004); opacity: 1; }
+    25%  { transform: scale(1, 0.004); opacity: 1; }
+    55%  { transform: scale(1, 1); opacity: 0.35; }
+    100% { transform: scale(1, 1); opacity: 0; }
 }
 
 /* ── Note about a seasonal look that Symbolics hides (built by theme-info.js) ── */
@@ -655,5 +1174,36 @@ html[data-yy-theme="symbolics"] .yy-season-hint .card-header {
 @media (prefers-reduced-motion: reduce) {
     html[data-yy-theme="symbolics"] .yy-season-hint {
         animation: none;
+    }
+}
+
+/* ── Less motion: no blinking, breathing, flickering or shaking ── */
+@media (prefers-reduced-motion: reduce) {
+    html[data-yy-theme="symbolics"] .btn,
+    html[data-yy-theme="symbolics"] .navbar,
+    html[data-yy-theme="symbolics"] .navbar .open-debt-badge,
+    html[data-yy-theme="symbolics"] h1,
+    html[data-yy-theme="symbolics"] .navbar-brand,
+    html[data-yy-theme="symbolics"] .stat-card-warning,
+    html[data-yy-theme="symbolics"] .yy-terminal,
+    html[data-yy-theme="symbolics"] .yy-terminal::before,
+    html[data-yy-theme="symbolics"] .yy-terminal-cursor,
+    html[data-yy-theme="symbolics"] .yy-terminal-status::after,
+    html[data-yy-theme="symbolics"] .yy-terminal-fly,
+    html[data-yy-theme="symbolics"] .yy-term-err,
+    html[data-yy-theme="symbolics"].yy-fx-alarm body > *,
+    html[data-yy-theme="symbolics"].yy-fx-glitch body > *,
+    html[data-yy-theme="symbolics"] .card::after,
+    html[data-yy-theme="symbolics"] .order-card::after,
+    html[data-yy-theme="symbolics"] .summary-card::after,
+    html[data-yy-theme="symbolics"] .modal-content::after {
+        animation: none !important;
+    }
+
+    html[data-yy-theme="symbolics"] .card::after,
+    html[data-yy-theme="symbolics"] .order-card::after,
+    html[data-yy-theme="symbolics"] .summary-card::after,
+    html[data-yy-theme="symbolics"] .modal-content::after {
+        opacity: 0.5;
     }
 }
