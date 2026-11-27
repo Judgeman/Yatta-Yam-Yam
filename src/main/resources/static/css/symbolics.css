@@ -1263,6 +1263,119 @@ html[data-yy-theme="symbolics"] .yy-neofetch-colors span {
     color: #000;
 }
 
+/* ── Chat (symbolics-chat.js): an IRC-style window, and new messages in the status ── */
+html[data-yy-theme="symbolics"] .yy-chat {
+    padding: 0;
+}
+
+html[data-yy-theme="symbolics"] .yy-chat-top {
+    flex: none;
+    padding: 6px 16px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--neo-cyan);
+    background: #032a2e;
+    border-bottom: 1px solid var(--neo-cyan);
+}
+
+html[data-yy-theme="symbolics"] .yy-chat-log {
+    flex: 1;
+    min-height: 0;
+    padding: 8px 16px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    user-select: text;
+}
+
+html[data-yy-theme="symbolics"] .yy-chat-time,
+html[data-yy-theme="symbolics"] .yy-chat-line.is-system {
+    color: var(--neo-dim);
+}
+
+html[data-yy-theme="symbolics"] .yy-chat-nick {
+    font-weight: 700;
+}
+
+html[data-yy-theme="symbolics"] .yy-chat-nick.is-me {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+html[data-yy-theme="symbolics"] .yy-chat-line.is-action {
+    font-style: italic;
+}
+
+html[data-yy-theme="symbolics"] .yy-chat-line.is-mention {
+    color: var(--neo-yellow);
+    background: rgba(var(--neo-yellow-rgb), 0.1);
+}
+
+html[data-yy-theme="symbolics"] .yy-chat-form {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 1ch;
+    padding: 8px 16px max(8px, env(safe-area-inset-bottom));
+    border-top: 1px solid var(--neo-cyan);
+}
+
+html[data-yy-theme="symbolics"] .yy-chat-prompt {
+    flex: none;
+    color: var(--neo-cyan);
+}
+
+html[data-yy-theme="symbolics"] .yy-chat-input {
+    flex: 1;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--neo-green);
+    font: inherit;
+    caret-color: var(--neo-green);
+}
+
+html[data-yy-theme="symbolics"] .yy-chat-input:focus,
+html[data-yy-theme="symbolics"] .yy-chat-input:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+@media (pointer: coarse) {
+    html[data-yy-theme="symbolics"] .yy-chat-input {
+        font-size: 16px; /* phones zoom into smaller fields */
+    }
+}
+
+/* "2 new messages" instead of "System status: online"; a click opens the chat */
+html[data-yy-theme="symbolics"] .yy-terminal.has-notice .yy-terminal-status {
+    cursor: pointer;
+}
+
+html[data-yy-theme="symbolics"] .yy-terminal.has-alert .yy-terminal-status {
+    color: var(--neo-magenta);
+    text-shadow: 0 0 6px rgba(var(--neo-magenta-rgb), 0.8);
+    animation: yy-blink 1.2s steps(1) infinite;
+}
+
+html[data-yy-theme="symbolics"] .yy-terminal.has-alert .yy-terminal-status::after {
+    background: var(--neo-magenta);
+    box-shadow: 0 0 6px var(--neo-magenta);
+}
+
+@media (max-width: 576px) {
+    html[data-yy-theme="symbolics"] .yy-terminal.has-notice .yy-terminal-status {
+        display: block;
+        flex: 0 1 auto;
+        min-width: 0;
+        max-width: 45%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
+
 /* ── Surprises from the command line (symbolics.js sets a class on <html> for a while) ── */
 
 /* SUDO without the right password: red alert, the page shakes */
@@ -1412,6 +1525,7 @@ html[data-yy-theme="symbolics"] .yy-season-hint .card-header {
     html[data-yy-theme="symbolics"] .yy-terminal,
     html[data-yy-theme="symbolics"] .yy-terminal::before,
     html[data-yy-theme="symbolics"] .yy-terminal-cursor,
+    html[data-yy-theme="symbolics"] .yy-terminal-status,
     html[data-yy-theme="symbolics"] .yy-terminal-status::after,
     html[data-yy-theme="symbolics"] .yy-terminal-fly,
     html[data-yy-theme="symbolics"] .yy-term-err,
