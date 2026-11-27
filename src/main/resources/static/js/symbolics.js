@@ -78,6 +78,9 @@
     var jobs = [];           // what Ctrl+C stops
     var stopHooks = [];      // called when the line goes (Symbolics switched off)
     var leaving = false;     // a command is taking us to another page
+    var startHooks = [];     // called when the line is built
+    var notice = null;       // { text, alert } shown instead of "System status: online"
+    var noticeClick = null;  // what a click on that notice does
     var timers = [];
     var hideTimer = null;
     var frame = 0;
@@ -1428,9 +1431,23 @@
     function alarm() {
         effect('alarm', 4000);
         els.status.textContent = 'System status: intruder alert';
-        later(function () {
-            els.status.textContent = 'System status: online';
-        }, 4000);
+        later(showNotice, 4000);
+    }
+
+    // The status at the right end of the line: "System status: online", or a notice
+    // from a program (the chat: "2 new messages"); an alert notice blinks
+    function setNotice(text, alert) {
+        notice = text ? { text: text, alert: !!alert } : null;
+        showNotice();
+    }
+
+    function showNotice() {
+        if (!bar) {
+            return;
+        }
+        els.status.textContent = notice ? notice.text : 'System status: online';
+        bar.classList.toggle('has-notice', !!notice);
+        bar.classList.toggle('has-alert', !!(notice && notice.alert));
     }
 
     // sudo rm …: a fake meltdown with a happy end
@@ -1922,6 +1939,11 @@
         line.appendChild(field);
 
         var status = make('div', 'yy-terminal-status', 'System status: online');
+        status.addEventListener('click', function () {
+            if (notice && noticeClick) {
+                noticeClick();
+            }
+        });
 
         bar.appendChild(panel);
         bar.appendChild(line);
@@ -1962,6 +1984,7 @@
         });
 
         document.body.appendChild(bar);
+        showNotice();
         render();
         refocus();
     }
@@ -2017,6 +2040,9 @@
         if (theme === SYMBOLICS) {
             if (!bar && document.body) {
                 build();
+                startHooks.forEach(function (hook) {
+                    hook();
+                });
                 if (started && was !== SYMBOLICS) {
                     // Switched on just now (not a page load in Symbolics mode)
                     hoverText = BOOT_TEXT;
@@ -2107,6 +2133,16 @@
         },
         onStop: function (fn) {
             stopHooks.push(fn);
+        },
+        onStart: function (fn) {
+            startHooks.push(fn);
+            if (bar) {
+                fn();
+            }
+        },
+        notice: setNotice,
+        onNoticeClick: function (fn) {
+            noticeClick = fn;
         },
         print: print,
         rows: printRows,

@@ -301,6 +301,11 @@
         });
     }
 
+    // For the kitchen bot in symbolics-chat.js: "what is open?"
+    sh.loadOrders = function () {
+        return fetchPage('/orders/dashboard').then(ordersOf);
+    };
+
     function processLine(order) {
         return padStart(order.id, 5) + ' ' + padEnd(order.user.substring(0, 10), 10) + ' ' + padEnd(order.status, 8)
             + ' ' + padEnd(order.date, 7) + ' ' + padStart(order.people, 4) + '  ' + slug(order.place);

@@ -149,7 +149,8 @@
             tip: 'Point at a button or link: the command line at the bottom shows what a click would run. '
                 + 'You can type it, too: press \u201C/\u201D or click the line, enter e.g. OPEN "Archive" and press Enter. '
                 + 'Tab completes names, HELP (or --help) lists the commands, and admins will find a few old friends. '
-                + 'After a page change you can type on right away. And maybe don\u2019t try sudo.'
+                + 'After a page change you can type on right away. CHAT talks to the others, TALK to the kitchen. '
+                + 'And maybe don\u2019t try sudo.'
         }
     };
 

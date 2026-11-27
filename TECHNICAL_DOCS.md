@@ -200,6 +200,17 @@ Eintrag im Kontaktbuch (z. B. Restaurant oder Lieferdienst). Unabhängig von den
 | `item`      | Item                 | Ausgewähltes Gericht      |
 | `quantity`  | int                  | Bestellte Menge           |
 
+### ChatMessage
+
+Nachricht im Chat `#lunch` der Symbolics-Kommandozeile (siehe [Easter Egg: Symbolics-Modus](#easter-egg-symbolics-modus)). Unabhängig von den übrigen Entitäten; Nachrichten, die älter als 30 Tage sind, löscht `ChatService` beim nächsten Schreiben.
+
+| Feld        | Typ           | Beschreibung                                                  |
+|-------------|---------------|---------------------------------------------------------------|
+| `id`        | Long (PK)     | Aufsteigend, der Browser fragt „alles nach `id` X“ ab          |
+| `author`    | String        | Name des Nutzers beim Schreiben (ein späteres Umbenennen ändert ihn nicht) |
+| `text`      | String        | Eine Zeile, höchstens 500 Zeichen, ohne Steuerzeichen          |
+| `createdAt` | LocalDateTime | Automatisch gesetzt via `@PrePersist`                          |
+
 ---
 
 ## 5. Authentifizierung & Session
@@ -322,6 +333,15 @@ Der Cookie hat eine Ablaufzeit von `Integer.MAX_VALUE` Sekunden (~68 Jahre), ist
 | POST    | `/contacts/{id}/delete`  | Kontakt löschen                                            |
 
 Das Kontaktbuch ist über den Knopf „Contacts“ im Dashboard erreichbar. Im Telefonbestell-Dialog der Bestelldetailseite öffnet das Kontaktbuch-Symbol ein reines Nachschlage-Pop-up (ohne Bearbeiten) mit allen Kontakten und ihren Nummern; Kontakte am Standort der Bestellung stehen oben.
+
+### Chat (`ChatController`, Präfix `/chat`)
+
+| Methode | Pfad             | Beschreibung                                                                 |
+|---------|------------------|------------------------------------------------------------------------------|
+| GET     | `/chat/messages` | JSON `{ me, messages, online }`: die letzten 50 Nachrichten oder mit `?after=<id>` bis zu 100 neuere; `online` = wer in den letzten 90 s abgefragt hat (mit Sekunden seit der letzten eigenen Nachricht). Zählt selbst als „online“. |
+| POST    | `/chat/messages` | JSON `{ text }` → die gespeicherte Nachricht. Braucht das CSRF-Token im Header (das Theme-Fragment legt es als `<meta name="yy-csrf">` in jede Seite). Mehr als 5 Nachrichten in 5 Sekunden: 429 mit `retryAfter` (ms). |
+
+Beide nur mit Namens-Cookie (sonst 401). Wer gerade „online“ ist, hält `ChatService` im Speicher (nach einem Neustart leer).
 
 ---
 
@@ -566,12 +586,14 @@ Yatta-Yam-Yam/
     │   │   ├── WrappedHintAdvice.java        # wrappedYear im Januar für den Wrapped-Hinweis
     │   │   └── WrappedPreview.java           # Wrapped-Vorschau zum Testen (?preview=on, pro Sitzung)
     │   ├── controller/
+    │   │   ├── ChatController.java           # Chat der Symbolics-Kommandozeile (JSON)
     │   │   ├── ContactController.java        # Kontaktbuch: Liste, Anlegen, Bearbeiten, Löschen
     │   │   ├── LoginController.java          # Cookie-Login, Nutzer-Flow, /users, /version
     │   │   ├── OrderController.java          # Bestellungen, Auswahl, Zahlungen, Artikelverwaltung
     │   │   └── WrappedController.java        # Jahresrückblick /wrapped
     │   ├── model/
     │   │   ├── AppUser.java                  # Nutzer-Entität
+    │   │   ├── ChatMessage.java              # Nachricht im Chat #lunch
     │   │   ├── Contact.java                  # Kontakt (Name, Standort, Adresse, Telefonnummern, Bild)
     │   │   ├── FoodOrder.java                # Bestellungs-Entität (inkl. Status- und Standort-Enum)
     │   │   ├── Item.java                     # Einzelner Menüartikel
@@ -580,6 +602,7 @@ Yatta-Yam-Yam/
     │   │   └── UserOrderSelection.java       # Nutzerauswahl für eine Bestellung
     │   ├── repository/
     │   │   ├── AppUserRepository.java
+    │   │   ├── ChatMessageRepository.java
     │   │   ├── ContactRepository.java
     │   │   ├── FoodOrderRepository.java
     │   │   ├── ItemListRepository.java
@@ -588,6 +611,7 @@ Yatta-Yam-Yam/
     │   │   └── UserOrderSelectionRepository.java
     │   └── service/
     │       ├── AppUserService.java           # Nutzer anlegen, umbenennen, Statistiken
+    │       ├── ChatService.java              # Chat: Nachrichten, Limits, Aufräumen, wer online ist
     │       ├── ContactService.java           # Kontakte speichern (inkl. Bild-Upload), löschen
     │       ├── OrderService.java             # Bestelllogik, Kostenberechnung, Zahlungen
     │       ├── PaymentCalculatorService.java # Daten für den Zahlungsrechner (nur lesend)
@@ -630,6 +654,7 @@ Yatta-Yam-Yam/
         │       ├── pizza.js                  # Pizza-Besucher: fliegende Pizza, Pizzastück, Pizzabäcker
         │       ├── symbolics.js              # Symbolics-Modus: bedienbare Kommandozeile mit Tab-Vervollständigung
         │       ├── symbolics-apps.js         # Programme der Kommandozeile: GREP, TOP, PS, NEOFETCH, VIM, SL, ...
+        │       ├── symbolics-chat.js         # Chat #lunch (CHAT, WALL, WHO) und der Küchen-Bot (TALK)
         │       ├── theme-info.js             # (i)-Knopf in der Menüleiste mit Infos zum aktiven Look
         │       ├── theme.js                  # Hell/dunkel nach Systemeinstellung, Saison-Looks, Symbolics-Easter-Egg
         │       ├── visitors.js               # Besucher: Zeitplan, Bewegungen, Rufwort
@@ -756,6 +781,10 @@ Ein versteckter dritter Look im Stil von symbolics.com, der ersten jemals regist
     - Versteckt, für Admins: `VIM`/`VI` (Vollbild-Editor mit Normal-, Einfüge- und Befehlsmodus; raus nur mit `:q!`, `:wq`, `ZZ`, `ZQ` – oder auf dem Handy per Knopf; wer herumirrt, bekommt Hinweise bis zum Stack-Overflow-Zitat; `NANO`/`EMACS` öffnen mit einem Seitenhieb ebenfalls Vim), `SL` (eine Dampflok fährt über den Bildschirm, Strg+C wirkt nicht), `CMATRIX` (Matrix-Regen mit „WAKE UP, …“), `REBOOT` (BIOS-Startbildschirm, danach lädt die Seite neu), `SHUTDOWN` (Herunterfahren bis „It's now safe to turn off your computer.“), `UPTIME`, `PING <Host>` (Antwortzeiten in Minuten, Strg+C stoppt), `KILL`, `RM`, `MAKE` (`make love` → „NOT WAR?“, `make coffee` → 418), `SSH`, `FORTUNE`, `COWSAY`, `LOLCAT`, dazu `XYZZY` und `HELLO`.
     - Bildschirmschoner: Nach 10 Minuten ohne Eingabe (sichtbarer Tab, kein offener Dialog, nicht bei `prefers-reduced-motion`) kommt der Matrix-Regen; jede Taste, Maus- oder Touch-Bewegung beendet ihn.
     - Vollbild-Programme liegen als Ebene über allem in der Kommandozeile, bekommen die Tasten (die Seite und das Rufwort `symbolics` nicht) und geben den Fokus beim Schließen an die Zeile zurück.
+  - **Chat** (`static/js/symbolics-chat.js`, Server: `ChatController`/`ChatService`, siehe Routen): `CHAT` öffnet den Kanal `#lunch` für alle Eingeloggten als Vollbild im IRC-Stil – Zeitstempel, farbige Nicknamen (jeder Name eine eigene Farbe), `/me <Aktion>`, `/who`, `/clear`, `/join #kitchen`, `/help`, `/quit` oder Esc; Tab vervollständigt Namen, ↑/↓ holen eigene Zeilen zurück; wer kommt und geht, steht als `-!-`-Zeile im Verlauf, ebenso ein Datumswechsel. Erwähnungen des eigenen Namens sind gelb hinterlegt. `WALL <Text>` schreibt nach `#lunch`, ohne den Chat zu öffnen (auch `FORTUNE | WALL`), `WHO` listet, wer die Kommandozeile gerade offen hat.
+    - Der Browser fragt nur im Symbolics-Modus nach neuen Nachrichten: alle 3 s bei offenem Chat, sonst alle 20 s (60 s in einem versteckten Tab), sofort wieder beim Zurückkehren in den Tab. Neue Nachrichten zeigt die Kommandozeile rechts statt „System status: online“ blinkend an („2 new messages · type chat“ bzw. „Message for you“ bei einer Erwähnung); ein Klick darauf öffnet den Chat. Die zuletzt gesehene Nachricht steht pro Browser in `localStorage` (`yy-chat-seen`), andere Tabs ziehen mit; beim allerersten Mal gilt nichts Altes als neu.
+    - Zeilen gehen der Reihe nach raus; sagt der Server 429, wartet der Browser `retryAfter` ab und schickt sie dann (nichts geht verloren, die Reihenfolge bleibt). Alles wird als Text angezeigt, nie als HTML.
+  - **Küchen-Bot:** `TALK` (oder `TALK KITCHEN`, `ELIZA`, `/join #kitchen`) öffnet `#kitchen` im selben Fenster – ein kleiner Bot im ELIZA-Stil, der nur im Browser läuft (niemand liest mit, nichts geht an den Server). Er antwortet auf Deutsch oder Englisch, je nachdem, wie man schreibt, kennt die offenen Bestellungen (über die Dashboard-Abfrage von `symbolics-apps.js`) und die Uhrzeit, hat Meinungen zu Pizza, Ananas, Salat und Kaffee, erzählt Witze und spiegelt Sätze wie „Ich bin müde“ zurück; „tschüss“ beendet das Gespräch.
   - **SUDO** klappt nie, sorgt aber für Unterhaltung: `sudo make me a sandwich` → „OKAY.“ und Sandwiches steigen auf; `sudo rm …` → gespielter Absturz mit Lösch-Protokoll, Glitch-Effekt und Kernel Panic („OUT OF LUNCH“), dann Entwarnung; alles andere fragt nach dem Passwort (unsichtbar wie bei sudo, Esc bricht ab) und meldet nach drei Versuchen „… IS NOT IN THE SUDOERS FILE. THIS INCIDENT WILL BE REPORTED.“ mit rotem Alarm, wackelnder Seite, Status „INTRUDER ALERT“ und einem zufälligen Nachsatz. Passwörter landen nicht im Verlauf.
   - Ausgabefenster „Dynamic Lunch Listener“ über der Zeile (`role="log"`, `aria-live`), schließt mit Esc, Klick daneben oder nach einem ausgeführten Befehl; ohne offene Liste holen ↑/↓ frühere Befehle zurück (`sessionStorage`, `yy-terminal-history`, 50 Einträge, übersteht Seitenwechsel im Tab). Eigener Block-Cursor (der echte ist ausgeblendet), auf dem Handy 16 px Schrift gegen das Zoomen und ein gekürzter Prompt (`C:\…\DASHBOARD>`).
   - Beim Einschalten (nicht beim Laden einer Seite) fährt der Bildschirm hoch wie ein alter Röhrenmonitor.
