@@ -10,10 +10,13 @@
      theme.js). visitors.js sends the season's visitors across the screen; they are drawn
      in the seasonal scripts (which run after it, in this order) and styled in visitors.css.
      symbolics.js builds the command line of the Symbolics mode at the bottom of the screen,
-     symbolics-apps.js adds its extra programs (GREP, TOP, NEOFETCH, VIM, ...).
+     symbolics-apps.js adds its extra programs (GREP, TOP, NEOFETCH, VIM, ...),
+     symbolics-chat.js the chat (CHAT, WALL, WHO) and the kitchen bot (TALK).
      theme-info.js adds the (i) button about the current look to the menu bar. -->
 <th:block th:fragment="head">
     <meta name="color-scheme" content="light dark"/>
+    <!-- CSRF token for scripts that send data (the chat of the Symbolics command line) -->
+    <meta th:if="${_csrf != null}" name="yy-csrf" th:content="${_csrf.token}" th:attr="data-header=${_csrf.headerName}"/>
     <link rel="stylesheet" th:href="@{/css/christmas.css}"/>
     <link rel="stylesheet" th:href="@{/css/easter.css}"/>
     <link rel="stylesheet" th:href="@{/css/halloween.css}"/>
@@ -42,6 +45,7 @@
     <script th:src="@{/js/mario.js}" defer></script>
     <script th:src="@{/js/symbolics.js}" defer></script>
     <script th:src="@{/js/symbolics-apps.js}" defer></script>
+    <script th:src="@{/js/symbolics-chat.js}" defer></script>
     <script th:src="@{/js/theme-info.js}" defer></script>
     <!-- January only (wrappedYear from WrappedHintAdvice), for logged-in users, not on
          the Wrapped pages themselves: a small hint at the bottom right linking to the
