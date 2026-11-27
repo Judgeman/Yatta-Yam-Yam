@@ -148,7 +148,8 @@
                 + 'maker Symbolics. This mode is a nod to the neon retro look of the site.',
             tip: 'Point at a button or link: the command line at the bottom shows what a click would run. '
                 + 'You can type it, too: press \u201C/\u201D or click the line, enter e.g. OPEN "Archive" and press Enter. '
-                + 'Tab completes names, HELP lists all commands. And maybe don\u2019t try sudo.'
+                + 'Tab completes names, HELP (or --help) lists the commands, and admins will find a few old friends. '
+                + 'After a page change you can type on right away. And maybe don\u2019t try sudo.'
         }
     };
 
