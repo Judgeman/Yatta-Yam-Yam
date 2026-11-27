@@ -16,11 +16,13 @@
  * Names are the labels the line shows on hover, matched without regard to case; the
  * quotes are optional. Tab completes the command or the name: a single match is written
  * out in full, several are listed and completed as far as they agree, and pressing Tab
- * again cycles through them (Shift+Tab backwards). Enter runs an exact match, or the
- * only name that starts with what was typed or has a word starting with it. If there
- * is none, a message says so and offers similar names; a name that fits several lists
- * them. ↑/↓ recall earlier commands (sessionStorage, so they survive page changes in
- * this tab), Esc closes the output window. SUDO … has a few surprises.
+ * again cycles through them (Shift+Tab backwards); while the list shows, ↑/↓ move
+ * through it, too, and Enter runs the one picked (a picked command that needs a name
+ * just stays in the line). Enter runs an exact match, or the only name that starts with
+ * what was typed or has a word starting with it. If there is none, a message says so
+ * and offers similar names; a name that fits several lists them. Without the list,
+ * ↑/↓ recall earlier commands (sessionStorage, so they survive page changes in this
+ * tab). Esc closes the output window. SUDO … has a few surprises.
  *
  * The line is built while html[data-yy-theme="symbolics"] is set and removed when it
  * goes. Styles: css/symbolics.css.
@@ -774,7 +776,7 @@
             ['WHOAMI, DATE, ECHO', 'THE USUAL'],
             ['EXIT', 'LEAVE SYMBOLICS MODE']
         ]);
-        print('TAB COMPLETES (AGAIN: NEXT MATCH)   \u2191/\u2193 HISTORY   ESC CLOSES THIS WINDOW', 'info');
+        print('TAB COMPLETES (AGAIN OR \u2191/\u2193: PICK A MATCH)   \u2191/\u2193 HISTORY   ESC CLOSES THIS WINDOW', 'info');
     }
 
     function dir(arg) {
@@ -1029,6 +1031,11 @@
 
     // ── Keys ──
 
+    // The list of matches Tab opened is showing (↑/↓ then move through it)
+    function listOpen() {
+        return !!completion && !els.suggest.hidden;
+    }
+
     function onKeyDown(e) {
         if (e.isComposing) {
             return;
@@ -1046,7 +1053,14 @@
                 break;
             case 'Enter':
                 e.preventDefault();
-                submit();
+                if (listOpen() && completion.index >= 0 && / $/.test(completion.items[completion.index].text)) {
+                    // A command picked from the list that needs a name: keep it and go on typing
+                    completion = null;
+                    clearSuggestions();
+                    update(true);
+                } else {
+                    submit();
+                }
                 break;
             case 'Escape':
                 e.preventDefault();
@@ -1063,8 +1077,13 @@
                 break;
             case 'ArrowUp':
             case 'ArrowDown':
-                if (!sudo) {
-                    e.preventDefault();
+                if (sudo || e.altKey || e.ctrlKey || e.metaKey) {
+                    return;
+                }
+                e.preventDefault();
+                if (listOpen()) {
+                    complete(e.key === 'ArrowDown' ? 1 : -1); // move through the Tab list
+                } else {
                     recall(e.key === 'ArrowUp' ? 1 : -1);
                 }
                 break;
@@ -1150,6 +1169,7 @@
         input.addEventListener('keydown', onKeyDown);
         input.addEventListener('input', function () {
             completion = null;
+            historyIndex = -1; // typing starts afresh: ↑ goes to the latest command again
             if (!els.suggest.hidden) {
                 clearSuggestions();
             }
